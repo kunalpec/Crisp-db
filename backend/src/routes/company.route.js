@@ -5,7 +5,7 @@ import { inviteEmployeeFromSameCompany } from '../controllers/invite/inviteEmplo
 import { authenticate } from '../middlewares/Auth.middleware.js';
 import { getActivePlans, getPlanById } from '../controllers/SuperAdmin/Plan.controller.js';
 import { getApiKey } from '../controllers/Company/get_apikey.controller.js';
-
+import { updateCompanyPlan } from '../controllers/Company/updatePlan.controller.js';
 // Create company router
 const companyRouter = express.Router();
 
@@ -19,12 +19,15 @@ companyRouter.post('/send-invite', authenticate, inviteEmployeeFromSameCompany);
 // companyRouter.post('/accept-invite', acceptInviteAndSignup);
 
 // Get active plans (for users / signup)
-companyRouter.get('/plans/active', getActivePlans);
+companyRouter.get('/plans/active', authenticate,getActivePlans);
 
 // Get plan by id (query param: ?id=)
 companyRouter.get('/plans/by-id', getPlanById);
 
 // Get All Company ApiKey
 companyRouter.get('/api-key', authenticate, getApiKey);
+
+// Update plans
+companyRouter.post('/recharge-plans',authenticate,updateCompanyPlan);
 
 export default companyRouter;

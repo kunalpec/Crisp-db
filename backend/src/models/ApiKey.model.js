@@ -26,11 +26,7 @@ const apiKeySchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+apiKeySchema.index({ company_id: 1 }, { unique: true });
 
-// Only ONE active key per company
-apiKeySchema.index(
-  { company_id: 1 },
-  { unique: true, partialFilterExpression: { is_active: true } }
-);
 
 export const ApiKey = mongoose.model('ApiKey', apiKeySchema);
