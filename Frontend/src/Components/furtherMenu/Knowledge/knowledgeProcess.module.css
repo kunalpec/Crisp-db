@@ -1,0 +1,431 @@
+@import url('https://fonts.googleapis.com/css2?family=Monoton&display=swap');
+
+.processSection {
+  padding: 4rem 1rem;
+  text-align: center;
+  background-color: #fff;
+}
+
+.header {
+  margin-bottom: 3rem;
+}
+
+.label {
+  color: purple;
+  /* font-weight: ; */
+  font-size: 2rem;
+  font-family: 'Monoton', cursive;
+}
+
+.header h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 0.5rem 0;
+  color: #1b0036;
+}
+
+.header p {
+  max-width: 700px;
+  margin: 0 auto;
+  color: #555;
+  font-size: 1rem;
+}
+
+.stepsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.stepCard {
+  flex: 1 1 250px;
+  max-width: 270px;
+  background: #fff;
+  text-align: center;
+  margin-left: 2rem;
+}
+
+.iconWrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.iconImage {
+  width: 100%;
+  max-width: 150px;
+  border-radius: 1rem;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.stepNumber {
+  position: absolute;
+  left: -2.4rem; /* move to right of image */
+  top: 10px;    /* vertical position (adjust as needed) */
+  font-size: 6rem;
+  color: #530c0c;
+  opacity: 0.1;
+  font-family: 'Monoton', cursive;
+  z-index: 1;
+  pointer-events: none;
+}
+.stepCard h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1b0036;
+  margin: 0.5rem 0;
+}
+
+.stepCard p {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.6;
+}
+
+
+/* curious section */
+
+.curiousSectionWrapper {
+  background: rgb(60, 2, 60);
+  border-radius: 2rem;
+  padding: 3rem 2rem;
+  margin: 2rem auto;
+  max-width: 90%;
+}
+
+.curiousSectionContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.curiousSectionImage img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 1rem;
+}
+
+.curiousSectionContent {
+  flex: 1;
+  min-width: 300px;
+}
+
+.curiousSectionTitle {
+  font-size: 2rem;
+  color: white;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  
+}
+
+.curiousSectionText {
+  color: white;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  max-width: 500px;
+}
+
+.curiousSectionButtons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.curiousSectionDemoBtn {
+  background-color: rgb(228, 49, 151);
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 999px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.curiousSectionDemoBtn:hover {
+  /* background-color: #ff4d2f; */
+}
+
+.curiousSectionFreeBtn {
+  background-color: rgb(228, 49, 151);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 999px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.curiousSectionFreeBtn:hover {
+  /* background-color: #f0f0f0; */
+}
+
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .stepsContainer {
+    gap: 5rem;
+  }
+  .title {
+    font-size: 1.6rem;
+  }
+  
+  .curiousSectionTitle {
+    font-size: 1.8rem;
+  }
+ 
+}
+
+/* 1080px */
+@media (max-width: 1080px) {
+ .curiousSectionText {
+    font-size: 1rem;
+  }
+  .stepCard h3 {
+    font-size: 1.1rem;
+  }
+}
+
+/* 992px */
+@media (max-width: 992px) {
+ .header h2 {
+    font-size: 1.6rem;
+  }
+  .curiousSectionDemoBtn,
+  .curiousSectionFreeBtn {
+    padding: 0.7rem 1.3rem;
+  }
+}
+
+/* 800px */
+@media (max-width: 800px) {
+ .stepCard {
+    max-width: 90%;
+    margin: 0 auto;
+  }
+  .stepsContainer {
+    gap: 2rem;
+  }
+}
+
+/* 768px */
+@media (max-width: 768px) {
+  .header h2 {
+    font-size: 1.75rem;
+  }
+
+  .stepNumber {
+    font-size: 3rem;
+  }
+
+  .itemsWrapper {
+    gap: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.4rem;
+  }
+
+  .curiousSectionContainer {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .curiousSectionImage {
+    order: 2;
+  }
+
+  .curiousSectionContent {
+    order: 1;
+  }
+}
+
+/* 600px */
+@media (max-width: 600px) {
+  /* Add your styles for 600px here */
+}
+
+/* 562px */
+@media (max-width: 562px) {
+  /* Add your styles for 562px here */
+}
+
+/* 480px */
+@media (max-width: 480px) {
+  .stepsContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stepCard {
+    max-width: 90%;
+  }
+
+  .stepNumber {
+    font-size: 2.5rem;
+  }
+}
+
+/* 320px */
+@media (max-width: 320px) {
+  .label {
+    font-size: 1.5rem;
+  }
+
+  .header h2 {
+    font-size: 1.4rem;
+  }
+
+  .stepCard h3 {
+    font-size: 1rem;
+  }
+
+  .stepCard p {
+    font-size: 0.85rem;
+  }
+
+  .curiousSectionTitle {
+    font-size: 1.4rem;
+  }
+
+  .curiousSectionText {
+    font-size: 1rem;
+  }
+}
+
+/* significant step */
+
+.significantTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1b1b1b;
+  margin-bottom: 3rem;
+  max-width: 700px;
+  margin-inline: auto;
+}
+
+.significantItemsWrapper {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+.significantItemCard {
+  position: relative;
+  padding: 2rem 1rem;
+  background-color: #fff;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  z-index: 1;
+}
+
+.significantItemCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  border-radius: 1rem;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(90deg, purple,rgb(117, 2, 117)) top left,              linear-gradient(90deg,purple,rgb(117, 2, 117)) top right,              linear-gradient(90deg,purple,rgb(117, 2, 117)) bottom right,              linear-gradient(90deg,purple,rgb(117, 2, 117)) bottom left;
+  background-size: 100% 2px, 2px 100%, 100% 2px, 2px 100%;
+  background-repeat: no-repeat;
+  background-position: top left, top right, bottom right, bottom left;
+  transition: background-size 1.5s steps(5, start);
+  -webkit-transition: background-size 1.5s steps(5, start);
+  -moz-transition: background-size 1.5s steps(5, start);
+  -ms-transition: background-size 1.5s steps(5, start);
+  -o-transition: background-size 1.5s steps(5, start);
+}
+
+.significantItemCard:hover::before {
+  background-size: 100% 2px, 2px 100%, 100% 2px, 2px 100%;
+  animation: borderFlow 1s linear forwards;
+}
+
+@keyframes borderFlow {
+  0% {
+    background-size: 0% 2px, 0 0, 0 0, 0 0;
+  }
+  25% {
+    background-size: 100% 2px, 0 0, 0 0, 0 0;
+  }
+  50% {
+    background-size: 100% 2px, 2px 100%, 0 0, 0 0;
+  }
+  75% {
+    background-size: 100% 2px, 2px 100%, 100% 2px, 0 0;
+  }
+  100% {
+    background-size: 100% 2px, 2px 100%, 100% 2px, 2px 100%;
+  }
+}
+
+
+.icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 1rem;
+}
+
+.significantItemCard h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #1b0036;
+}
+
+.significantItemCard p {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  
+  .significantTitle {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  
+   .significantItemsWrapper {
+    gap: 1.5rem;
+  }
+
+  .significantTitle {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .significantItemsWrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .significantTitle {
+    font-size: 1.2rem;
+  }
+
+  .icon {
+    width: 36px;
+    height: 36px;
+  }
+}

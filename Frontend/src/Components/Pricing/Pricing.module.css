@@ -1,0 +1,483 @@
+/* pricing hero section */
+.pricingHeroSection {
+  width: 100%;
+  height: 30rem;
+  background: linear-gradient(135deg, #eef2ff, #f3e8ff);
+  background-image: url('../../assets/pricing/pricing-hero-back.jpg');
+  background-size: cover;
+  background-position: center;
+  padding: 4rem 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-bottom-left-radius: 2rem;
+  border-bottom-right-radius: 2rem;
+}
+
+.pricingHeroContainer {
+  max-width: 800px;
+}
+
+.pricingHeroTag {
+  background: white;
+  color: #2962ff;
+  border: 1px solid #d1d5db;
+  border-radius: 9999px;
+  padding: 0.4rem 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.pricingHeroTitle {
+  font-weight: 700;
+  font-size: clamp(2rem, 6vw, 4rem); 
+  background-color: transparent;
+  text-align: center;
+  display: inline-block;
+
+  /* Gradient Text Border */
+  background: linear-gradient(90deg, #00e5ff, #a259ff, #ff00ff, #a259ff, #00e5ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1px transparent;
+  position: relative;
+  animation: upward 1s ease-in-out;
+}
+.pricingHeroTitle::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  color: transparent;
+  -webkit-text-stroke: 1px #00e5ff;
+  filter: blur(1px);
+}
+
+@keyframes upward{
+  0%{
+    transform: translateY(300%);
+  }
+  100%{
+    transform: translateY(0%);
+  }
+}
+
+.pricingHeroSubtitle {
+  font-size: 1.125rem;
+  color: #4b5563;
+  margin-top: 1rem;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .pricingHeroTitle {
+    font-size: 2rem;
+  }
+
+  .pricingHeroSubtitle {
+    font-size: 1rem;
+  }
+
+  .pricingHeroSection {
+    padding: 3rem 1.5rem;
+  }
+}
+
+
+
+/* pricing first section */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.heroSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 1200px;
+  width: 100%;
+}
+
+.ctaButton {
+  padding: 0.6rem 1.2rem;
+  border: 1px solid #ccc;
+  background-color: white;
+  border-radius: 999px;
+  color: #1a1a1a;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.ctaButton:hover {
+  background-color: #f0f0f0;
+}
+
+.heading {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.highlight {
+  color: #2962ff;
+}
+
+.description {
+  font-size: 1.1rem;
+  color: #555;
+  max-width: 600px;
+  margin-bottom: 2rem;
+}
+
+.pricingStats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.pricingCard {
+  flex: 1 1 200px;
+  border: 1px solid #d0d0ff;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 255, 0.05);
+}
+
+.pricingValue {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2962ff;
+}
+
+.pricingLabel {
+  color: #555;
+  margin-top: 0.5rem;
+}
+
+.imageSection {
+  width: 100%;
+  max-width: 600px;
+}
+
+.imageSection img {
+  width: 100%;
+  border-radius: 12px;
+}
+
+/* Responsive Layout */
+@media screen and (min-width: 768px) {
+  .heroSection {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    gap: 3rem;
+  }
+
+  .contentLeft {
+    flex: 1;
+  }
+
+  .imageSection {
+    flex: 1;
+  }
+}
+
+
+
+.pricingSection {
+  padding: 60px 0;
+  background-color: #f8f9fa;
+  text-align: center;
+}
+
+.pricingHeader h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #2a2a2a;
+  margin-bottom: 15px;
+  /* transition: all 0.5s ease; */
+}
+
+.pricingHeader h1:hover {
+  color: #020a2d;
+  /* transform: rotate(360deg); */
+}
+
+.pricingHeader p {
+  font-size: 1.1rem;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto 40px;
+}
+
+.pricingContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+}
+
+.pricingCard {
+  position: relative;
+  background-color: #ffffffa5;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.pricingCard:hover {
+  transform: translateY(-10px) scale3d(1.05, 1.05, 1.1);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+
+
+
+
+.pricingCard h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.price {
+  margin-bottom: 20px;
+}
+
+.amount {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2a2a2a;
+}
+
+
+.period {
+  font-size: 1rem;
+  color: #666;
+  margin-left: 5px;
+}
+
+
+.features {
+  list-style: none;
+  padding: 0;
+  margin: 2px 0 20px;
+  /* flex-grow: 1; */
+}
+
+.features li {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+
+
+.priceButton {
+  padding: 12px 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: #020a2d;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.priceButton:hover {
+  background-color: #13c4a1;
+}
+
+
+/* Responsive Media Queries */
+@media (max-width: 1200px) {
+  .pricingContainer {
+    max-width: 900px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+  .pricingHeader h1 {
+    font-size: 2.4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .pricingContainer {
+    max-width: 600px;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .pricingHeader h1 {
+    font-size: 2rem;
+  }
+  .pricingHeader p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .pricingContainer {
+    max-width: 100%;
+    padding: 0 15px;
+  }
+  .pricingHeader h1 {
+    font-size: 1.6rem;
+  }
+  .pricingCard {
+    padding: 20px;
+  }
+  .pricingCard h2 {
+    font-size: 1.5rem;
+  }
+  .amount {
+    font: 2rem;
+  }
+  .features li {
+    font-size: 0.9rem;
+  }
+  .priceButton {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .pricingContainer {
+    padding: 0 10px;
+  }
+  .pricingHeader h1 {
+    font-size: 1.4rem;
+  }
+  .pricingCard h2 {
+    font-size: 1.3rem;
+  }
+  .amount {
+    font-size: 1.8rem;
+  }
+  .features li {
+    font-size: 0.85rem;
+  }
+}
+
+/* pricing-4th section */
+.excellentSection {
+  background-color: #f7faff;
+  padding: 4rem 1.5rem;
+  text-align: center;
+}
+
+.excellentHeader {
+  max-width: 900px;
+  margin: 0 auto 3rem;
+  position: relative;
+  text-align: left;
+}
+
+.featureTag {
+  background-color: transparent;
+  border: 2px solid #4c8df6;
+  color: #4c8df6;
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.excellentTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+  text-align: left;
+  color: #1d1d1d;
+}
+
+.smartAI {
+  color: #2874f0;
+}
+
+.excellentSubtitle {
+  color: #6c757d;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+.excellentGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.featureCard {
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  max-width: 25rem;
+  text-align: left;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  transition: transform 0.3s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-5px);
+}
+
+.cardImage {
+  width: 100%;
+  height: auto;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+}
+
+.cardTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2874f0;
+  margin-bottom: 0.5rem;
+}
+
+.cardText {
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .excellentTitle {
+    font-size: 2rem;
+  }
+
+  .cardTitle {
+    font-size: 1.1rem;
+  }
+
+  .cardText {
+    font-size: 0.95rem;
+  }
+  .featureCard{
+    width: 97%;
+  }
+}

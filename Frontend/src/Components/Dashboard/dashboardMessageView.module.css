@@ -1,0 +1,217 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+  background-color: #f9f9f9;
+}
+
+.messageview {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+}
+
+.metaHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.languageTag, .dateTag {
+  background-color: #eee;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.messageArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.incomingMsg {
+  align-self: flex-start;
+  background-color: #e1f0ff;
+  padding: 8px 12px;
+  border-radius: 12px;
+  max-width: 70%;
+}
+
+.outgoingMsg {
+  align-self: flex-end;
+  background-color: #dcf8c6;
+  padding: 8px 12px;
+  border-radius: 12px;
+  max-width: 70%;
+}
+
+.replyBar {
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+
+.replyTabs {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.replyTabs span {
+  cursor: pointer;
+  color: #666;
+}
+
+.replyTabs .active {
+  color: #000;
+  font-weight: bold;
+}
+
+.inputSection {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 24px;
+  padding: 4px 12px;
+  background: white;
+}
+
+.inputSection input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  padding: 8px;
+}
+
+.inputSection button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #333;
+}
+
+/* Media Queries */
+
+@media (max-width: 1440px) {
+  .container {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .container {
+    padding: 12px;
+  }
+  .messageArea {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 1075px) {
+  .inputSection input {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 992px) {
+  .container {
+    padding: 10px;
+  }
+  .inputSection input {
+    font-size: 13px;
+    padding: 7px;
+  }
+  .inputSection button {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 8px;
+  }
+  .incomingMsg, .outgoingMsg {
+    max-width: 85%;
+  }
+  .inputSection input {
+    font-size: 12px;
+    padding: 6px;
+  }
+  .inputSection button {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 6px;
+  }
+  .inputSection input {
+    font-size: 12px;
+    padding: 5px;
+  }
+}
+
+@media (max-width: 562px) {
+  .inputSection {
+    padding: 3px 10px;
+  }
+  .inputSection input {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 475px) {
+  .container {
+    padding: 5px;
+  }
+  .inputSection input {
+    font-size: 11px;
+    padding: 4px;
+  }
+  .inputSection button {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 375px) {
+  .container {
+    padding: 4px;
+  }
+  .messageArea {
+    padding: 8px;
+  }
+  .inputSection input {
+    font-size: 10px;
+    padding: 4px;
+  }
+  .inputSection button {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 320px) {
+  .container {
+    padding: 3px;
+  }
+  .messageview {
+    padding: 10px;
+    font-size: 14px;
+  }
+  .inputSection input {
+    font-size: 9px;
+    padding: 3px;
+  }
+  .inputSection button {
+    font-size: 12px;
+  }
+}

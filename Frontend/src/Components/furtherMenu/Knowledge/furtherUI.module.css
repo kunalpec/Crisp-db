@@ -1,0 +1,84 @@
+
+/* significant step */
+
+.significantTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1b1b1b;
+  margin-bottom: 3rem;
+  max-width: 700px;
+  margin-inline: auto;
+}
+
+.significantItemsWrapper {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.significantItemCard {
+  flex: 1 1 280px;
+  max-width: 300px;
+  background: #fff;
+  text-align: center;
+  padding: 1.5rem 1rem;
+
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 1rem;
+}
+
+.significantItemCard h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #1b0036;
+}
+
+.significantItemCard p {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  
+  .significantTitle {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  
+   .significantItemsWrapper {
+    gap: 1.5rem;
+  }
+
+  .significantTitle {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .significantItemsWrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .significantTitle {
+    font-size: 1.2rem;
+  }
+
+  .icon {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+

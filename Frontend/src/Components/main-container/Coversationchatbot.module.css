@@ -1,0 +1,153 @@
+.chatbotContainer {
+    background-color: #fff;
+    min-height: 100vh;
+    position: relative;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    overflow: hidden;
+    margin-top: 3rem;
+  }
+  
+  .integrationLabel {
+    color: #d3a8b6;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    margin-left: 2rem;
+    text-align: justify;
+  }
+  .mediatordiv{
+    display: flex;
+    justify-content: space-evenly;
+  }
+  .mediatertext{
+    font-size: 2rem;
+    text-align: justify;
+  }
+  
+  .chatbotTitle {
+    font-size: 3rem;
+    color: #d3a8b6;
+    margin: 0;
+    line-height: 1.2;
+    margin-right: 2rem;
+  }
+  
+  .skillabText {
+    font-size: 10rem;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    opacity: 0.1;
+    pointer-events: none;
+  }
+  
+  .placeholderText {
+    font-size: 1.2rem;
+    color: #666;
+    max-width: 40rem;
+    /* margin: 20px auto; */
+    line-height: 1.5;
+  }
+  
+  .integrationGrid {
+    position: relative;
+    height: 500px; /* Adjust height as needed */
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .integrationButton {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: #fff;
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    color: #333;
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
+  
+  .integrationButton:hover {
+    transform: scale(1.1);
+  }
+  
+  .icon {
+    font-size: 1.2rem;
+    color: #1a1a3d;
+  }
+  .app{
+    height: 3rem;
+    width: 3rem;
+  }
+  .app:hover{
+    transition: 0.5s ease-in-out;
+    transform: scale(1.1);    
+  }
+  .appdiv{
+    position: absolute;
+    height: auto;
+    width: 22rem;
+    gap: 1rem;
+    animation: wave 1s infinite ease-in;
+  }
+
+  @keyframes wave {
+    0%{
+      
+      transform: translateY(0%);
+     }
+     
+    50%{
+      transform: translateY(10%);
+
+    }
+
+  }
+  
+  /* Responsive Adjustments */
+  @media (min-width: 768px) {
+    
+    .chatbotTitle {
+      font-size: 3rem;
+    }
+    .skillabText {
+      font-size: 12rem;
+      top: 25%;
+    }
+    .integrationGrid {
+      height: 600px;
+    }
+    
+  }
+  @media(max-width: 768px){
+    .chatbotContainer{
+      display: none;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .chatbotContainer {
+      padding: 40px;
+    }
+    .skillabText {
+      font-size: 15rem;
+      top: 30%;
+    }
+    .integrationGrid {
+      height: 700px;
+    }
+  }

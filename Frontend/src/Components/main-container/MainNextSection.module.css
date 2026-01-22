@@ -1,0 +1,294 @@
+/* ======================================================
+   GLOBAL MOTION TOKENS
+====================================================== */
+:root {
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ======================================================
+   CARD SECTION
+====================================================== */
+.cardContainer {
+  position: relative;
+  width: 100%;
+  padding: 2rem 1rem;
+
+  display: flex;
+  justify-content: space-evenly;
+  gap: 2rem;
+
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.card {
+  padding: 0 2rem;
+  margin: 2rem;
+
+  border-radius: 14px;
+  background: #ffffff;
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  transition:
+    transform 0.35s var(--ease-soft),
+    box-shadow 0.35s var(--ease-soft);
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+}
+
+.cardImage {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.cardImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  transition: transform 0.5s var(--ease-soft);
+}
+
+.card:hover .cardImage img {
+  transform: scale(1.06);
+}
+
+.cardContent {
+  padding: 20px;
+}
+
+.title {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  color: #2c2c2c;
+}
+
+.description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.button {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: #fff;
+
+  border: none;
+  padding: 10px 22px;
+  border-radius: 999px;
+
+  font-size: 1rem;
+  cursor: pointer;
+
+  transition:
+    transform 0.25s var(--ease-smooth),
+    box-shadow 0.25s var(--ease-smooth);
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.35);
+}
+
+/* ======================================================
+   INDUSTRY LAYOUT
+====================================================== */
+.industry {
+  display: flex;
+  gap: 2rem;
+
+  width: 80%;
+  margin: 4rem auto;
+  padding: 20px;
+}
+
+.sidebar {
+  width: 300px;
+  background: #ffffff;
+
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.category {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  padding: 2rem;
+  margin-bottom: 1rem;
+
+  border-radius: 10px;
+  cursor: pointer;
+
+  transition:
+    background 0.3s var(--ease-soft),
+    transform 0.3s var(--ease-soft);
+}
+
+.category:hover {
+  background: rgba(0, 123, 255, 0.08);
+  transform: translateX(6px);
+}
+
+.icon {
+  font-size: 1.5rem;
+}
+
+.categoryTitle {
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.categorySubtitle {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.active {
+  background: rgba(0, 123, 255, 0.15);
+}
+
+.mainContent {
+  flex: 1;
+  padding: 2rem;
+
+  background: #ffffff;
+  border-radius: 12px;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.illustration {
+  margin-top: 20px;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 400px;
+
+  border-radius: 12px;
+  background: #ecf0f1;
+}
+
+.industryimage {
+  width: 90%;
+  object-fit: contain;
+
+  transition: transform 0.6s var(--ease-soft);
+}
+
+.industryimage:hover {
+  transform: scale(1.04);
+}
+
+/* ======================================================
+   BENEFITS / FEATURES SECTION
+====================================================== */
+.pageWrapper {
+  min-height: 100vh;
+  padding: 40px 20px;
+
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  color: #ffffff;
+}
+
+.headerSection {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.mainHeading {
+  font-size: 2.5rem;
+  line-height: 1.2;
+}
+
+.categoryLabel {
+  margin-top: 10px;
+  font-size: 1.2rem;
+  color: #ffd700;
+}
+
+.contentArea {
+  max-width: 1200px;
+  margin: auto;
+
+  display: grid;
+  gap: 2rem;
+}
+
+.featureBox {
+  padding: 2rem;
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+
+  transition:
+    transform 0.35s var(--ease-soft),
+    background 0.35s var(--ease-soft);
+}
+
+.featureBox:hover {
+  transform: translateY(-6px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.featureIcon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.featureTitle {
+  font-size: 1.5rem;
+  color: #ffd700;
+}
+
+.featureDescription {
+  color: #ccc;
+  line-height: 1.6;
+}
+
+.actionLink {
+  color: #4a90e2;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.actionLink:hover {
+  text-decoration: underline;
+}
+
+.featurecontent {
+  display: flex;
+  gap: 2rem;
+}
+
+/* ======================================================
+   RESPONSIVE
+====================================================== */
+@media (max-width: 992px) {
+  .cardContainer,
+  .industry,
+  .featurecontent {
+    display: block;
+  }
+
+  .industry {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+  }
+}

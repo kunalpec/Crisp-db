@@ -1,0 +1,362 @@
+.dashboardNav-container {
+  width: 210px;
+  height: 100vh;
+  background-color: white;
+  padding: 20px;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid #ddd;
+}
+
+.dashboardNav-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dashboardNav-companyIcon {
+  width: 40px;
+  height: 40px;
+  background-color: #2f80ed;
+  border-radius: 50%;
+  position: relative;
+}
+
+.dashboardNav-companyIcon::after {
+  content: "💬";
+  position: absolute;
+  top: 5px;
+  left: 10px;
+  font-size: 18px;
+  color: white;
+}
+
+.dashboardNav-Name {
+  font-weight: 600;
+}
+
+.dashboardNav-Domain {
+  font-size: 12px;
+  color: gray;
+}
+
+.dashboardNav-getStarted {
+  background-color: #00c48c;
+  color: white;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin: 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  gap: 10px;
+}
+
+.dashboardNav-notificationbadge {
+  background-color: red;
+  border-radius: 50%;
+  padding: 3px 7px;
+  font-size: 12px;
+}
+
+.dashboardNav-section {
+  flex-grow: 1;
+  overflow-y: scroll;
+}
+
+.dashboardNav-inboxHeader {
+  background-color: #1976f2;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+}
+
+.dashboardNav-subtitle {
+  font-size: 13px;
+  margin: 15px 0 5px;
+  color: gray;
+}
+
+.dashboardNav-defaultInbox,
+.dashboardNav-newSubInbox,
+.dashboardNav-otherInbox {
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dashboardNav-inboxIcon {
+  font-size: 16px;
+}
+
+.dashboardNav-bottom {
+  margin-top: auto;
+}
+
+.dashboardNav-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #333;
+}
+
+.dashboardNav-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.dashboardNav-userIcon {
+  width: 40px;
+  height: 40px;
+  background-color: #d2ebf3;
+  border-radius: 50%;
+  position: relative;
+}
+
+/* .dashboardNav-userIcon::after {
+  content: "🟢";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-size: 14px;
+} */
+
+.dashboardNav-userName {
+  font-weight: 500;
+}
+
+.dashboardNav-userEmail {
+  font-size: 12px;
+  color: gray;
+}
+
+
+@media (max-width: 1440px) {
+  .dashboardNav-container {
+    width: 190px;
+    padding: 16px;
+  }
+  .dashboardNav-getStarted {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
+  .dashboardNav-subtitle {
+    font-size: 12px;
+  }
+}
+
+/* 1200px and below */
+@media (max-width: 1200px) {
+  .dashboardNav-container {
+    width: 170px;
+  }
+  .dashboardNav-Name {
+    font-size: 1rem;
+  }
+  .dashboardNav-Domain {
+    font-size: 11px;
+  }
+}
+
+/* 992px and below */
+@media (max-width: 992px) {
+  .dashboardNav-container {
+    width: 150px;
+  }
+  .dashboardNav-getStarted {
+    font-size: 0.85rem;
+    padding: 6px 8px;
+  }
+  .dashboardNav-section {
+    font-size: 13px;
+  }
+  .dashboardNav-option {
+    font-size: 13px;
+  }
+}
+
+/* 768px and below */
+@media (max-width: 768px) {
+  .dashboardNav-container {
+    width: 130px;
+    padding: 12px;
+  }
+  .dashboardNav-companyIcon {
+    width: 32px;
+    height: 32px;
+  }
+  .dashboardNav-getStarted {
+    font-size: 0.8rem;
+    padding: 6px;
+  }
+  .dashboardNav-userIcon {
+    width: 32px;
+    height: 32px;
+  }
+  .dashboardNav-userName,
+  .dashboardNav-userEmail {
+    font-size: 11px;
+  }
+  .dashboardNav-subtitle {
+    margin: 10px 0 4px;
+  }
+  .dashboardNav-defaultInbox,
+  .dashboardNav-newSubInbox,
+  .dashboardNav-otherInbox {
+    padding: 8px;
+    font-size: 13px;
+  }
+}
+
+/* 600px and below */
+@media (max-width: 600px) {
+  .dashboardNav-container {
+    width: 110px;
+    padding: 10px;
+  }
+  .dashboardNav-Name,
+  .dashboardNav-Domain {
+    display: none;
+  }
+  .dashboardNav-getStarted {
+    padding: 6px;
+    font-size: 0.75rem;
+    gap: 6px;
+    justify-content: center;
+  }
+  .dashboardNav-getStarted span.dashboardNav-notificationbadge {
+    font-size: 10px;
+    padding: 2px 5px;
+  }
+  .dashboardNav-subtitle {
+    font-size: 11px;
+  }
+  .dashboardNav-defaultInbox,
+  .dashboardNav-newSubInbox,
+  .dashboardNav-otherInbox {
+    padding: 6px;
+    font-size: 12px;
+  }
+  .dashboardNav-option {
+    font-size: 12px;
+  }
+  .dashboardNav-user {
+    gap: 6px;
+  }
+}
+
+/* 522px and below */
+@media (max-width: 522px) {
+  .dashboardNav-container {
+    width: 90px;
+  }
+  .dashboardNav-getStarted {
+    display: none; 
+  }
+  .dashboardNav-inboxHeader span,
+  .dashboardNav-defaultInbox,
+  .dashboardNav-newSubInbox,
+  .dashboardNav-otherInbox,
+  .dashboardNav-option {
+    font-size: 11px;
+  }
+  .dashboardNav-subtitle {
+    display: none; 
+}
+}
+
+/* 425px and below */
+@media (max-width: 425px) {
+  .dashboardNav-container {
+    width: 75px;
+    padding: 8px;
+  }
+  .dashboardNav-companyIcon {
+    width: 28px;
+    height: 28px;
+  }
+  .dashboardNav-section,
+  .dashboardNav-bottom {
+    font-size: 10px;
+  }
+  .dashboardNav-defaultInbox,
+  .dashboardNav-newSubInbox,
+  .dashboardNav-otherInbox {
+    padding: 5px;
+  }
+  .dashboardNav-userName,
+  .dashboardNav-userEmail {
+    display: none;
+  }
+  .dashboardNav-userIcon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* 380px and below */
+@media (max-width: 380px) {
+  .dashboardNav-container {
+    width: 60px;
+  }
+  .dashboardNav-companyIcon::after {
+    font-size: 14px;
+    top: 3px;
+    left: 7px;
+  }
+  .dashboardNav-option svg,
+  .dashboardNav-inboxHeader svg {
+    font-size: 16px;
+  }
+  .dashboardNav-option,
+  .dashboardNav-inboxHeader {
+    justify-content: center;
+  }
+  .dashboardNav-option span,
+  .dashboardNav-inboxHeader span {
+    display: none;
+  }
+}
+
+/* 320px and below */
+@media (max-width: 320px) {
+  .dashboardNav-container {
+    width: 50px;
+    padding: 6px;
+  }
+  .dashboardNav-companyIcon {
+    width: 24px;
+    height: 24px;
+  }
+  .dashboardNav-companyIcon::after {
+    font-size: 12px;
+    top: 2px;
+    left: 6px;
+  }
+}

@@ -1,0 +1,234 @@
+/* ===============================
+   Main Wrapper
+================================ */
+.form_main_div {
+  min-height: 100vh;
+  background: url('../../assets/form/login-bg.jpg') center / cover no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  perspective: 1000px;
+}
+
+/* ===============================
+   Overlay
+================================ */
+.darkOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1;
+  transition: opacity 0.5s ease;
+}
+
+.darkOverlay.dimmed {
+  opacity: 0.3;
+}
+
+/* ===============================
+   Animation Scene
+================================ */
+.form_imgdiv {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.animatescene img {
+  position: absolute;
+}
+
+/* Light */
+.lighting {
+  top: 20%;
+  left: -120%;
+  width: 580px;
+  animation: floatY 4s ease-in-out infinite;
+}
+
+/* Robot */
+.robot {
+  bottom: 22%;
+  left: -40%;
+  width: 480px;
+  opacity: 0;
+  animation: floatY 3s ease-in-out infinite;
+  transition: opacity 1s ease;
+}
+
+/* Board */
+.board {
+  bottom: 12%;
+  left: -38%;
+  width: 580px;
+}
+
+/* ===============================
+   Animations
+================================ */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes boardSlideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes lightFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes beamPulse {
+  0%, 100% { filter: brightness(0.6); }
+  50% { filter: brightness(0.4); }
+}
+
+@keyframes rotateY360 {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+/* Trigger classes */
+.animateBoard {
+  animation: boardSlideUp 3s ease-out forwards;
+}
+
+.animateLight {
+  animation: lightFade 3s ease forwards, beamPulse 2s infinite 1s;
+}
+
+.animateRobot {
+  opacity: 1;
+  animation: rotateY360 6s linear infinite;
+  backface-visibility: visible;
+  will-change: transform;
+}
+
+/* ===============================
+   Login Form
+================================ */
+.container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 420px;
+  padding: 40px;
+  background: rgba(58, 237, 177, 0.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 40px 6px;
+}
+
+/* Heading */
+.loginheading {
+  font-size: 32px;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.subtext {
+  text-align: center;
+  color: wheat;
+  margin-bottom: 30px;
+}
+
+.signupLink {
+  color: #00aaff;
+  text-decoration: none;
+}
+
+/* Form */
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  color: #fff;
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+.errorInput {
+  border-color: #dc3545;
+}
+
+.error {
+  color: #ff6b6b;
+  font-size: 14px;
+}
+
+.success {
+  color: #28a745;
+  font-size: 14px;
+}
+
+/* Button */
+.submitButton {
+  padding: 12px;
+  background: #6f42c1;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.submitButton:hover {
+  background: #5936a2;
+}
+
+.forgotPassword {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.a {
+  color: #00aaff;
+  text-decoration: none;
+}
+
+/* ===============================
+   Responsive
+================================ */
+@media (max-width: 992px) {
+  .form_imgdiv {
+    display: none;
+  }
+
+  .container {
+    margin: 0 1rem;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 25px;
+    border-radius: 30px 6px;
+  }
+
+  .loginheading {
+    font-size: 26px;
+  }
+}

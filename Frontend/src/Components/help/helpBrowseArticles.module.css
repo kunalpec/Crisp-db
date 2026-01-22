@@ -1,0 +1,67 @@
+/* .helpBrowseSectionWrapper {
+  padding: 60px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  background-color: #ffffff;
+}
+
+.helpBrowseSectionHeading {
+  font-size: 36px;
+  font-weight: 600;
+  color: #2f2f2f;
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.helpBrowseSectionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+}
+
+.helpBrowseSectionCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background-color: #f9fafb;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+
+.helpBrowseSectionCard:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+  background-color: #ffffff;
+}
+
+.helpBrowseSectionIcon {
+  width: 50px;
+  height: 50px;
+  background-color: #ddd;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.helpBrowseSectionText {
+  flex: 1;
+}
+
+.helpBrowseSectionLabel {
+  display: inline-block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.helpBrowseSectionDescription {
+  font-size: 15px;
+  color: #4b5563;
+  line-height: 1.5;
+} */

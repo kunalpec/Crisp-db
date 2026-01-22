@@ -1,0 +1,39 @@
+.mainDashboard{
+    display: flex
+}
+
+.dashMsgView{
+    width: 40%;
+}
+
+
+@media (max-width: 1024px) {
+  .mainDashboard {
+    grid-template-columns: 1fr 2fr;
+  }
+
+ 
+}
+
+
+@media (max-width: 768px) {
+  .mainDashboard {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    height: auto;
+  }
+
+  .dashChat,
+  .dashMsgView {
+    border: none;
+    padding: 0.5rem;
+  }
+}
+
+/* Small phones */
+@media (max-width: 425px) {
+  .dashChat,
+  .dashMsgView {
+    padding: 0.25rem;
+  }
+}

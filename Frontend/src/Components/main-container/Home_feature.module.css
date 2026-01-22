@@ -1,0 +1,240 @@
+.features-section {
+  padding: 60px 0;
+  background-color: #f8f9fa;
+}
+
+.feature-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  background-color: transparent;
+}
+
+.feature-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  grid-column: 1 / -1;
+}
+
+.feature-header h2 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #2a2a2a;
+  margin-bottom: 10px;
+  transition: all 1s ease;
+  -webkit-transition: all 1s ease;
+  -moz-transition: all 1s ease;
+  -ms-transition: all 1s ease;
+  -o-transition: all 1s ease;
+}
+
+.feature-header h2:hover {
+ color: #020a2d;
+ transform:scale(1.2) ;
+ -webkit-transform:scale(1.2) ;
+ -moz-transform:scale(1.2) ;
+ -ms-transform:scale(1.2) ;
+ -o-transform:scale(1.2) ;
+}
+
+.feature-box {
+  background: linear-gradient(to bottom right, white 10%, #f3e9dc 100%);
+  padding: 20px;
+  height: 16rem; /* Slightly increased height for better content fit */
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border-top-right-radius: 50px;
+  border-bottom-left-radius: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.feature-box:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  color: #0e0f10;
+  margin-bottom: 1rem;
+}
+
+.feature-icon i {
+  transition: transform 0.6s ease;
+}
+
+.feature-box:hover .feature-icon i {
+  transform: rotate(360deg);
+}
+
+.feature-box h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2a2a2a;
+  margin-bottom: 10px;
+}
+
+.feature-box p {
+  font-size: 1rem;
+  color: gray;
+  line-height: 1.5;
+  padding: 0 10px; /* Added padding to prevent text from touching edges */
+}
+
+/* === Responsive Media Queries === */
+
+/* Large screens (1440px and above) */
+@media (max-width: 1440px) {
+  .feature-container {
+    max-width: 1100px;
+    gap: 35px;
+  }
+  .feature-header h2 {
+    font-size: 2.6rem;
+  }
+}
+
+/* Desktop screens (1200px - 1439px) */
+@media (max-width: 1200px) {
+  .feature-container {
+    max-width: 900px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+  .feature-header h2 {
+    font-size: 2.4rem;
+  }
+  .feature-box {
+    height: 15rem;
+  }
+}
+
+/* Laptops (992px - 1199px) */
+@media (max-width: 992px) {
+  .feature-container {
+    max-width: 750px;
+    gap: 25px;
+  }
+  .feature-header h2 {
+    font-size: 2.2rem;
+  }
+}
+
+/* Tablets (768px - 991px) */
+@media (max-width: 768px) {
+  .feature-container {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+    gap: 20px;
+  }
+  .feature-header h2 {
+    font-size: 2rem;
+  }
+  .feature-box {
+    height: 14rem;
+  }
+}
+
+/* Small tablets (600px - 767px) */
+@media (max-width: 600px) {
+  .feature-container {
+    max-width: 500px;
+    gap: 15px;
+  }
+  .feature-header h2 {
+    font-size: 1.8rem;
+  }
+  .feature-box h3 {
+    font-size: 1.4rem;
+  }
+  .feature-box p {
+    font-size: 0.95rem;
+  }
+}
+
+/* Mobile (400px - 599px) */
+@media (max-width: 400px) {
+  .feature-container {
+    max-width: 100%; /* Full width to avoid overflow */
+    padding: 0 15px;
+    gap: 12px;
+  }
+  .feature-header h2 {
+    font-size: 1.6rem;
+  }
+  .feature-box {
+    height: 13rem;
+    padding: 15px; /* Reduced padding to fit content */
+  }
+  .feature-box h3 {
+    font-size: 1.3rem;
+  }
+  .feature-box p {
+    font-size: 0.9rem;
+    padding: 0 8px; /* Adjusted padding */
+  }
+  .feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.8rem;
+  }
+}
+
+/* Small mobile (320px - 399px) */
+@media (max-width: 399px) {
+  .feature-container {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+  .feature-header h2 {
+    font-size: 1.4rem;
+  }
+  .feature-box {
+    height: 12rem;
+    padding: 12px;
+  }
+  .feature-box h3 {
+    font-size: 1.2rem;
+  }
+  .feature-box p {
+    font-size: 0.85rem;
+    padding: 0 5px;
+  }
+  .feature-icon {
+    font-size: 2.2rem;
+    margin-bottom: 0.6rem;
+  }
+}
+
+/* Very small mobile (below 320px) */
+@media (max-width: 319px) {
+  .feature-container {
+    max-width: 100%;
+    padding: 0 8px;
+    gap: 10px;
+  }
+  .feature-header h2 {
+    font-size: 1.3rem;
+  }
+  .feature-box {
+    height: 11rem;
+    padding: 10px;
+  }
+  .feature-box h3 {
+    font-size: 1.1rem;
+  }
+  .feature-box p {
+    font-size: 0.8rem;
+    padding: 0 5px;
+  }
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+}

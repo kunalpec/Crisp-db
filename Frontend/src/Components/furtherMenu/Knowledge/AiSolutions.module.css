@@ -1,0 +1,351 @@
+
+
+.section {
+  margin-top: 2rem;
+  padding: 4rem 2rem;
+  background-color: #002e3a;
+  color: white;
+  text-align: center;
+}
+
+.subheading {
+  color: #00f0ff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.heading {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 1rem 0;
+}
+
+.description {
+  max-width: 650px;
+  margin: 0 auto 2rem;
+  font-size: 1rem;
+  color: #c7d0d6;
+}
+
+.cardsWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+}
+
+/* Card Style */
+.leftcard {
+  background-color: #f5fdfd;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  flex: 1;
+  min-width: 300px;
+  max-width: 90%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.rightcard {
+  background-color: #f5fdfd;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  flex: 1;
+  min-width: 300px;
+  max-width: 90%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.content {
+  flex: 1;
+  min-width: 260px;
+  text-align: left;
+}
+
+.content h3 {
+  color: #00313c;
+  margin-bottom: 1rem;
+}
+
+.content p {
+  color: #222;
+  margin-bottom: 1.5rem;
+}
+
+.content a {
+  color: #0a7c8a;
+  text-decoration: underline;
+}
+
+.features {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1.5rem;
+}
+
+.features li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  color: #00313c;
+}
+
+.icon {
+  color: #1aaac5;
+  margin-right: 0.5rem;
+}
+
+.demoButton {
+  background-color: #016b74;
+  color: white;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.demoButton:hover {
+  background-color: #014a51;
+}
+
+.image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 260px;
+}
+
+.image img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Right Card Stats */
+.statsBox {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.statItem {
+  background-color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  color: #00313c;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  text-align: left;
+}
+
+.statItem h3 {
+  font-size: 1.5rem;
+  color: #00313c;
+}
+
+.statItem p {
+  margin-top: 0.25rem;
+  color: #555;
+}
+@media (max-width: 1200px) {
+  .heading {
+    font-size: 1.9rem;
+  }
+
+  .leftcard,
+  .rightcard {
+    padding: 1.8rem;
+  }
+}
+
+@media (max-width: 1140px) {
+  .leftcard,
+  .rightcard {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .content {
+    text-align: center;
+  }
+
+  .image {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 1080px) {
+  .description {
+    font-size: 0.95rem;
+  }
+
+  .heading {
+    font-size: 1.8rem;
+  }
+
+  .demoButton {
+    padding: 0.65rem 1.1rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .leftcard,
+  .rightcard {
+    max-width: 100%;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .cardsWrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 800px) {
+  .subheading {
+    font-size: 0.85rem;
+  }
+
+  .heading {
+    font-size: 1.7rem;
+  }
+
+  .description {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .content {
+    text-align: center;
+  }
+
+  .statsBox {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .statItem {
+    flex: 1 1 40%;
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 600px) {
+  .heading {
+    font-size: 1.6rem;
+  }
+
+  .demoButton {
+    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+  }
+
+  .statItem h3 {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 562px) {
+  .leftcard,
+  .rightcard {
+    padding: 1.5rem;
+  }
+
+  .statItem {
+    padding: 0.9rem 1.2rem;
+  }
+}
+
+@media (max-width: 475px) {
+  .heading {
+    font-size: 1.5rem;
+  }
+
+  .description {
+    font-size: 0.85rem;
+  }
+
+  .demoButton {
+    font-size: 0.85rem;
+    padding: 0.6rem 0.9rem;
+  }
+
+  .statItem h3 {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .statItem {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+
+  .demoButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 375px) {
+  .heading {
+    font-size: 1.4rem;
+  }
+
+  .description {
+    font-size: 0.8rem;
+  }
+
+  .subheading {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .heading {
+    font-size: 1.2rem;
+  }
+
+  .description {
+    font-size: 0.75rem;
+  }
+
+  .demoButton {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.75rem;
+  }
+
+  .statItem h3 {
+    font-size: 1.1rem;
+  }
+
+  .statItem p {
+    font-size: 0.8rem;
+  }
+}

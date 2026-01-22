@@ -1,0 +1,265 @@
+/* ================= ROOT ================= */
+:root {
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ================= OVERLAY ================= */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+
+  background: rgba(15, 15, 15, 0.85);
+  backdrop-filter: blur(12px);
+
+  animation: overlayFade 0.45s var(--ease-soft);
+}
+
+@keyframes overlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar {
+  position: relative;
+
+  width: 80%;
+  max-width: 1200px;
+  margin-bottom: 2rem;
+  padding: 2.5rem;
+
+  border-radius: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+
+  display: flex;
+
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+
+  animation: sidebarUp 0.6s var(--ease-soft);
+}
+
+@keyframes sidebarUp {
+  from {
+    transform: translateY(60px) scale(0.97);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* ================= LAYOUT ================= */
+.wholeMenu {
+  display: flex;
+  gap: 3rem;
+  width: 100%;
+}
+
+.leftMenu {
+  display: flex;
+  gap: 3rem;
+  flex: 1;
+}
+
+.mainMenuUl {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.middleMenu {
+  animation: fadeSlide 0.35s var(--ease-soft);
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ================= MENU ITEMS ================= */
+.menu {
+  position: relative;
+  padding: 0.45rem 0;
+
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #ffffff;
+  cursor: pointer;
+
+  transition:
+    transform 0.25s var(--ease-smooth),
+    opacity 0.25s var(--ease-smooth);
+}
+
+.menu:hover {
+  transform: translateX(6px);
+  opacity: 0.9;
+}
+
+.menu::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ffffff, #aaaaaa);
+
+  transition: width 0.35s var(--ease-soft);
+}
+
+.menu:hover::after {
+  width: 100%;
+}
+
+/* ================= LINKS ================= */
+.link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ================= MIDDLE MENU ================= */
+.middleMenuList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.furtherNavItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.95rem;
+
+  transition:
+    transform 0.25s var(--ease-smooth),
+    opacity 0.25s var(--ease-smooth);
+}
+
+.furtherNavItem:hover {
+  transform: translateX(6px);
+  opacity: 0.85;
+}
+
+/* ================= RIGHT CONTENT ================= */
+.rightContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+.headerImgContainer {
+  width: 100%;
+}
+
+.bgImage {
+  width: 100%;
+  border-radius: 0.75rem;
+  object-fit: cover;
+
+  transition:
+    transform 0.4s var(--ease-soft),
+    box-shadow 0.4s var(--ease-soft);
+}
+
+/* .bgImage:hover {
+  transform: scale(1.03);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+} */
+
+/* ================= CONTACT ================= */
+.contactDetails {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.9rem;
+  color: #ffffff;
+}
+
+.contactDetails p {
+  margin: 0.25rem 0;
+}
+
+.socialIcons {
+  display: flex;
+  gap: 0.9rem;
+  margin-top: 0.4rem;
+}
+
+.socialIcons i {
+  cursor: pointer;
+  transition: opacity 0.25s ease;
+}
+
+.socialIcons i:hover {
+  opacity: 0.7;
+}
+
+/* ================= CLOSE BUTTON ================= */
+.closeBtn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+
+  width: 3rem;
+  height: 3rem;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+  border: none;
+
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+
+  font-size: 1.4rem;
+  cursor: pointer;
+
+  transition:
+    background 0.25s var(--ease-smooth),
+    transform 0.25s var(--ease-smooth);
+}
+
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: rotate(90deg);
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 900px) {
+  .wholeMenu {
+    flex-direction: column;
+  }
+
+  .leftMenu {
+    flex-direction: column;
+  }
+
+  .contactDetails {
+    flex-direction: column;
+  }
+}

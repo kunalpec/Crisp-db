@@ -1,0 +1,85 @@
+.helpBrowseSectionArticleView {
+  max-width: 900px;
+  margin: 4rem auto;
+  padding: 2rem;
+
+  background-color: #ffffff;
+  font-family: "Inter", sans-serif;
+}
+
+/* Back Button */
+.helpBrowseSectionBackBtn {
+  background: none;
+  border: none;
+  color: #007bff;
+
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 2rem;
+  padding-left: 0.25rem;
+
+  transition: color 0.2s ease;
+}
+
+.helpBrowseSectionBackBtn:hover,
+.helpBrowseSectionBackBtn:focus-visible {
+  color: #0056b3;
+  outline: none;
+}
+
+/* Title */
+.helpBrowseSectionArticleTitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #2f2f2f;
+  margin-bottom: 2rem;
+}
+
+/* Articles Grid */
+.helpBrowseSectionArticles {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Article Card */
+.helpBrowseSectionArticleCard {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background-color: #f9fafb;
+
+  padding: 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.helpBrowseSectionArticleCard:hover {
+  background-color: #ffffff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  transform: translateY(-3px);
+}
+
+/* Article Title */
+.helpBrowseSectionArticleCard h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #111827;
+}
+
+/* Article Summary */
+.helpBrowseSectionArticleCard p {
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .helpBrowseSectionArticleView {
+    padding: 1.25rem;
+    margin: 2rem auto;
+  }
+
+  .helpBrowseSectionArticleTitle {
+    font-size: 1.5rem;
+  }
+}
