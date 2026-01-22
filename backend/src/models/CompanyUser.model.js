@@ -29,16 +29,16 @@ const companyUserSchema = new mongoose.Schema(
       required: true,
     },
 
-    phone_number :{
-      country_code : {
-        required : true,
-        type : String
+    phone_number: {
+      country_code: {
+        required: true,
+        type: String,
       },
-      number : {
-        type : String , 
-        required : true , 
-        unique : true
-      }
+      number: {
+        type: String,
+        required: true,
+        unique: true,
+      },
     },
 
     role: {
@@ -56,6 +56,14 @@ const companyUserSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    forgot_password_otp: {
+      type: String,
+      default: null,
+    },
+    forgot_password_otp_expiry: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -66,10 +74,7 @@ const companyUserSchema = new mongoose.Schema(
  * Multi-tenant uniqueness
  * A user email must be unique per company
  */
-companyUserSchema.index(
-  { company_id: 1, email: 1 },
-  { unique: true }
-);
+companyUserSchema.index({ company_id: 1, email: 1 }, { unique: true });
 
 /**
  * Ensure only one super_admin per company
@@ -123,16 +128,9 @@ companyUserSchema.methods.generateAccessToken = function () {
  * Generate refresh token
  */
 companyUserSchema.methods.generateRefreshToken = function () {
-  return jwt.sign(
-    { _id: this._id },
-    process.env.REFRESH_TOKEN_SECRET,
-    {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
-    }
-  );
+  return jwt.sign({ _id: this._id }, process.env.REFRESH_TOKEN_SECRET, {
+    expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+  });
 };
 
-export const CompanyUser = mongoose.model(
-  'CompanyUser',
-  companyUserSchema
-);
+export const CompanyUser = mongoose.model('CompanyUser', companyUserSchema);

@@ -3,7 +3,8 @@ import AsyncHandler from '../utils/AsyncHandler.util.js';
 import ApiError from '../utils/ApiError.util.js';
 import ApiResponse from '../utils/ApiResponse.util.js';
 import HTTP_STATUS from '../constants/httpStatusCodes.constant.js';
-
+import { sendEmailApi } from '../utils/emailService.util.js';
+import crypto from 'crypto';
 /**
  * Generate Access and Refresh Tokens
  */
@@ -28,47 +29,89 @@ export const generateTokens = async (user) => {
  * Login Controller
  */
 export const login = AsyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, OTP } = req.body;
 
-  // Validate request payload
-  if (!email || !password) {
+  // ❌ Invalid request if nothing usable is provided
+  if (!OTP && (!email || !password)) {
     throw new ApiError(
       HTTP_STATUS.BAD_REQUEST,
-      'Email and password are required'
+      'Provide either OTP or email and password'
     );
   }
 
-  // Retrieve user by email
-  const user = await CompanyUser.findOne({
-    email: email.toLowerCase(),
-  });
-
-  if (!user) {
-    throw new ApiError(
-      HTTP_STATUS.UNAUTHORIZED,
-      'Invalid email or password'
-    );
-  }
-
-  // Validate password
-  const isPasswordValid = await user.isPasswordCorrect(password);
-  if (!isPasswordValid) {
-    throw new ApiError(
-      HTTP_STATUS.UNAUTHORIZED,
-      'Invalid email or password'
-    );
-  }
-
-  // Generate tokens
-  const { accessToken, refreshToken } = await generateTokens(user);
+  let user;
 
   /**
-   * ✅ COOKIE OPTIONS (POSTMAN + DEV SAFE)
+   * ============================
+   * OTP-ONLY LOGIN FLOW
+   * ============================
+   */
+  if (OTP) {
+    user = await CompanyUser.findOne({
+      forgot_password_otp: OTP,
+      forgot_password_otp_expiry: { $gt: new Date() },
+    });
+
+    if (!user) {
+      throw new ApiError(
+        HTTP_STATUS.UNAUTHORIZED,
+        'Invalid or expired OTP'
+      );
+    }
+
+    // ✅ Clear OTP immediately (single-use)
+    user.forgot_password_otp = null;
+    user.forgot_password_otp_expiry = null;
+    await user.save();
+  }
+
+  /**
+   * ============================
+   * EMAIL + PASSWORD LOGIN FLOW
+   * ============================
+   */
+  else {
+    user = await CompanyUser.findOne({
+      email: email.toLowerCase(),
+    });
+
+    if (!user) {
+      throw new ApiError(
+        HTTP_STATUS.UNAUTHORIZED,
+        'Invalid email or password'
+      );
+    }
+
+    const isPasswordValid = await user.isPasswordCorrect(password);
+    if (!isPasswordValid) {
+      throw new ApiError(
+        HTTP_STATUS.UNAUTHORIZED,
+        'Invalid email or password'
+      );
+    }
+  }
+
+  /**
+   * ============================
+   * GENERATE TOKENS
+   * ============================
+   */
+  const accessToken = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
+
+  // Save refresh token
+  user.refresh_token = refreshToken;
+  await user.save();
+
+  /**
+   * ============================
+   * COOKIE OPTIONS (DEV SAFE)
+   * ============================
    */
   const cookieOptions = {
     httpOnly: true,
-    secure: false,      // ❗ MUST be false for Postman / HTTP
-    sameSite: 'lax',    // ❗ 'none' breaks cookies without HTTPS
+    secure: false, // true in production with HTTPS
+    sameSite: 'lax',
   };
 
   res
@@ -81,7 +124,11 @@ export const login = AsyncHandler(async (req, res) => {
       maxAge: Number(process.env.REFRESH_COOKIE_MAX_AGE),
     });
 
-  // Response
+  /**
+   * ============================
+   * RESPONSE (ALL USER + COMPANY INFO)
+   * ============================
+   */
   return res.status(HTTP_STATUS.OK).json(
     new ApiResponse(
       HTTP_STATUS.OK,
@@ -92,8 +139,54 @@ export const login = AsyncHandler(async (req, res) => {
         phone_number: user.phone_number,
         role: user.role,
         company_id: user.company_id,
+        is_online: user.is_online,
       },
       'Login successful'
+    )
+  );
+});
+
+
+
+// OTP Login
+export const forgetPassword = AsyncHandler(async (req, res) => {
+  const { recoveryEmail } = req.body;
+
+  if (!recoveryEmail) {
+    throw new ApiError(400, 'Email is required');
+  }
+
+  const user = await CompanyUser.findOne({ email: recoveryEmail });
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  // Generate 6-digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  user.forgot_password_otp = otp;
+  user.forgot_password_otp_expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+  await user.save();
+
+  // Send OTP email
+  await sendEmailApi({
+    from: `"Crisp Support" <${process.env.EMAIL_USER}>`,
+    to: recoveryEmail,
+    subject: 'Password Reset OTP',
+    html: `
+      <p>Hello ${user.username},</p>
+      <p>Your password reset OTP is:</p>
+      <h2>${otp}</h2>
+      <p>This OTP is valid for 10 minutes.</p>
+    `,
+  });
+
+  return res.json(
+    new ApiResponse(
+      200,
+      null,
+      'OTP sent to your email'
     )
   );
 });

@@ -3,7 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
 // Import cron job file so it runs automatically when app starts
-import './controllers/AutoCeanPlan.controller.js';
+import './controllers/SuperAdmin/AutoCeanPlan.controller.js';
 
 const app = express();
 
