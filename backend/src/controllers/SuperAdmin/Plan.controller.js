@@ -4,19 +4,10 @@ import AsyncHandler from '../../utils/AsyncHandler.util.js';
 import ApiError from '../../utils/ApiError.util.js';
 import ApiResponse from '../../utils/ApiResponse.util.js';
 import HTTP_STATUS from '../../constants/httpStatusCodes.constant.js';
+import { requireSuperAdmin } from './checkRole.controller.js';
 
-// Check the presence of Super_admin
-const requireSuperAdmin = (req) => {
-  if (!req.user || req.user.role !== 'Super_admin') {
-    throw new ApiError(HTTP_STATUS.FORBIDDEN, 'Only Super_admin can access this resource');
-  }
-};
 
-/**
- * =========================
- * CREATE PLAN only by super admin
- * =========================
- */
+// CREATE PLAN only by super admin
 export const createPlan = AsyncHandler(async (req, res) => {
   requireSuperAdmin(req);
   const { name, description, price, billing_cycle, duration } = req.body;

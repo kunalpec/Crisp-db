@@ -8,10 +8,7 @@ import AsyncHandler from '../../utils/AsyncHandler.util.js';
 import ApiError from '../../utils/ApiError.util.js';
 import ApiResponse from '../../utils/ApiResponse.util.js';
 
-/**
- * Create Customer Company with Admin User
- * Automatically creates a company and assigns a company admin
- */
+// Create Company
 export const createCompany = AsyncHandler(async (req, res) => {
   const { company_name, company_domain, username, email, password, phone_number, plan_id } =
     req.body;

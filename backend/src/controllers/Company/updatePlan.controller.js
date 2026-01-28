@@ -5,12 +5,11 @@ import ApiError from '../../utils/ApiError.util.js';
 import ApiResponse from '../../utils/ApiResponse.util.js';
 import AsyncHandler from '../../utils/AsyncHandler.util.js';
 
-/**
- * Recharge or Change Company Plan
- * - Same plan  → Recharge
- * - New plan   → Change plan
- * - API key remains same, expiry updated
- */
+// Recharge or Change Company Plan
+// - Same plan  → Recharge
+// - New plan   → Change plan
+// - API key remains same, expiry updated
+
 export const updateCompanyPlan = AsyncHandler(async (req, res) => {
   const { plan_id } = req.body;
   const user = req.user;

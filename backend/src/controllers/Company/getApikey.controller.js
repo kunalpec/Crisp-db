@@ -1,26 +1,14 @@
-import { CompanyUser } from '../../models/CompanyUser.model.js';
 import { Company } from '../../models/Company.model.js';
-import { Plan } from '../../models/Plan.model.js';
 import { ApiKey } from '../../models/ApiKey.model.js';
+
 import AsyncHandler from '../../utils/AsyncHandler.util.js';
-import ApiError from '../../utils/ApiError.util.js';
 import ApiResponse from '../../utils/ApiResponse.util.js';
+import ApiError from '../../utils/ApiError.util.js';
 import HTTP_STATUS from '../../constants/httpStatusCodes.constant.js';
+import {requireCompanyAdmin} from "./checkRole.controller.js";
 
-
-// Allow only company admin
-export const requireCompanyAdmin = (req) => {
-  if (!req.user || req.user.role !== 'super_admin') {
-    throw new ApiError(
-      HTTP_STATUS.FORBIDDEN,
-      'Only company admin can access this resource'
-    );
-  }
-};
-
-// Get Api Key for Company only access by Company Admin
+// Get API Key (Company Admin only)
 export const getApiKey = AsyncHandler(async (req, res) => {
-  // Only company admin allowed
   requireCompanyAdmin(req);
 
   const companyId = req.user.company_id;
@@ -32,20 +20,38 @@ export const getApiKey = AsyncHandler(async (req, res) => {
     );
   }
 
-  // Get active API key for company
+  // Check company is active
+  const company = await Company.findOne({
+    _id: companyId,
+    status: 'active',
+  });
+
+  if (!company) {
+    throw new ApiError(
+      HTTP_STATUS.FORBIDDEN,
+      'Company is inactive or does not exist'
+    );
+  }
+
+  const now = new Date();
+
+  // ✅ Get valid API key
   const apiKey = await ApiKey.findOne({
     company_id: companyId,
-    is_active: true,
-  }).select('-api_key_hash'); // hide secret hash
+    $or: [
+      { expires_at: null },
+      { expires_at: { $gt: now } },
+    ],
+  }).select('-api_key_hash');
 
   if (!apiKey) {
     throw new ApiError(
       HTTP_STATUS.NOT_FOUND,
-      'API key not found'
+      'API key not found or expired'
     );
   }
 
-  return res.json(
+  return res.status(HTTP_STATUS.OK).json(
     new ApiResponse(
       HTTP_STATUS.OK,
       {
@@ -53,9 +59,9 @@ export const getApiKey = AsyncHandler(async (req, res) => {
         company_id: apiKey.company_id,
         start_at: apiKey.start_at,
         expires_at: apiKey.expires_at,
-        is_active: apiKey.is_active,
       },
       'API key fetched successfully'
     )
   );
 });
+

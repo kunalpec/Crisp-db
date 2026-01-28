@@ -3,41 +3,63 @@ import AsyncHandler from '../../utils/AsyncHandler.util.js';
 import ApiError from '../../utils/ApiError.util.js';
 import ApiResponse from '../../utils/ApiResponse.util.js';
 import HTTP_STATUS from '../../constants/httpStatusCodes.constant.js';
-
-
-// Check the presence of Super_admin
-const requireSuperAdmin = (req) => {
-  if (!req.user || req.user.role !== 'Super_admin') {
-    throw new ApiError(HTTP_STATUS.FORBIDDEN, 'Only Super_admin can access this resource');
-  }
-};
+import { requireSuperAdmin } from './checkRole.controller.js';
+import { ApiKey } from '../../models/ApiKey.model.js';
 
 // =========================
-// GET ALL ACTIVE COMPANIES SuperAdmin only
+// GET ALL ACTIVE COMPANIES (SuperAdmin only)
 // =========================
 export const getAllActiveCompanies = AsyncHandler(async (req, res) => {
-  requireSuperAdmin (req);
+  requireSuperAdmin(req);
+
   const companies = await Company.find({
-    status: 'active',
+    status: 'active',is_system:false
   })
-    .populate('plan_id')       // optional but useful
-    .populate('owner_user_id') // optional
+    .populate('plan_id')
+    .populate('owner_user_id')
     .sort({ createdAt: -1 });
 
-  if (!companies.length) {
-    throw new ApiError(
-      HTTP_STATUS.NOT_FOUND,
-      'No active companies found'
-    );
-  }
-
-  return res.json(
+  return res.status(HTTP_STATUS.OK).json(
     new ApiResponse(
       HTTP_STATUS.OK,
-      companies,
+      companies, // can be []
       'Active companies fetched successfully'
     )
   );
 });
 
 
+// auto deactivate the company
+export const autoDeactivateCompaniesJob = async () => {
+  const now = new Date();
+
+  console.log('🔍 Checking company API key expiry...');
+
+  const companies = await Company.find({
+    status: 'active',
+    is_system: false,
+  }).select('_id name');
+
+  let deactivated = 0;
+
+  for (const company of companies) {
+    const validApiKey = await ApiKey.findOne({
+      company_id: company._id,
+      $or: [
+        { expires_at: null },
+        { expires_at: { $gt: now } },
+      ],
+    });
+
+    if (!validApiKey) {
+      await Company.findByIdAndUpdate(company._id, {
+        status: 'inactive',
+      });
+
+      console.log(`❌ Deactivated: ${company.name}`);
+      deactivated++;
+    }
+  }
+
+  console.log(`✅ Deactivation job finished. Total: ${deactivated}`);
+};

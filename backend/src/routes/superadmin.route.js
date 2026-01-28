@@ -19,7 +19,7 @@ const superadminRouter = express.Router();
 superadminRouter.post('/plans', authenticate, createPlan);
 
 // Update existing plan
-superadminRouter.put('/plans/:planId', authenticate, updatePlan);
+superadminRouter.patch('/plans/:planId', authenticate, updatePlan);
 
 // Deactivate a plan
 superadminRouter.patch('/plans/:planId/deactivate', authenticate, deactivatePlan);
@@ -33,7 +33,6 @@ superadminRouter.get('/plans/active', authenticate, getActivePlans);
 // Get plan by id (query param: ?id=)
 superadminRouter.get('/plans/by-id', getPlanById);
 
-// Child company routes
 
 // View all active companies
 superadminRouter.get('/view-all-companies', authenticate, getAllActiveCompanies);

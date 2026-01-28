@@ -3,7 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
 // Import cron job file so it runs automatically when app starts
-import './controllers/SuperAdmin/AutoCeanPlan.controller.js';
+import './controllers/SuperAdmin/AutoCleanPlan.controller.js';
 
 const app = express();
 
@@ -41,13 +41,11 @@ import systemRouter from './routes/system.route.js';
 import authRouter from './routes/auth.route.js';
 import companyRouter from './routes/company.route.js';
 import superadminRouter from './routes/superadmin.route.js';
-import employeeRouter from './routes/employee.route.js';
 
 // Register API routes
 app.use('/api/v1/system', systemRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/superadmin', superadminRouter);
 app.use('/api/v1/company', companyRouter);
-app.use('/api/v1/employee', employeeRouter);
 
 export default app;
