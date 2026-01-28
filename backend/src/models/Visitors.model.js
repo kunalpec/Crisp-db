@@ -27,6 +27,12 @@ const visitorSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+
+    is_verified: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
   },
   { timestamps: true }
 );
