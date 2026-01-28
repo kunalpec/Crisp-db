@@ -112,30 +112,94 @@ http://localhost:5000
 ### Authentication
 
 - `POST /api/v1/auth/login` - User login
+  - **Request Body**: `{ "email": "string", "password": "string" }`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "user": object, "accessToken": "string", "refreshToken": "string" } }`
+
+- `POST /api/v1/auth/forget-password` - Forget password
+  - **Request Body**: `{ "email": "string" }`
+  - **Response**: `{ "success": boolean, "message": "string" }`
 
 ### Company
 
 - `POST /api/v1/company/create-company` - Create a new company
+  - **Request Body**: `{ "companyName": "string", "adminEmail": "string", "adminPassword": "string", "phone": { "countryCode": "string", "number": "string" } }`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "company": object, "admin": object } }`
+
 - `POST /api/v1/company/send-invite` - Send invite to employee (requires authentication)
-- `POST /api/v1/company/accept-invite` - Accept invite and signup
-- `GET /api/v1/company/plans/active` - Get active plans
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Request Body**: `{ "email": "string", "role": "string" }`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "invite": object } }`
+
+- `GET /api/v1/company/plans/active` - Get active plans (requires authentication)
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "plans": array } }`
+
 - `GET /api/v1/company/plans/by-id` - Get plan by id (query param: ?id=)
+  - **Query Params**: `id=<planId>`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "plan": object } }`
+
+- `GET /api/v1/company/api-key` - Get All Company ApiKey (requires authentication)
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "apiKeys": array } }`
+
+- `POST /api/v1/company/recharge-plans` - Update plans (requires authentication)
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Request Body**: `{ "planId": "string" }`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "updatedCompany": object } }`
+
+### Employee
+
+- `POST /api/v1/employee/accept-invite` - Accept invite and sign up employee
+  - **Request Body**: `{ "token": "string", "password": "string", "username": "string", "phone": { "countryCode": "string", "number": "string" } }`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "user": object, "accessToken": "string", "refreshToken": "string" } }`
 
 ### Superadmin
 
 - `POST /api/v1/superadmin/plans` - Create new plan (requires authentication)
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Request Body**: `{ "name": "string", "description": "string", "price": number, "features": array }`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "plan": object } }`
+
 - `PUT /api/v1/superadmin/plans/:planId` - Update existing plan (requires authentication)
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Request Body**: `{ "name": "string", "description": "string", "price": number, "features": array }`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "plan": object } }`
+
 - `PATCH /api/v1/superadmin/plans/:planId/deactivate` - Deactivate a plan (requires authentication)
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "plan": object } }`
+
 - `DELETE /api/v1/superadmin/plans/:planId` - Delete plan (requires authentication)
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Response**: `{ "success": boolean, "message": "string" }`
+
 - `GET /api/v1/superadmin/plans/active` - Get all active plans (requires authentication)
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "plans": array } }`
+
 - `GET /api/v1/superadmin/plans/by-id` - Get plan by id (query param: ?id=)
+  - **Query Params**: `id=<planId>`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "plan": object } }`
+
 - `GET /api/v1/superadmin/view-all-companies` - View all active companies (requires authentication)
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "companies": array } }`
 
 ### System (Bootstrap)
 
 - `POST /api/v1/system/create-super-company` - Create super company (requires bootstrap secret)
+  - **Headers**: `x-bootstrap-secret: <secret>`
+  - **Request Body**: `{ "companyName": "string", "adminEmail": "string", "adminPassword": "string", "phone": { "countryCode": "string", "number": "string" } }`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "company": object, "admin": object } }`
+
 - `POST /api/v1/system/create-super-admin` - Create super admin (requires bootstrap secret)
+  - **Headers**: `x-bootstrap-secret: <secret>`
+  - **Request Body**: `{ "email": "string", "password": "string", "username": "string", "phone": { "countryCode": "string", "number": "string" } }`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "admin": object } }`
+
 - `DELETE /api/v1/system/delete-super-admin` - Delete super admin (requires bootstrap secret)
+  - **Headers**: `x-bootstrap-secret: <secret>`
+  - **Response**: `{ "success": boolean, "message": "string" }`
 
 ## Project Structure
 

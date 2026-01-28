@@ -22,6 +22,11 @@ const visitorSchema = new mongoose.Schema(
     },
 
     current_page: String,
+
+    socket_id: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

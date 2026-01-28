@@ -52,6 +52,11 @@ const companyUserSchema = new mongoose.Schema(
       default: false,
     },
 
+    socket_id: {
+      type: String,
+      default: null,
+    },
+
     refresh_token: {
       type: String,
       default: null,
