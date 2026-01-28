@@ -63,3 +63,4 @@ export const autoDeactivateCompaniesJob = async () => {
 
   console.log(`✅ Deactivation job finished. Total: ${deactivated}`);
 };
+
