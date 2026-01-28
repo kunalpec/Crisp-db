@@ -147,6 +147,10 @@ http://localhost:5000
   - **Request Body**: `{ "planId": "string" }`
   - **Response**: `{ "success": boolean, "message": "string", "data": { "updatedCompany": object } }`
 
+- `GET /api/v1/company/employee-info` - Get Employees Details (requires authentication)
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Response**: `{ "success": boolean, "message": "string", "data": { "employees": array } }`
+
 ### Employee
 
 - `POST /api/v1/employee/accept-invite` - Accept invite and sign up employee
