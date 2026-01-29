@@ -13,7 +13,8 @@ export const getAllActiveCompanies = AsyncHandler(async (req, res) => {
   requireSuperAdmin(req);
 
   const companies = await Company.find({
-    status: 'active',is_system:false
+    status: 'active',
+    is_system: false,
   })
     .populate('plan_id')
     .populate('owner_user_id')
@@ -27,7 +28,6 @@ export const getAllActiveCompanies = AsyncHandler(async (req, res) => {
     )
   );
 });
-
 
 // auto deactivate the company
 export const autoDeactivateCompaniesJob = async () => {
@@ -45,10 +45,7 @@ export const autoDeactivateCompaniesJob = async () => {
   for (const company of companies) {
     const validApiKey = await ApiKey.findOne({
       company_id: company._id,
-      $or: [
-        { expires_at: null },
-        { expires_at: { $gt: now } },
-      ],
+      $or: [{ expires_at: null }, { expires_at: { $gt: now } }],
     });
 
     if (!validApiKey) {
@@ -63,4 +60,3 @@ export const autoDeactivateCompaniesJob = async () => {
 
   console.log(`✅ Deactivation job finished. Total: ${deactivated}`);
 };
-

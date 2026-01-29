@@ -5,7 +5,7 @@ import AsyncHandler from '../../utils/AsyncHandler.util.js';
 import ApiResponse from '../../utils/ApiResponse.util.js';
 import ApiError from '../../utils/ApiError.util.js';
 import HTTP_STATUS from '../../constants/httpStatusCodes.constant.js';
-import {requireCompanyAdmin} from "./checkRole.controller.js";
+import { requireCompanyAdmin } from './checkRole.controller.js';
 
 // Get API Key (Company Admin only)
 export const getApiKey = AsyncHandler(async (req, res) => {
@@ -14,10 +14,7 @@ export const getApiKey = AsyncHandler(async (req, res) => {
   const companyId = req.user.company_id;
 
   if (!companyId) {
-    throw new ApiError(
-      HTTP_STATUS.BAD_REQUEST,
-      'Company not linked to user'
-    );
+    throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Company not linked to user');
   }
 
   // Check company is active
@@ -27,10 +24,7 @@ export const getApiKey = AsyncHandler(async (req, res) => {
   });
 
   if (!company) {
-    throw new ApiError(
-      HTTP_STATUS.FORBIDDEN,
-      'Company is inactive or does not exist'
-    );
+    throw new ApiError(HTTP_STATUS.FORBIDDEN, 'Company is inactive or does not exist');
   }
 
   const now = new Date();
@@ -38,17 +32,11 @@ export const getApiKey = AsyncHandler(async (req, res) => {
   // ✅ Get valid API key
   const apiKey = await ApiKey.findOne({
     company_id: companyId,
-    $or: [
-      { expires_at: null },
-      { expires_at: { $gt: now } },
-    ],
+    $or: [{ expires_at: null }, { expires_at: { $gt: now } }],
   }).select('-api_key_hash');
 
   if (!apiKey) {
-    throw new ApiError(
-      HTTP_STATUS.NOT_FOUND,
-      'API key not found or expired'
-    );
+    throw new ApiError(HTTP_STATUS.NOT_FOUND, 'API key not found or expired');
   }
 
   return res.status(HTTP_STATUS.OK).json(
@@ -64,4 +52,3 @@ export const getApiKey = AsyncHandler(async (req, res) => {
     )
   );
 });
-

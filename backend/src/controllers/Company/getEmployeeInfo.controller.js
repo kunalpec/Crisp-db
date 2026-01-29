@@ -12,16 +12,13 @@ export const getEmployee = AsyncHandler(async (req, res) => {
   const companyId = req.user.company_id;
 
   if (!companyId) {
-    throw new ApiError(
-      HTTP_STATUS.BAD_REQUEST,
-      'Company not linked to user'
-    );
+    throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Company not linked to user');
   }
 
   // 👥 Fetch employees
   const employees = await CompanyUser.find({
     company_id: companyId,
-    role: { $in: ['company_admin','company_agent']}, // optional: exclude admin
+    role: { $in: ['company_admin', 'company_agent'] }, // optional: exclude admin
   })
     .select('-password -refreshToken') // hide sensitive fields
     .sort({ createdAt: -1 })

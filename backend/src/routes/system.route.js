@@ -1,9 +1,6 @@
 import express from 'express';
 
-import {
-  createSuperAdmin,
-  deleteSuperAdmin,
-} from '../controllers/bootstrap/superAdmin.service.js';
+import { createSuperAdmin, deleteSuperAdmin } from '../controllers/bootstrap/superAdmin.service.js';
 
 import { createSuperCompany } from '../controllers/bootstrap/SuperCompany.service.js';
 import { verifyBootstrapSecret } from '../middlewares/verifyBootstrapSecret.middleware.js';
@@ -24,25 +21,13 @@ const systemRouter = express.Router();
 // Bootstrap routes (run once)
 
 // Create system provider company
-systemRouter.post(
-  '/create-super-company',
-  verifyBootstrapSecret,
-  createSuperCompany
-);
+systemRouter.post('/create-super-company', verifyBootstrapSecret, createSuperCompany);
 
 // Create super admin
-systemRouter.post(
-  '/create-super-admin',
-  verifyBootstrapSecret,
-  createSuperAdmin
-);
+systemRouter.post('/create-super-admin', verifyBootstrapSecret, createSuperAdmin);
 
 // Delete super admin (dangerous)
-systemRouter.delete(
-  '/delete-super-admin',
-  verifyBootstrapSecret,
-  deleteSuperAdmin
-);
+systemRouter.delete('/delete-super-admin', verifyBootstrapSecret, deleteSuperAdmin);
 
 // Plan management routes (Super Admin)
 

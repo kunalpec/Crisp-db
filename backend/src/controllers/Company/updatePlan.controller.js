@@ -64,9 +64,7 @@ export const updateCompanyPlan = AsyncHandler(async (req, res) => {
   await apiKey.save();
 
   // ✅ Check recharge vs change
-  const isSamePlan =
-    company.plan_id &&
-    company.plan_id.toString() === plan_id;
+  const isSamePlan = company.plan_id && company.plan_id.toString() === plan_id;
 
   // ✅ Update company plan
   company.plan_id = plan._id;
@@ -90,9 +88,7 @@ export const updateCompanyPlan = AsyncHandler(async (req, res) => {
           expires_at,
         },
       },
-      isSamePlan
-        ? 'Plan recharged successfully'
-        : 'Company plan updated successfully'
+      isSamePlan ? 'Plan recharged successfully' : 'Company plan updated successfully'
     )
   );
 });

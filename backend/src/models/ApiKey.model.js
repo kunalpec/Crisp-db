@@ -14,11 +14,11 @@ const apiKeySchema = new mongoose.Schema(
       unique: true,
     },
 
-    start_at:{
-      type:Date,
-      default:null,
+    start_at: {
+      type: Date,
+      default: null,
     },
-    
+
     expires_at: {
       type: Date,
       default: null,
@@ -27,6 +27,5 @@ const apiKeySchema = new mongoose.Schema(
   { timestamps: true }
 );
 apiKeySchema.index({ company_id: 1 }, { unique: true });
-
 
 export const ApiKey = mongoose.model('ApiKey', apiKeySchema);

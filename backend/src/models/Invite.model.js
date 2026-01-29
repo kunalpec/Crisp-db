@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const inviteSchema = new mongoose.Schema(
   {
@@ -9,14 +9,14 @@ const inviteSchema = new mongoose.Schema(
 
     company_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Company",
+      ref: 'Company',
       required: true,
     },
 
     role: {
       type: String,
-      enum: ["company_agent","company_admin"],
-      default: "company_agent",
+      enum: ['company_agent', 'company_admin'],
+      default: 'company_agent',
     },
 
     token: {
@@ -38,4 +38,4 @@ const inviteSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const Invite = mongoose.model("Invite", inviteSchema);
+export const Invite = mongoose.model('Invite', inviteSchema);

@@ -32,11 +32,7 @@ export const createSuperCompany = AsyncHandler(async (req, res) => {
   });
 
   // Send response
-  return res.status(201).json(
-    new ApiResponse(
-      201,
-      company,
-      'Provider company created successfully'
-    )
-  );
+  return res
+    .status(201)
+    .json(new ApiResponse(201, company, 'Provider company created successfully'));
 });

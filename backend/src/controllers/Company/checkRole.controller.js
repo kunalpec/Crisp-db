@@ -8,9 +8,6 @@ import HTTP_STATUS from '../../constants/httpStatusCodes.constant.js';
 // Check company_admin
 export const requireCompanyAdmin = (req) => {
   if (!req.user || req.user.role !== 'company_admin') {
-    throw new ApiError(
-      HTTP_STATUS.FORBIDDEN,
-      'Only company admin can access this resource'
-    );
+    throw new ApiError(HTTP_STATUS.FORBIDDEN, 'Only company admin can access this resource');
   }
 };

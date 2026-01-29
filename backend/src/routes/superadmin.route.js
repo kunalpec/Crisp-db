@@ -33,7 +33,6 @@ superadminRouter.get('/plans/active', authenticate, getActivePlans);
 // Get plan by id (query param: ?id=)
 superadminRouter.get('/plans/by-id', getPlanById);
 
-
 // View all active companies
 superadminRouter.get('/view-all-companies', authenticate, getAllActiveCompanies);
 

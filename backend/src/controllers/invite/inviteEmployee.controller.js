@@ -117,11 +117,7 @@ export const inviteEmployeeFromSameCompany = AsyncHandler(async (req, res) => {
     `,
   });
 
-  return res.status(201).json(
-    new ApiResponse(
-      201,
-      { inviteLink },
-      `Invite sent successfully by ${senderEmail}`
-    )
-  );
+  return res
+    .status(201)
+    .json(new ApiResponse(201, { inviteLink }, `Invite sent successfully by ${senderEmail}`));
 });

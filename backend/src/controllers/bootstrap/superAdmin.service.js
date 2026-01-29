@@ -9,10 +9,10 @@ import AsyncHandler from '../../utils/AsyncHandler.util.js';
  * Scope: Provider (System) Company Only
  */
 export const createSuperAdmin = AsyncHandler(async (req, res) => {
-  const { username, email, password , phone_number } = req.body;
+  const { username, email, password, phone_number } = req.body;
 
   // Validate request payload
-  if (!username || !email || !password  || !phone_number) {
+  if (!username || !email || !password || !phone_number) {
     throw new ApiError(400, 'Username, email, password and phone number are required');
   }
 
@@ -58,7 +58,7 @@ export const createSuperAdmin = AsyncHandler(async (req, res) => {
         username: superAdmin.username,
         email: superAdmin.email,
         role: superAdmin.role,
-        phone_number : superAdmin.phone_number
+        phone_number: superAdmin.phone_number,
       },
       'Super admin created successfully'
     )
@@ -84,9 +84,7 @@ export const deleteSuperAdmin = AsyncHandler(async (req, res) => {
   });
 
   if (!superAdmin) {
-    return res
-      .status(200)
-      .json(new ApiResponse(200, null, 'Super admin does not exist'));
+    return res.status(200).json(new ApiResponse(200, null, 'Super admin does not exist'));
   }
 
   // Remove super admin user
@@ -96,7 +94,5 @@ export const deleteSuperAdmin = AsyncHandler(async (req, res) => {
   systemCompany.owner_user_id = null;
   await systemCompany.save();
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, null, 'Super admin deleted successfully'));
+  return res.status(200).json(new ApiResponse(200, null, 'Super admin deleted successfully'));
 });

@@ -3,16 +3,11 @@ import { Company } from '../models/Company.model.js';
 import { ApiKey } from '../models/ApiKey.model.js';
 import { ChatRoom } from '../models/ChatRoom.model.js';
 
-
+// verify
 export const registerVisitorVerification = (socket) => {
   socket.on('frontend:verify-response', async (payload) => {
     try {
-      const {
-        session_id,
-        company_apikey,
-        user_info,
-        current_page,
-      } = payload;
+      const { session_id, company_apikey, user_info, current_page } = payload;
 
       // 1️⃣ Validate API key
       const apiKey = await ApiKey.findOne({
@@ -69,11 +64,10 @@ export const registerVisitorVerification = (socket) => {
       socket.join(room.room_id);
 
       // 6️⃣ Notify frontend
-      socket.emit('visitor:ready', {
+      socket.emit('visitor:connected', {
         visitor_id: visitor._id,
         room_id: room.room_id,
       });
-
     } catch (err) {
       console.error('Visitor verify error:', err);
       socket.emit('verify:failed', 'SERVER_ERROR');
@@ -81,9 +75,8 @@ export const registerVisitorVerification = (socket) => {
   });
 };
 
-
 // make the room
-export const joinRoomIfVerified = (socket,io) => {
+export const joinRoomIfVerified = (socket, io) => {
   socket.on('visitor:hello', async ({ session_id }) => {
     if (!session_id) return;
 
@@ -109,16 +102,15 @@ export const joinRoomIfVerified = (socket,io) => {
 
     socket.join(room.room_id);
 
-    socket.emit('visitor:ready', {
+    socket.emit('visitor:connected', {
       visitor_id: visitor._id,
       room_id: room.room_id,
     });
   });
 };
 
-
-export const readVisitorMessage=(socket,io)=>{
-  socket.on("Visitor:message",(message)=>{
-    console.log("Listen to User",message);
+export const readVisitorMessage = (socket, io) => {
+  socket.on('Visitor:message', (message) => {
+    console.log('Listen to User', message);
   });
-}
+};

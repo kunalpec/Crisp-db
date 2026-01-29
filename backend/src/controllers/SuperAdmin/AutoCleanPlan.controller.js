@@ -16,4 +16,3 @@ cron.schedule('0 2 1 * *', async () => {
     console.error('❌ Maintenance job failed:', error);
   }
 });
- 

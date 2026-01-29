@@ -15,9 +15,8 @@ import MainDashboard from "../Components/Dashboard/MainDashboard";
 
 import ForgotPasswordForm from "../Components/signUp_Login/forgot/ForgotPasswordForm";
 import ResetPassword from "../Components/signUp_Login/forgot/ResetPassword";
-import { CallSocket } from "../Components/aiChatBot/callSocket";
-import {CallEmployeeSocket} from "../Components/aiChatBot/callSocketEmployee";
 
+import ChatBoard from "../Components/AIChatBot/ChatBoard";
 export const routes = [
   { path: "/", element: <Main /> },
   { path: "/Pricing", element: <Pricing /> },
@@ -25,8 +24,9 @@ export const routes = [
   { path: "/App", element: <Apphero /> },
   { path: "/help", element: <Help /> },
   { path: "/help/:topicName", element: <HelpTopicArticles /> },
-  { path: "/chatbot", element: <CallSocket /> },
 
+  {path: "/chatbot",element:<ChatBoard/>},
+  
   // further menu
   { path: "/widget", element: <Widgets /> },
   { path: "/knowledge", element: <KnowledgeBase /> },

@@ -10,10 +10,7 @@ import crypto from 'crypto';
  */
 export const generateTokens = async (user) => {
   if (!user) {
-    throw new ApiError(
-      HTTP_STATUS.INTERNAL_SERVER_ERROR,
-      'User is required for token generation'
-    );
+    throw new ApiError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'User is required for token generation');
   }
 
   const accessToken = user.generateAccessToken();
@@ -33,10 +30,7 @@ export const login = AsyncHandler(async (req, res) => {
 
   // ❌ Invalid request if nothing usable is provided
   if (!OTP && (!email || !password)) {
-    throw new ApiError(
-      HTTP_STATUS.BAD_REQUEST,
-      'Provide either OTP or email and password'
-    );
+    throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Provide either OTP or email and password');
   }
 
   let user;
@@ -53,41 +47,31 @@ export const login = AsyncHandler(async (req, res) => {
     });
 
     if (!user) {
-      throw new ApiError(
-        HTTP_STATUS.UNAUTHORIZED,
-        'Invalid or expired OTP'
-      );
+      throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Invalid or expired OTP');
     }
 
     // ✅ Clear OTP immediately (single-use)
     user.forgot_password_otp = null;
     user.forgot_password_otp_expiry = null;
     await user.save();
-  }
+  } else {
 
   /**
    * ============================
    * EMAIL + PASSWORD LOGIN FLOW
    * ============================
    */
-  else {
     user = await CompanyUser.findOne({
       email: email.toLowerCase(),
     });
 
     if (!user) {
-      throw new ApiError(
-        HTTP_STATUS.UNAUTHORIZED,
-        'Invalid email or password'
-      );
+      throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Invalid email or password');
     }
 
     const isPasswordValid = await user.isPasswordCorrect(password);
     if (!isPasswordValid) {
-      throw new ApiError(
-        HTTP_STATUS.UNAUTHORIZED,
-        'Invalid email or password'
-      );
+      throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Invalid email or password');
     }
   }
 
@@ -146,7 +130,53 @@ export const login = AsyncHandler(async (req, res) => {
   );
 });
 
+export const logout = AsyncHandler(async (req, res) => {
+  const user = req.user; // set by auth middleware
 
+  if (!user || !user.company_id) {
+    throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'User not authenticated');
+  }
+
+  /**
+   * ============================
+   * REMOVE REFRESH TOKEN FROM DB
+   * ============================
+   */
+  await CompanyUser.findOneAndUpdate(
+    {
+      _id: user._id,
+      company_id: user.company_id,
+    },
+    {
+      $set: { refresh_token: null },
+    },
+    {
+      runValidators: false, // ✅ DO NOT validate before update
+    }
+  );
+
+  /**
+   * ============================
+   * CLEAR AUTH COOKIES
+   * ============================
+   */
+  const cookieOptions = {
+    httpOnly: true,
+    secure: false, // true in production
+    sameSite: 'lax',
+  };
+
+  res.clearCookie('accessToken', cookieOptions).clearCookie('refreshToken', cookieOptions);
+
+  /**
+   * ============================
+   * RESPONSE
+   * ============================
+   */
+  return res
+    .status(HTTP_STATUS.OK)
+    .json(new ApiResponse(HTTP_STATUS.OK, null, 'Logout successful'));
+});
 
 // OTP Login
 export const forgetPassword = AsyncHandler(async (req, res) => {
@@ -182,11 +212,5 @@ export const forgetPassword = AsyncHandler(async (req, res) => {
     `,
   });
 
-  return res.json(
-    new ApiResponse(
-      200,
-      null,
-      'OTP sent to your email'
-    )
-  );
+  return res.json(new ApiResponse(200, null, 'OTP sent to your email'));
 });

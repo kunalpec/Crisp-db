@@ -6,7 +6,6 @@ import ApiResponse from '../../utils/ApiResponse.util.js';
 import HTTP_STATUS from '../../constants/httpStatusCodes.constant.js';
 import { requireSuperAdmin } from './checkRole.controller.js';
 
-
 // CREATE PLAN only by super admin
 export const createPlan = AsyncHandler(async (req, res) => {
   requireSuperAdmin(req);
@@ -184,7 +183,7 @@ export const cleanupDeprecatedPlans = async () => {
 
 /**
  * =========================
- * READ ACTIVE PLANS (FOR USERS) by super admin and Company admin 
+ * READ ACTIVE PLANS (FOR USERS) by super admin and Company admin
  * =========================
  */
 export const getActivePlans = AsyncHandler(async (req, res) => {
@@ -198,15 +197,8 @@ export const getActivePlans = AsyncHandler(async (req, res) => {
     plans = await Plan.find({ is_active: true }).sort({ createdAt: -1 });
   }
 
-  return res.json(
-    new ApiResponse(
-      HTTP_STATUS.OK,
-      plans,
-      'Plans fetched successfully'
-    )
-  );
+  return res.json(new ApiResponse(HTTP_STATUS.OK, plans, 'Plans fetched successfully'));
 });
-
 
 // ========================
 //  PLANS BY ID by super admin and Company admin
