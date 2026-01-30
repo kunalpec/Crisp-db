@@ -58,7 +58,7 @@ const ForgotPasswordForm = () => {
   const sendOtp = async () => {
     const email = formData.email;
     try {
-      const response = await axios.post("http://localhost:5000/api/otp/forgot-password", { email });
+      const response = await axios.post("/api/v1/auth/forget-password", { recoveryEmail: email }, { withCredentials: true });
 
       const success = response?.data?.message === "OTP sent to email";
 
@@ -85,10 +85,10 @@ const ForgotPasswordForm = () => {
     
 
     try {
-      const response = await axios.post("http://localhost:5000/api/otp/verify-otp", {
+      const response = await axios.post("/api/v1/auth/verify-otp", {
         email: formData.email,
         otp: String(formData.otp),
-      });
+      }, { withCredentials: true });
 
       console.log("OTP Verification Response:", response);
 

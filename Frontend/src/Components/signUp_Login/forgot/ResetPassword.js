@@ -65,7 +65,7 @@ const ResetPassword = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/otp/reset-password',
+      const response = await axios.post('/api/v1/auth/reset-password',
         {
           email: emailForReset,
           newPassword: String(newPassword),
@@ -73,7 +73,8 @@ const ResetPassword = () => {
         {
           headers: {
             'Content-Type': 'application/json',
-          }
+          },
+          withCredentials: true
         }
       );
 

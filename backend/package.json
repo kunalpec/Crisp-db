@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon src/index.js",
-    "format": "prettier --write ."
+    "start": "node src/index.js",
+    "format": "prettier --write .",
+    "fix:apikey-index": "node src/scripts/fix-apikey-index.js"
   },
   "keywords": [],
   "author": "",

@@ -10,7 +10,7 @@ const Pricing = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/plans/")
+      .get("/api/v1/system/plans/by-id")
       .then((res) => {
         setPlans(res.data?.plans || []);
       })

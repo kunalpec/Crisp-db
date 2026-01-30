@@ -13,7 +13,7 @@ const MainDashboard = () => {
   useEffect(() => {
     const fetchChats = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/chat/get-chat/${userId}`);
+        const response = await fetch(`/api/v1/chat/get-chat/${userId}`, { credentials: 'include' });
         const data = await response.json();
         if (data && Array.isArray(data)) {
           // Map backend data to frontend format
@@ -55,7 +55,7 @@ const MainDashboard = () => {
     if (!selectedConversation) return;
 
     try {
-      const response = await fetch('http://localhost:5000/api/chat/add-message', {
+      const response = await fetch('/api/v1/chat/add-message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -214,3 +214,71 @@ export const forgetPassword = AsyncHandler(async (req, res) => {
 
   return res.json(new ApiResponse(200, null, 'OTP sent to your email'));
 });
+
+/**
+ * Verify OTP for password reset
+ */
+export const verifyOtp = AsyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
+    throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Email and OTP are required');
+  }
+
+  const user = await CompanyUser.findOne({
+    email: email.toLowerCase(),
+    forgot_password_otp: otp,
+    forgot_password_otp_expiry: { $gt: new Date() },
+  });
+
+  if (!user) {
+    throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Invalid or expired OTP');
+  }
+
+  return res.status(HTTP_STATUS.OK).json(
+    new ApiResponse(HTTP_STATUS.OK, null, 'OTP verified successfully')
+  );
+});
+
+/**
+ * Reset password using OTP
+ * Note: OTP is optional if user is already verified via verify-otp
+ */
+export const resetPassword = AsyncHandler(async (req, res) => {
+  const { email, newPassword, otp } = req.body;
+
+  if (!email || !newPassword) {
+    throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Email and new password are required');
+  }
+
+  if (newPassword.length < 6) {
+    throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Password must be at least 6 characters');
+  }
+
+  // Find user by email and verify OTP if provided
+  const query = { email: email.toLowerCase() };
+  if (otp) {
+    query.forgot_password_otp = otp;
+    query.forgot_password_otp_expiry = { $gt: new Date() };
+  } else {
+    // If no OTP provided, check if user has a valid OTP (already verified)
+    query.forgot_password_otp = { $ne: null };
+    query.forgot_password_otp_expiry = { $gt: new Date() };
+  }
+
+  const user = await CompanyUser.findOne(query);
+
+  if (!user) {
+    throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Invalid or expired OTP');
+  }
+
+  // Update password
+  user.password_hash = newPassword; // Will be hashed by pre-save hook
+  user.forgot_password_otp = null;
+  user.forgot_password_otp_expiry = null;
+  await user.save();
+
+  return res.status(HTTP_STATUS.OK).json(
+    new ApiResponse(HTTP_STATUS.OK, null, 'Password reset successfully')
+  );
+});

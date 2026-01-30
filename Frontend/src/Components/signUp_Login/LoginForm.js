@@ -69,8 +69,9 @@ const LoginForm = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        formData
+        "/api/v1/auth/login",
+        formData,
+        { withCredentials: true }
       );
 
       dispatch(loginActions.loginSuccess(response.data.user));

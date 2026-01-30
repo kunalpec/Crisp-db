@@ -4,7 +4,11 @@ import { ChatRoom } from "../models/ChatRoom.model.js";
  * 1️⃣ Employee connection verification
  */
 export const registerEmployeeSocket = (socket, io) => {
-  const { userId, companyId, role, email } = socket.user;
+  // JWT uses snake_case: _id, company_id
+  const userId = socket.user._id;
+  const companyId = socket.user.company_id;
+  const role = socket.user.role;
+  const email = socket.user.email;
 
   socket.emit("employee:connected", {
     userId,
@@ -24,7 +28,7 @@ export const JoinRoomById = (socket, io) => {
     }
 
     try {
-      const { companyId } = socket.user;
+      const companyId = socket.user.company_id; // JWT uses snake_case
 
       const room = await ChatRoom.findOne({
         room_id,
@@ -52,7 +56,7 @@ export const waitingRoom = (socket, io) => {
   socket.on("employee:waiting", async () => {
     try {
 
-      const companyId = socket.user.company_id; // ✅ FIX
+      const companyId = socket.user.company_id; // JWT uses snake_case
 
       if (!companyId) {
         return socket.emit("employee:waiting-rooms", []);

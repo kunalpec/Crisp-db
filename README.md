@@ -57,7 +57,7 @@ Crisp-DB is a full-stack application consisting of a React frontend and a Node.j
    npm run format
    ```
 
-The server will run on the port specified in `.env` (default: 5000).
+The server will run on the port specified in `.env` (default: 3000).
 
 ### Frontend Setup
 
@@ -79,7 +79,7 @@ The server will run on the port specified in `.env` (default: 5000).
    npm start
    ```
 
-The frontend will run on [http://localhost:3000](http://localhost:3000).
+The frontend will run on [http://localhost:3001](http://localhost:3001) (React default port, or next available port).
 
 ### Running the Full Application
 
@@ -104,7 +104,7 @@ The API is structured around RESTful endpoints. Use tools like Postman or curl t
 ### Base URL
 
 ```
-http://localhost:5000
+http://localhost:3000
 ```
 
 ## API Endpoints
@@ -307,10 +307,27 @@ crisp-db/
 
 ## Environment Variables
 
-- `MONGO_URI`: MongoDB connection string
-- `PORT`: Server port (default: 5000)
-- `JWT_SECRET`: Secret key for JWT tokens
-- `CORS_ORIGIN`: Allowed CORS origins
+### Backend (.env)
+
+- `MONGODB_URI`: MongoDB connection string (e.g., `mongodb://localhost:27017`)
+- `PORT`: Server port (default: 3000)
+- `ACCESS_TOKEN_SECRET`: Secret key for JWT access tokens
+- `REFRESH_TOKEN_SECRET`: Secret key for JWT refresh tokens
+- `ACCESS_TOKEN_EXPIRY`: Access token expiry (e.g., `15m`)
+- `REFRESH_TOKEN_EXPIRY`: Refresh token expiry (e.g., `7d`)
+- `ACCESS_COOKIE_MAX_AGE`: Access cookie max age in milliseconds
+- `REFRESH_COOKIE_MAX_AGE`: Refresh cookie max age in milliseconds
+- `CORS_ORIGIN`: Allowed CORS origins (e.g., `http://localhost:3001`)
+- `EMAIL_USER`: Email address for sending emails
+- `EMAIL_PASS`: Email password or app password
+- `CLOUDINARY_CLOUD_NAME`: Cloudinary cloud name (for file uploads)
+- `CLOUDINARY_API_KEY`: Cloudinary API key
+- `CLOUDINARY_API_SECRET`: Cloudinary API secret
+
+### Frontend (.env)
+
+- `REACT_APP_API_BASE_URL`: Backend API base URL (default: `http://localhost:3000`)
+- `REACT_APP_SOCKET_URL`: Socket.IO server URL (default: `http://localhost:3000`)
 
 ## Dependencies
 
@@ -347,6 +364,144 @@ crisp-db/
 - `gsap`: Animation library
 - `react-scripts`: Build scripts for React
 - `web-vitals`: Performance monitoring
+
+## WebSocket (Socket.IO) Architecture
+
+The application uses Socket.IO for real-time communication between employees and visitors, similar to Crisp.
+
+### Room Structure
+
+#### Company Rooms
+- **Format**: `company_<companyId>`
+- **Purpose**: All employees of the same company join this room automatically when they connect
+- **Events**:
+  - `employee:connected` - When an employee connects
+  - `employee:disconnected` - When an employee disconnects
+  - `visitor:connected` - When a new visitor connects (notifies all employees)
+  - `visitor:disconnected` - When a visitor disconnects
+
+#### Visitor Rooms
+- **Format**: `visitor_<visitorSessionId>`
+- **Purpose**: Each visitor has their own room. Employees can join to chat with specific visitors
+- **Events**:
+  - `visitor:connected` - Visitor successfully connected
+  - `employee:joined-room` - Employee joined the visitor's room
+  - `employee:left-room` - Employee left the visitor's room
+  - `message:received` - New message in the room
+
+### Socket Events
+
+#### Employee Events
+
+**Client → Server:**
+- `joinCompanyRoom` - Join company room (automatic on connection)
+- `joinVisitorRoom` - Join a specific visitor room to chat
+- `leaveVisitorRoom` - Leave a visitor room
+- `employee:waiting` - Request list of waiting visitors
+- `sendMessage` - Send a message to a room
+- `typing` - Indicate typing in a room
+- `stopTyping` - Stop typing indicator
+
+**Server → Client:**
+- `employee:connected` - Employee successfully connected
+- `employee:disconnected` - Employee disconnected
+- `employee:joined-room-success` - Successfully joined visitor room
+- `employee:left-room-success` - Successfully left visitor room
+- `employee:waiting-rooms` - List of waiting visitors
+- `visitor:connected` - New visitor connected (broadcast to company room)
+- `visitor:disconnected` - Visitor disconnected (broadcast to company room)
+- `message:received` - New message received
+
+#### Visitor Events
+
+**Client → Server:**
+- `frontend:verify-response` - Send verification data (API key, session ID, etc.)
+- `visitor:hello` - Reconnection attempt
+- `sendMessage` - Send a message
+- `typing` - Indicate typing
+- `stopTyping` - Stop typing indicator
+
+**Server → Client:**
+- `backend:verify-request` - Server requests verification
+- `verify:failed` - Verification failed
+- `visitor:connected` - Visitor successfully connected
+- `employee:joined-room` - Employee joined the room
+- `employee:left-room` - Employee left the room
+- `message:received` - New message received
+
+### Data Flow
+
+1. **Visitor Connection:**
+   - Visitor connects → Server requests verification
+   - Visitor sends API key and session ID
+   - Server validates, creates/finds visitor and chat room
+   - Visitor joins `visitor_<sessionId>` room
+   - Company room receives `visitor:connected` event
+
+2. **Employee Connection:**
+   - Employee connects with valid JWT token
+   - Automatically joins `company_<companyId>` room
+   - Company room receives `employee:connected` event
+   - Employee can request waiting visitors list
+
+3. **Employee → Visitor Chat:**
+   - Employee clicks on a visitor
+   - Employee emits `joinVisitorRoom` with `visitorSessionId`
+   - Server verifies access and joins employee to visitor room
+   - Both can now exchange messages in that room
+
+4. **Message Flow:**
+   - Either party emits `sendMessage` with `{ roomId, message, sender }`
+   - Server validates access, saves to database
+   - Broadcasts `message:received` to all in the room
+
+### Security
+
+- **Authentication**: Employees authenticated via JWT tokens in cookies
+- **Authorization**: Employees can only access visitors from their company
+- **Room Isolation**: Messages are scoped to specific rooms, preventing cross-room leakage
+- **Visitor Verification**: Visitors must provide valid API key matching their company
+
+### Socket Handler Structure
+
+```
+backend/src/socket/
+├── index.js              # Main socket initialization
+├── rooms.js              # Room utility functions
+├── handlers/
+│   ├── companyHandler.js   # Employee/company room handlers
+│   ├── visitorHandler.js   # Visitor room handlers
+│   └── messageHandler.js   # Message handlers
+├── agent.socket.js       # Legacy employee handlers (for compatibility)
+└── visitor.socket.js     # Legacy visitor handlers (for compatibility)
+```
+
+## Bugs Fixed
+
+### Frontend
+- ✅ Fixed `react-scripts` version (was `^0.0.0`, now `5.0.1`)
+- ✅ Fixed React version compatibility (downgraded from 19.0.0 to 18.3.1)
+- ✅ Fixed `react-router-dom` breaking changes (downgraded from v7 to v6)
+- ✅ Fixed hardcoded API URLs (now uses proxy and relative URLs)
+- ✅ Fixed socket URL configuration (now uses environment variables)
+
+### Backend
+- ✅ Added missing `start` script to package.json
+- ✅ Fixed CORS configuration (now uses environment variable with fallback)
+- ✅ Fixed port configuration (default 3000, not 5000)
+- ✅ Fixed socket authentication middleware
+- ✅ Added missing OTP verification and reset password endpoints
+- ✅ Fixed JWT field name inconsistencies (`companyId` vs `company_id`)
+
+### Socket Architecture
+- ✅ Implemented proper company room structure (`company_<companyId>`)
+- ✅ Implemented proper visitor room structure (`visitor_<visitorSessionId>`)
+- ✅ Created modular socket handler structure
+- ✅ Fixed room joining logic for employees
+- ✅ Fixed visitor verification flow
+- ✅ Implemented proper message broadcasting
+- ✅ Added typing indicators
+- ✅ Fixed employee/visitor disconnection handling
 
 ## Contributing
 
