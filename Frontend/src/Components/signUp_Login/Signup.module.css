@@ -1,0 +1,372 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+/* ========================= */
+/* MAIN LAYOUT */
+/* ========================= */
+
+.form_main_div {
+  display: grid;
+  grid-template-columns: 1fr 520px;
+  align-items: center;
+  min-height: 100vh;
+  padding: 40px 6%;
+  background: url('../../assets/form/background-login.jpeg') no-repeat center center;
+  background-size: cover;
+  position: relative;
+}
+
+.form_main_div::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 20, 0.65);
+}
+
+/* ========================= */
+/* LEFT HERO */
+/* ========================= */
+
+.leftHero {
+  z-index: 2;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 520px;
+  padding-right: 60px;
+}
+
+.heroTitle {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  background: linear-gradient(90deg, #45f3ff, #9f6bff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.heroText {
+  font-size: 1rem;
+  color: #c7d0e0;
+  line-height: 1.6;
+}
+
+.glowOrb {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  margin-top: 32px;
+  background: radial-gradient(circle, #45f3ff, transparent 70%);
+  filter: blur(18px);
+}
+
+
+/* hero container */
+.leftHero {
+  position: relative;
+  overflow: hidden;
+  perspective: 800px; /* needed for 3D rotate */
+}
+
+/* rotating robot background */
+.leftHero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("../../assets/form/robotanimate.svg") center / 360px no-repeat; /* bigger */
+  opacity: 0.18;
+  animation: rotateRobotY 10s linear infinite;
+  z-index: 0;
+  transform-style: preserve-3d;
+}
+
+/* keep text above image */
+.leftHero > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Y-axis rotation */
+@keyframes rotateRobotY {
+  from {
+    transform: rotateY(360deg);
+  }
+  to {
+    transform: rotateY(0deg); /* clockwise */
+  }
+}
+
+
+/* ========================= */
+/* SIGNUP CARD */
+/* ========================= */
+
+.container {
+  backdrop-filter: blur(18px);
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
+  padding: 28px;
+  z-index: 2;
+  box-shadow: 0 0 50px rgba(69, 243, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hide scrollbar but keep scroll */
+
+.container {
+  scrollbar-width: none;       /* Firefox */
+  -ms-overflow-style: none;    /* IE/Edge */
+}
+
+.container::-webkit-scrollbar {
+  display: none;               /* Chrome/Safari */
+}
+
+/* ========================= */
+/* TEXT */
+/* ========================= */
+
+.signupTitle {
+  text-align: center;
+  color: #e6e6e6;
+  font-size: 2.4rem;
+  margin-bottom: 10px;
+}
+
+.signupHeading {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #b8c0cc;
+  margin-top: 10px;
+}
+
+.subtext {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #9aa3b2;
+}
+
+.loginLink {
+  color: #45f3ff;
+  text-decoration: none;
+}
+
+/* ========================= */
+/* FORM */
+/* ========================= */
+
+.form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.formGroup label {
+  color: #ddd;
+  font-size: 0.75rem;
+}
+
+.formGroup input,
+.formGroup select {
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  outline: none;
+  font-size: 0.85rem;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+  border-color: #45f3ff;
+  box-shadow: 0 0 8px #45f3ff;
+}
+
+/* ========================= */
+/* HERO TITLE ANIMATION */
+/* ========================= */
+
+/* ========================= */
+/* HERO TYPING ANIMATION */
+/* ========================= */
+
+.heroTitle {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  background: linear-gradient(90deg, #45f3ff, #9f6bff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  animation: heroFadeSlide 1.4s ease forwards,
+             heroGlow 2.8s ease-in-out infinite alternate;
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+
+@keyframes heroFadeSlide {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroGlow {
+  from {
+    filter: drop-shadow(0 0 4px rgba(69, 243, 255, 0.4));
+  }
+  to {
+    filter: drop-shadow(0 0 16px rgba(159, 107, 255, 0.7));
+  }
+}
+
+
+
+
+
+/* ========================= */
+/* BUTTON */
+/* ========================= */
+
+.submitButton {
+  margin: 12px auto 0;
+  padding: 6px 18px;
+  border-radius: 18px;
+  border: none;
+  background: linear-gradient(90deg, #45f3ff, #1fd1e0);
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.8rem;
+  min-width: 140px;
+}
+
+.submitButton:hover {
+  box-shadow: 0 0 18px #45f3ff;
+}
+
+/* ========================= */
+/* ERROR */
+/* ========================= */
+
+.error {
+  color: #ff2770;
+  font-size: 0.7rem;
+}
+
+.success {
+  color: #45f3ff;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+/* ========================= */
+/* RESPONSIVE */
+/* ========================= */
+
+@media (max-width: 1000px) {
+  .form_main_div {
+    grid-template-columns: 1fr;
+    padding: 24px;
+  }
+
+  .leftHero {
+    max-width: 100%;
+    padding-right: 0;
+    margin-bottom: 30px;
+    text-align: center;
+    align-items: center;
+  }
+
+  .heroTitle {
+    font-size: 2.2rem;
+  }
+
+  .container {
+    max-width: 520px;
+    margin: 0 auto;
+    max-height: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .heroTitle {
+    font-size: 1.8rem;
+  }
+
+  .heroText {
+    font-size: 0.9rem;
+  }
+
+  .container {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .signupTitle {
+    font-size: 1.8rem;
+  }
+
+  .formGroup input,
+  .formGroup select {
+    font-size: 0.8rem;
+  }
+
+  .submitButton {
+    min-width: 120px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ========================= */
+/* MOBILE FIX ONLY */
+/* ========================= */
+
+@media (max-width: 600px) {
+
+  .form_main_div {
+    align-items: start;
+    isolation: isolate;
+  }
+
+  .glowOrb {
+    position: absolute;
+    bottom: 35%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 140px;
+    height: 140px;
+    filter: blur(28px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .leftHero,
+  .container {
+    position: relative;
+    z-index: 2;
+  }
+
+  .leftHero {
+    margin-bottom: 10px;
+  }
+}

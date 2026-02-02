@@ -2,8 +2,7 @@ import React, { useState,useEffect,useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { authActions } from "../../store/authSlice";
-import styles from "./signUpForm.module.css";
-import style2 from './signUpStep2.module.css'
+import styles from "./Signup.module.css";
 import axios from "axios";
 import images from "../../assets/images";
 
@@ -124,222 +123,148 @@ useEffect(() => {
   };
 
 
-    const activeStyles = step1Complete ? style2 : styles;
+const activeStyles = styles;
 
-  return (
-    <div className={activeStyles.form_main_div}>
-      <div className={`${activeStyles.form_imgdiv} ${activeStyles.animatescene}`}>
-        <img src={images.lightanimate} alt="Light" className={activeStyles.lighting} ref={lightRef} />
-        <img src={images.boardanimate} alt="Board" className={activeStyles.board} ref={boardRef} />
-        <img src={images.robotanimate} alt="Robot" className={activeStyles.robot} ref={robotRef} />
-      </div>
- 
-        
-     
-      <div className={activeStyles.container}>
-        <h2 className={activeStyles.signupHeading}>
-          {step1Complete ? "Some details about your company" : "Open up your account now"}
-        </h2>
+return (
+  <div className={activeStyles.form_main_div}>
 
-        {!step1Complete && (
-          <p className={activeStyles.subtext}>
-            Already signed up? <a href="/login" className={activeStyles.loginLink}>Login</a>
-          </p>
-        )}
+    {/* LEFT HERO */}
+    <div className={activeStyles.leftHero}>
+      <h1 className={activeStyles.heroTitle}>
+        Welcome to the Meditor
+      </h1>
 
-        <form className={activeStyles.form}>
-          {!step1Complete && (
-            <>
-              <div className={activeStyles.formGroup}>
-                <label htmlFor="forUse">For Use</label>
-                <select id="forUse" name="forUse" onChange={handleSelectOption}>
-                  <option value="company">For Company</option>
-                  <option value="personal">For Personal Use</option>
-                </select>
-              </div>
+      <p className={activeStyles.heroText}>
+        Build AI powered conversations, automate workflows,
+        and connect with your customers like never before.
+      </p>
 
-              <div className={activeStyles.formGroup}>
-                <label htmlFor="firstName">First Name</label>
-                <input
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  placeholder="Enter Your First Name"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className={error.firstName ? activeStyles.errorInput : ""}
-                  required
-                />
-                {error.firstName && <p className={activeStyles.error}>{error.firstName}</p>}
-              </div>
-
-              <div className={activeStyles.formGroup}>
-                <label htmlFor="lastName">Last Name</label>
-                <input
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  placeholder="Enter Your Last Name"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className={error.lastName ? activeStyles.errorInput : ""}
-                />
-              </div>
-
-              <div className={activeStyles.formGroup}>
-                <label htmlFor="email">Email Address</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder={emailPlaceholder}
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={error.email ? activeStyles.errorInput : ""}
-                  required
-                />
-                {error.email && <p className={activeStyles.error}>{error.email}</p>}
-              </div>
-
-              <div className={activeStyles.formGroup}>
-                <label htmlFor="mobileNo">Contact Number</label>
-                <input
-                  type="tel"
-                  id="mobileNo"
-                  name="mobileNo"
-                  placeholder="Enter Your Contact Number"
-                  value={formData.mobileNo}
-                  onChange={handleChange}
-                  className={error.mobileNo ? activeStyles.errorInput : ""}
-                  required
-                />
-                {error.mobileNo && <p className={activeStyles.error}>{error.mobileNo}</p>}
-              </div>
-
-              <div className={activeStyles.formGroup}>
-                <label htmlFor="password">Password</label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder="Enter Your Password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={error.password ? activeStyles.errorInput : ""}
-                  required
-                />
-                {error.password && <p className={activeStyles.error}>{error.password}</p>}
-              </div>
-
-              <div className={activeStyles.formGroup}>
-                <label htmlFor="confirmPassword">Confirm Password</label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  placeholder="Re-enter Your Password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className={error.confirmPassword ? activeStyles.errorInput : ""}
-                  required
-                />
-                {error.confirmPassword && <p className={activeStyles.error}>{error.confirmPassword}</p>}
-              </div>
-
-              <div className={activeStyles.formGroup}>
-                <label htmlFor="address">Company Address</label>
-                <input
-                  type="text"
-                  id="address"
-                  name="address"
-                  placeholder={addressPlaceholder}
-                  value={formData.address}
-                  onChange={handleChange}
-                  className={error.address ? activeStyles.errorInput : ""}
-                  required
-                />
-                {error.address && <p className={activeStyles.error}>{error.address}</p>}
-              </div>
-
-              <button type="button" onClick={handleStep1Submit} className={activeStyles.submitButton}>
-                Register
-              </button>
-            </>
-          )}
-
-          {step1Complete && (
-            <>
-              <div className={activeStyles.formGroup}>
-                <label htmlFor="companyName">Company Name</label>
-                <input
-                  type="text"
-                  id="companyName"
-                  name="companyName"
-                  placeholder="Enter Your Company Name"
-                  value={formData.companyName}
-                  onChange={handleChange}
-                  className={error.companyName ? activeStyles.errorInput : ""}
-                  required
-                />
-                {error.companyName && <p className={activeStyles.error}>{error.companyName}</p>}
-              </div>
-
-              <div className={activeStyles.formGroup}>
-                <label htmlFor="website">Website Domain</label>
-                <div className={activeStyles.inputWithButton}>
-                  <input
-                    type="text"
-                    id="website"
-                    name="website"
-                    placeholder="www.acme.com"
-                    value={formData.website}
-                    onChange={handleChange}
-                    className={error.website ? activeStyles.errorInput : ""}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className={activeStyles.validateButton}
-                    onClick={() => validateDomain(formData.website)}
-                  >
-                    Validate
-                  </button>
-                </div>
-                {domainValidationError && <p className={activeStyles.error}>{domainValidationError}</p>}
-                {error.website && <p className={activeStyles.error}>{error.website}</p>}
-              </div>
-
-              <div className={activeStyles.formGroup}>
-                <label htmlFor="goal">Goal</label>
-                <select
-                  id="goal"
-                  name="goal"
-                  value={formData.goal}
-                  onChange={handleChange}
-                  className={error.goal ? activeStyles.errorInput : ""}
-                  required
-                >
-                  <option value="">-- Select your goal --</option>
-                  {goalOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-                {error.goal && <p className={activeStyles.error}>{error.goal}</p>}
-              </div>
-
-              <button type="submit" onClick={handleStep2Submit} className={activeStyles.submitButton}>
-                Discover My Dashboard
-              </button>
-            </>
-          )}
-
-          {isAuthenticated && <p className={activeStyles.success}>Successfully Signed Up!</p>}
-        </form>
-      </div>
+      <div className={activeStyles.glowOrb}></div>
     </div>
-  );
+
+    {/* SIGNUP CARD */}
+    <div className={activeStyles.container}>
+
+      <h1 className={activeStyles.signupTitle}>Sign Up</h1>
+
+      <form className={activeStyles.form}>
+        {!step1Complete && (
+          <>
+            <div className={activeStyles.formGroup}>
+              <label>For Use</label>
+              <select
+                className={activeStyles.groupfoam}
+                name="forUse"
+                onChange={handleSelectOption}
+              >
+                <option value="company">For Company</option>
+                <option value="personal">For Personal Use</option>
+              </select>
+            </div>
+
+            <div className={activeStyles.formGroup}>
+              <label>First Name</label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                placeholder="Enter Your First Name"
+              />
+            </div>
+
+            <div className={activeStyles.formGroup}>
+              <label>Last Name</label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                placeholder="Enter Your Last Name"
+              />
+            </div>
+
+            <div className={activeStyles.formGroup}>
+              <label>Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder={emailPlaceholder}
+              />
+            </div>
+
+            <div className={activeStyles.formGroup}>
+              <label>Contact Number</label>
+              <input
+                type="tel"
+                name="mobileNo"
+                value={formData.mobileNo}
+                onChange={handleChange}
+                placeholder="Enter Your Contact Number"
+              />
+            </div>
+
+            <div className={activeStyles.formGroup}>
+              <label>Password</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter Password"
+              />
+            </div>
+
+            <div className={activeStyles.formGroup}>
+              <label>Confirm Password</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Re-enter Password"
+              />
+            </div>
+
+            <div className={activeStyles.formGroup}>
+              <label>Company Address</label>
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder={addressPlaceholder}
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleStep1Submit}
+              className={activeStyles.submitButton}
+            >
+              Register
+            </button>
+          </>
+        )}
+      </form>
+
+      <h2 className={activeStyles.signupHeading}>
+        Create a new account now
+      </h2>
+
+      <p className={activeStyles.subtext}>
+        Already signed up?{" "}
+        <a href="/login" className={activeStyles.loginLink}>
+          Login
+        </a>
+      </p>
+    </div>
+  </div>
+);
+
 };
+
 
 export default SignUpForm;
