@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 // Import cron job file so it runs automatically when app starts
 import './controllers/SuperAdmin/AutoCleanPlan.controller.js';
+import './controllers/Auto/chatCleanup.cron.js';
 
 const app = express();
 

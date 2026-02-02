@@ -1,130 +1,126 @@
-import { Message } from '../../models/Message.model.js';
-import { Conversation } from '../../models/Conversation.model.js';
-import { ChatRoom } from '../../models/ChatRoom.model.js';
-import { Visitor } from '../../models/Visitors.model.js';
+import { Message } from "../../models/Message.model.js";
+import { Conversation } from "../../models/Conversation.model.js";
+import { ChatRoom } from "../../models/ChatRoom.model.js";
+import { Visitor } from "../../models/Visitors.model.js";
 
 /**
  * Handle sending a message
- * - Validate room access
- * - Save message to database
- * - Broadcast to room
  */
 export const handleSendMessage = async (socket, io, payload) => {
   try {
-    const { roomId, message, sender } = payload;
+    const { roomId, message } = payload;
 
-    if (!roomId || !message || !sender) {
-      return socket.emit('error', { message: 'Room ID, message, and sender are required' });
+    if (!roomId || !message) {
+      return socket.emit("error", {
+        message: "Room ID and message are required",
+      });
     }
 
-    // Validate room exists and user has access
-    const room = await ChatRoom.findOne({ room_id: roomId, status: { $ne: 'closed' } });
+    // 🔍 Validate active room ONLY
+    const room = await ChatRoom.findOne({
+      room_id: roomId,
+      status: "active",
+    });
 
     if (!room) {
-      return socket.emit('error', { message: 'Room not found or closed' });
+      return socket.emit("error", {
+        message: "Room not active",
+      });
     }
 
-    // For employees: verify they belong to the room's company
-    if (socket.user && socket.role !== 'visitor') {
-      // JWT uses snake_case: company_id
+    let senderType;
+    let senderId = null;
+
+    // 👨‍💼 Employee authorization
+    if (socket.user) {
       if (room.company_id.toString() !== socket.user.company_id.toString()) {
-        return socket.emit('error', { message: 'Unauthorized access to room' });
+        return socket.emit("error", {
+          message: "Unauthorized access",
+        });
       }
+
+      senderType = "agent";
+      senderId = socket.user._id;
+    }
+    // 🧑 Visitor authorization
+    else {
+      const visitor = await Visitor.findOne({
+        _id: room.visitor_id,
+        is_verified: true,
+        socket_id: socket.id,
+      });
+
+      if (!visitor) {
+        return socket.emit("error", {
+          message: "Unauthorized visitor",
+        });
+      }
+
+      senderType = "visitor";
+      senderId = visitor._id;
     }
 
-    // For visitors: verify they belong to the room
-    if (socket.role === 'visitor') {
-      const visitor = await Visitor.findOne({ socket_id: socket.id });
-      if (!visitor || room.visitor_id.toString() !== visitor._id.toString()) {
-        return socket.emit('error', { message: 'Unauthorized access to room' });
-      }
-    }
-
-    // Find or create conversation for this room
-    let conversation = await Conversation.findOne({ 
+    // 🔁 Find or create conversation
+    let conversation = await Conversation.findOne({
       company_id: room.company_id,
       visitor_id: room.visitor_id,
-      status: { $ne: 'closed' }
+      status: { $ne: "closed" },
     });
+
     if (!conversation) {
       conversation = await Conversation.create({
         company_id: room.company_id,
         visitor_id: room.visitor_id,
         assigned_agent: room.assigned_agent_id || null,
-        status: 'open',
+        status: "open",
       });
     }
 
-    // Map sender type to message schema
-    const senderTypeMap = {
-      employee: 'agent',
-      visitor: 'visitor',
-      agent: 'agent',
-    };
-
-    // Create message
+    // 📨 Create message
     const newMessage = await Message.create({
       conversation_id: conversation._id,
-      sender_id: sender.userId || null,
-      sender_type: senderTypeMap[sender.type] || 'visitor',
+      sender_id: senderId,
+      sender_type: senderType,
       content: message,
-      message_type: 'text',
+      message_type: "text",
     });
 
-    // Broadcast to room
-    io.to(roomId).emit('message:received', {
+    // 🕒 Update conversation activity
+    await Conversation.updateOne(
+      { _id: conversation._id },
+      { last_message_at: new Date() }
+    );
+
+    // 📡 Broadcast message
+    io.to(roomId).emit("message:received", {
       messageId: newMessage._id,
       roomId,
-      message,
-      sender,
+      message: newMessage.content,
+      senderType,
+      senderId,
       timestamp: newMessage.createdAt,
     });
 
-    console.log(`Message sent in room ${roomId} by ${sender.type}`);
+    console.log(`Message sent in room ${roomId}`);
   } catch (error) {
-    console.error('Error sending message:', error);
-    socket.emit('error', { message: 'Failed to send message' });
+    console.error("Error sending message:", error);
+    socket.emit("error", { message: "Failed to send message" });
   }
 };
+
 
 /**
  * Handle typing indicator
  */
-export const handleTyping = async (socket, io, payload) => {
-  try {
-    const { roomId, sender } = payload;
-
-    if (!roomId) {
-      return;
-    }
-
-    // Broadcast typing indicator to room (except sender)
-    socket.to(roomId).emit('typing', {
-      roomId,
-      sender,
-    });
-  } catch (error) {
-    console.error('Error handling typing:', error);
-  }
+export const handleTyping = (socket, io, { roomId }) => {
+  if (!roomId) return;
+  socket.to(roomId).emit("typing");
 };
 
 /**
  * Handle stop typing indicator
  */
-export const handleStopTyping = async (socket, io, payload) => {
-  try {
-    const { roomId, sender } = payload;
-
-    if (!roomId) {
-      return;
-    }
-
-    // Broadcast stop typing to room (except sender)
-    socket.to(roomId).emit('stopTyping', {
-      roomId,
-      sender,
-    });
-  } catch (error) {
-    console.error('Error handling stop typing:', error);
-  }
+export const handleStopTyping = (socket, io, { roomId }) => {
+  if (!roomId) return;
+  socket.to(roomId).emit("stopTyping");
 };

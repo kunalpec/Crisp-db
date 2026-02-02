@@ -31,6 +31,10 @@ const chatRoomSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    closed_at: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );

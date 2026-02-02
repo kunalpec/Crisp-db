@@ -3,69 +3,89 @@ import { socket } from "../../socket";
 
 export const EmployeeSocket = () => {
   const [waitingRooms, setWaitingRooms] = useState([]);
-  const [selectedRoomId, setSelectedRoomId] = useState(null);
+  const [selectedSessionId, setSelectedSessionId] = useState(null);
 
-  const intervalRef = useRef(null);
+  const requestedOnceRef = useRef(false);
 
   useEffect(() => {
     if (!socket.connected) socket.connect();
 
-    // ================= CONNECT =================
     socket.on("connect", () => {
       console.log("Employee socket connected:", socket.id);
 
-      // ✅ start polling ONLY after connect
-      if (!intervalRef.current) {
-        intervalRef.current = setInterval(() => {
-          socket.emit("employee:waiting");
-        }, 15000); // testing
+      if (!requestedOnceRef.current) {
+        socket.emit("employee:waiting");
+        requestedOnceRef.current = true;
       }
     });
 
     socket.on("employee:connected", (data) => {
-      console.log("Employee verified:", data);
+      console.log("Employee connected:", data);
     });
 
-    socket.on("employee:verify-success", ({ room_id }) => {
-      console.log("Room verified:", room_id);
-      socket.emit("employee:join-room", { room_id });
-    });
-
-    socket.on("employee:verify-failed", (msg) => {
-      console.error("Verify failed:", msg);
-    });
-
-    // 🔥 backend sends ARRAY
+    // 🔥 Initial waiting rooms (normalize data)
     socket.on("employee:waiting-rooms", (rooms) => {
-      console.log("Waiting rooms:", rooms);
-      setWaitingRooms(rooms);
+      const normalized = rooms.map((room) => ({
+        room_id: room.room_id,
+        visitorSessionId: room.visitor_id.session_id,
+        user_info: room.visitor_id.user_info,
+        current_page: room.visitor_id.current_page,
+      }));
+
+      setWaitingRooms(normalized);
     });
 
-    socket.on("employee:waiting-error", (msg) => {
-      console.error("Waiting error:", msg);
+    // 🟢 New visitor
+    socket.on("visitor:connected", ({ visitorSessionId, roomId, user_info, current_page }) => {
+      setWaitingRooms((prev) => {
+        if (prev.some((r) => r.visitorSessionId === visitorSessionId)) {
+          return prev;
+        }
+
+        return [
+          ...prev,
+          {
+            room_id: roomId,
+            visitorSessionId,
+            user_info,
+            current_page,
+          },
+        ];
+      });
+    });
+
+    // 🔴 Visitor disconnected
+    socket.on("visitor:disconnected", ({ visitorSessionId }) => {
+      setWaitingRooms((prev) =>
+        prev.filter((room) => room.visitorSessionId !== visitorSessionId)
+      );
+    });
+
+    // 🧹 Remove when assigned to agent
+    socket.on("visitor:assigned", ({ visitorSessionId }) => {
+      setWaitingRooms((prev) =>
+        prev.filter((room) => room.visitorSessionId !== visitorSessionId)
+      );
     });
 
     return () => {
       socket.off("connect");
       socket.off("employee:connected");
-      socket.off("employee:verify-success");
-      socket.off("employee:verify-failed");
       socket.off("employee:waiting-rooms");
-      socket.off("employee:waiting-error");
-
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+      socket.off("visitor:connected");
+      socket.off("visitor:reconnected");
+      socket.off("visitor:disconnected");
+      socket.off("visitor:assigned");
     };
   }, []);
 
   /* ================= JOIN ROOM ================= */
-  const handleJoinRoom = (room_id) => {
-    if (!socket.connected) return;
+  const handleJoinRoom = (visitorSessionId) => {
+    setSelectedSessionId(visitorSessionId);
 
-    setSelectedRoomId(room_id);
-    socket.emit("employee:verify-room", { room_id });
+    socket.emit("employee:join-visitor-room", {
+      visitorSessionId,
+    });
   };
 
   return (
@@ -81,14 +101,14 @@ export const EmployeeSocket = () => {
           <span>{room.room_id}</span>
           <button
             style={{ marginLeft: "10px" }}
-            onClick={() => handleJoinRoom(room.room_id)}
+            onClick={() => handleJoinRoom(room.visitorSessionId)}
           >
             Join
           </button>
         </div>
       ))}
 
-      {selectedRoomId && <p>Selected Room: {selectedRoomId}</p>}
+      {selectedSessionId && <p>Selected Visitor: {selectedSessionId}</p>}
     </div>
   );
 };

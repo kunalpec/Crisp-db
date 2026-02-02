@@ -16,7 +16,7 @@ import MainDashboard from "../Components/Dashboard/MainDashboard";
 import ForgotPasswordForm from "../Components/signUp_Login/forgot/ForgotPasswordForm";
 import ResetPassword from "../Components/signUp_Login/forgot/ResetPassword";
 
-import ChatBoard from "../Components/AIChatBot/ChatBoard";
+import ChatBoard from "../Components/aiChatBot/ChatBoard";
 export const routes = [
   { path: "/", element: <Main /> },
   { path: "/Pricing", element: <Pricing /> },

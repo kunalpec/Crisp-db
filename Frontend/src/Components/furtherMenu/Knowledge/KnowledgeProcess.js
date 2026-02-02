@@ -1,7 +1,7 @@
 import React, {Fragment} from 'react';
 import styles from './knowledgeProcess.module.css';
 import images from '../../../assets/images';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import {significantSteps} from './KnowledgeData';
 import { steps} from './KnowledgeData';
 import KnowledgeTestimonials from './KnowledgeTestimonials';
