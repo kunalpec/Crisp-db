@@ -15,6 +15,7 @@ const goalOptions = [
   "I'm just curious"
 ];
 
+
 const SignUpForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
