@@ -151,6 +151,7 @@ export const handleJoinVisitorRoom = async (
 
     const companyRoomId = getCompanyRoomId(companyId);
     io.to(companyRoomId).emit("visitor:assigned", {
+      roomId: visitorRoomId,
       visitorSessionId,
       visitorId: visitor._id,
     });
@@ -171,54 +172,52 @@ export const handleJoinVisitorRoom = async (
 /**
  * Handle employee leaving a visitor room
  */
-export const handleLeaveVisitorRoom = async (
-  socket,
-  io,
-  { visitorSessionId }
-) => {
+export const handleLeaveVisitorRoom = async (socket, io, { visitorSessionId }) => {
   try {
     const userId = socket.user._id;
     const companyId = socket.user.company_id;
 
     if (!visitorSessionId) {
-      return socket.emit("error", {
-        message: "Visitor session ID is required",
-      });
+      return socket.emit("error", { message: "Visitor session ID is required" });
     }
 
     const visitorRoomId = `visitor_${visitorSessionId}`;
     await socket.leave(visitorRoomId);
 
-    // 🔥 IMPORTANT: reset room state
     await ChatRoom.updateOne(
-      {
-        company_id: companyId,
-        assigned_agent_id: userId,
-      },
+      { company_id: companyId, assigned_agent_id: userId },
       {
         $set: {
           status: "waiting",
           assigned_agent_id: null,
-          closed_at: new Date(), // start 30-min timer
         },
       }
     );
 
+    // 🔔 Visitor notification
     io.to(visitorRoomId).emit("employee:left-room", {
-      employeeId: userId,
-      roomId: visitorRoomId,
+      system: true,
+      message: "Agent left the chat",
+    });
+
+    // 🔁 Waiting list update for ALL employees
+    const companyRoomId = getCompanyRoomId(companyId);
+    io.to(companyRoomId).emit("visitor:back-to-waiting", {
+      visitorSessionId,
     });
 
     socket.emit("employee:left-room-success", {
       roomId: visitorRoomId,
+      visitorSessionId,
     });
 
     console.log(`Employee ${userId} left ${visitorRoomId}`);
-  } catch (error) {
-    console.error("Leave visitor room error:", error);
+  } catch (err) {
+    console.error(err);
     socket.emit("error", { message: "Failed to leave visitor room" });
   }
 };
+
 
 /**
  * Get waiting visitors

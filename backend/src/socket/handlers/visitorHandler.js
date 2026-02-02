@@ -162,12 +162,15 @@ export const handleVisitorReconnection = async (socket, io, { session_id }) => {
 
     const companyRoomId = getCompanyRoomId(room.company_id);
 
-    io.to(companyRoomId).emit("visitor:connected", {
+    if(!room.assigned_agent_id)
+    {
+      io.to(companyRoomId).emit("visitor:connected", {
       visitorSessionId: session_id,
       roomId: visitorRoomId,
       user_info: visitor.user_info,
       current_page: visitor.current_page,
     });
+    }
 
     console.log(`Visitor ${session_id} reconnected`);
   } catch (error) {
