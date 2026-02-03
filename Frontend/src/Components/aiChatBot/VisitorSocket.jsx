@@ -1,23 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import { socket } from "../../socket";
 import { createSession } from "./createSession";
+import "./VisitorSocket.css";
 
 export const VisitorSocket = () => {
   const [text, setText] = useState("");
-  const [roomId, setRoomId] = useState("");
+  const [roomId, setRoomId] = useState(null);
   const [employeeTyping, setEmployeeTyping] = useState(false);
+  const [agentOnline, setAgentOnline] = useState(false);
   const [messages, setMessages] = useState([]);
 
   const typingRef = useRef(null);
+  const sessionRef = useRef();
 
-  /* =====================================================
-     SEND MESSAGE (OPTIMISTIC)
-  ===================================================== */
+  // send messages 
   const submitMessage = () => {
     const trimmed = text.trim();
-    if (!trimmed || !roomId) return;
+    if (!trimmed || !roomId || !agentOnline) return;
 
-    // ✅ ADD VISITOR MESSAGE LOCALLY (instant UI)
     const localMessage = {
       messageId: Date.now(),
       senderType: "visitor",
@@ -26,7 +26,6 @@ export const VisitorSocket = () => {
 
     setMessages((prev) => [...prev, localMessage]);
 
-    // send to backend
     socket.emit("message:send", {
       roomId,
       message: trimmed,
@@ -36,30 +35,50 @@ export const VisitorSocket = () => {
     socket.emit("stopTyping", { roomId });
   };
 
-  /* =====================================================
-     VISITOR TYPING (DEBOUNCED)
-  ===================================================== */
+  // visitio is typing 
   useEffect(() => {
-    if (!roomId) return;
+    if (!roomId || !agentOnline) return;
 
     if (text) {
       socket.emit("typing", { roomId });
 
-      if (typingRef.current) clearTimeout(typingRef.current);
-
+      clearTimeout(typingRef.current);
       typingRef.current = setTimeout(() => {
         socket.emit("stopTyping", { roomId });
       }, 1000);
     }
 
-    return () => typingRef.current && clearTimeout(typingRef.current);
-  }, [text, roomId]);
+    return () => clearTimeout(typingRef.current);
+  }, [text, roomId, agentOnline]);
 
-  /* =====================================================
-     SOCKET CONNECTION + EVENTS
-  ===================================================== */
+
+  // handle r=leave room
+  const handleLeaveButton = () => {
+    socket.emit("visitor:leave-chat", {
+      session_id: sessionRef.current,
+    });
+
+    // reset local UI immediately
+    setRoomId(null);
+    setAgentOnline(false);
+    setEmployeeTyping(false);
+    setMessages((prev) => [
+      ...prev,
+      {
+        messageId: Date.now(),
+        senderType: "system",
+        message: "You left the chat.",
+      },
+    ]);
+  };
+
+  // socket 
   useEffect(() => {
-    const sessionId = createSession();
+    if (!sessionRef.current) {
+      sessionRef.current = createSession();
+    }
+    const sessionId = sessionRef.current;
+
 
     if (!socket.connected) socket.connect();
 
@@ -81,28 +100,60 @@ export const VisitorSocket = () => {
       });
     });
 
+    // get self connection notification *
     socket.on("visitor:connected", (data) => {
-      if (data?.roomId) setRoomId(data.roomId);
+      if (data?.roomId) {
+        setRoomId(data.roomId);
+      }
     });
 
-    socket.on("verify:failed", (msg) => {
-      console.error("Verify failed:", msg);
+    // agent join the room *
+    socket.on("employee:joined-room", ({ roomId, agentpresent }) => {
+      setRoomId(roomId);
+      setAgentOnline(agentpresent);
+
+      if (agentpresent) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            messageId: Date.now(),
+            senderType: "system",
+            message: "Agent joined the chat",
+          },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            messageId: Date.now(),
+            senderType: "system",
+            message: "Waiting for agent to reconnect...",
+          },
+        ]);
+      }
     });
 
-    /* ================= RECEIVE EMPLOYEE MESSAGES ================= */
-    socket.on("message:received", (msg) => {
-      // ignore duplicate visitor echo (if backend ever sends it)
-      if (msg.senderType === "visitor") return;
 
-      setMessages((prev) => [...prev, msg]);
+    // agent reconnected *
+    socket.on("visitor:agent-reconnected", () => {
+      setAgentOnline(true);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          messageId: Date.now(),
+          senderType: "system",
+          message: "Agent reconnected",
+        },
+      ]);
     });
 
-    /* ================= TYPING ================= */
-    socket.on("typing", () => setEmployeeTyping(true));
-    socket.on("stopTyping", () => setEmployeeTyping(false));
-
-    /* ================= AGENT LEFT ================= */
+    // agent left the room *
     socket.on("employee:left-room", (data) => {
+      setAgentOnline(false);
+      setEmployeeTyping(false);
+      setRoomId(null);
+
       setMessages((prev) => [
         ...prev,
         {
@@ -111,54 +162,89 @@ export const VisitorSocket = () => {
           message: data?.message || "Agent left the chat",
         },
       ]);
-      setEmployeeTyping(false);
+    });
+
+    /* ===== RECEIVE MESSAGES ===== */
+    socket.on("message:received", (msg) => {
+      if (msg.senderType === "visitor") return;
+      setMessages((prev) => [...prev, msg]);
+    });
+
+    // typing and stopping *
+    socket.on("typing", () => setEmployeeTyping(true));
+    socket.on("stopTyping", () => setEmployeeTyping(false));
+
+    socket.on("verify:failed", (msg) => {
+      console.error("Verify failed:", msg);
     });
 
     return () => {
-      socket.off("connect");
-      socket.off("backend:verify-request");
       socket.off("visitor:connected");
-      socket.off("verify:failed");
+      socket.off("employee:joined-room");
+      socket.off("visitor:agent-reconnected");
+      socket.off("employee:left-room");
       socket.off("message:received");
       socket.off("typing");
       socket.off("stopTyping");
-      socket.off("employee:left-room");
-      socket.disconnect();
+      socket.off("backend:verify-request");
+      socket.off("verify:failed");
     };
   }, []);
 
+  /* ================= UI ================= */
   return (
-    <div>
-      <h3>Visitor Connected</h3>
+    <div className="visitor-container">
+      <div className="visitor-header">
+        <h3>Chat with Us</h3>
+        {!agentOnline && (
+          <span className="agent-status offline">Agent Offline</span>
+        )}
+        {agentOnline && (
+          <span className="agent-status online">Agent Online</span>
+        )}
+      </div>
 
-      <div
-        style={{
-          border: "1px solid #ccc",
-          padding: "10px",
-          height: "200px",
-          overflowY: "auto",
-          marginBottom: "8px",
-        }}
-      >
+      <div className="visitor-messages">
         {messages.map((msg) => (
-          <div key={msg.messageId}>
-            <b>{msg.senderType}:</b> {msg.message}
+          <div
+            key={msg.messageId}
+            className={`visitor-message ${msg.senderType === "visitor"
+              ? "visitor-msg"
+              : msg.senderType === "system"
+                ? "system-msg"
+                : "agent-msg"
+              }`}
+          >
+            {msg.message}
           </div>
         ))}
 
-        {employeeTyping && <em>Agent is typing...</em>}
+        {employeeTyping && agentOnline && (
+          <div className="typing-indicator">Agent is typing...</div>
+        )}
       </div>
 
-      <input
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Type message..."
-        onKeyDown={(e) => e.key === "Enter" && submitMessage()}
-      />
+      <div className="visitor-input">
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={
+            agentOnline ? "Type your message..." : "Waiting for agent..."
+          }
+          disabled={!agentOnline}
+          onKeyDown={(e) => e.key === "Enter" && submitMessage()}
+        />
 
-      <button onClick={submitMessage} disabled={!roomId}>
-        Send
-      </button>
+        <button
+          onClick={submitMessage}
+          disabled={!roomId || !agentOnline}
+        >
+          Send
+        </button>
+        <button onClick={handleLeaveButton}>
+          Leave room
+        </button>
+      </div>
     </div>
   );
 };
