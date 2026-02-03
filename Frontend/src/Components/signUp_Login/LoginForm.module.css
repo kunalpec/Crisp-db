@@ -20,19 +20,44 @@
 }
 .aiTitle {
   position: relative;
-  overflow: hidden;
+    display: inline-block; /* lock text + typing in same row */
+
+   align-items: baseline;
 }
 
 .aiTitle::after {
-  content: "|";
+  content: "Meditor";
   margin-left: 6px;
-  animation: blink 1s infinite;
+
+  display: inline-block;
+  vertical-align: bottom;
+
+  overflow: hidden;
+  white-space: nowrap;
+
+  border-right: 1px solid #fff;
+
+  animation:
+    typing 2.5s steps(7, end) infinite,
+    blink 0.8s step-end infinite;
 }
 
-@keyframes blink {
-  0%, 50%, 100% { opacity: 1; }
-  25%, 75% { opacity: 0; }
+/* typing letters */
+/* reveal text without resizing */
+@keyframes typing {
+  0% { clip-path: inset(0 100% 0 0); }
+  40% { clip-path: inset(0 0 0 0); }
+  60% { clip-path: inset(0 0 0 0); }
+  100% { clip-path: inset(0 100% 0 0); }
 }
+
+
+/* cursor blink */
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+
+
 
 .sideContent h1 span {
   animation: glowPulse 3s ease-in-out infinite;

@@ -1,0 +1,126 @@
+.page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0b0f1a, #0f172a, #000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: #fff;
+}
+
+.container {
+  max-width: 1200px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.left {
+  max-width: 520px;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #818cf8;
+  margin-bottom: 16px;
+  letter-spacing: 2px;
+  font-size: 12px;
+}
+
+.heading {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 24px;
+}
+
+.heading span {
+  color: #6366f1;
+}
+
+.description {
+  color: #9ca3af;
+  font-size: 16px;
+  margin-bottom: 32px;
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+}
+
+.primaryBtn {
+  border-radius: 16px !important;
+  padding: 0.75rem 32px !important;
+  font-weight: 600;
+  font-size: 1rem;
+  color: white; /* text color */
+  background: linear-gradient(135deg, #4f46e5, #0c5ce6); /* modern gradient */
+  border: none;
+  transition: all 0.3s ease; /* smooth hover */
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(12, 92, 230, 0.3); /* soft shadow to pop */
+}
+
+.primaryBtn:hover {
+  background: linear-gradient(135deg, #4338ca, #0747a6); /* darker gradient on hover */
+  transform: translateY(-2px); /* subtle lift effect */
+  box-shadow: 0 6px 16px rgba(12, 92, 230, 0.4); /* stronger shadow on hover */
+}
+
+
+
+.secondaryBtn {
+  border-radius: 16px !important;
+  padding: 0 32px !important;
+  color: #d1d5db !important;
+  border-color: #4b5563 !important;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 600px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 18px !important;
+}
+
+.cardContent {
+  padding: 24px;
+}
+
+.icon {
+  color: #818cf8;
+  margin-bottom: 16px;
+}
+
+.cardContent h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.cardContent p {
+  font-size: 14px;
+  color: #9ca3af;
+}

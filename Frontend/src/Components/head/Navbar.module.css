@@ -1,162 +1,148 @@
 /* =========================
-   Navbar
+   Premium Glass Navbar
 ========================= */
 .navbar {
   position: fixed;
-  top: 5%;
-  left: 10%;
-  width: 80%;
+  top: 4%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
   height: 5rem;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  padding: 0 3rem;
-  margin: 0 auto;
-
+  padding: 0 2.8rem;
   z-index: 1000;
 
-  background-color: rgba(17, 17, 17, 0.9);
-  border: 1px solid #ffffff;
-  border-radius: 50px;
+  /* glass effect */
+  background: rgba(10, 10, 12, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 60px;
+
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
   animation: slideDown 0.8s ease-out;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.35s ease;
 }
 
+.navbar:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* =========================
+   Animation
+========================= */
 @keyframes slideDown {
   from {
-    transform: translateY(-120%);
+    transform: translate(-50%, -120%);
     opacity: 0;
   }
   to {
-    transform: translateY(0);
+    transform: translate(-50%, 0);
     opacity: 1;
   }
 }
 
-.navbar:hover {
-  background: linear-gradient(
-    to top left,
-    rgba(17, 17, 17, 0.9),
-    rgba(50, 50, 50, 0.7),
-    rgba(17, 17, 17, 0.7)
-  );
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-}
-
 /* =========================
-   Left Section
+   Hamburger
 ========================= */
-.left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-/* Hamburger Menu */
 .hamburger {
+  width: 28px;
+  height: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
-  width: 24px;
-  height: 18px;
-
-  background: none;
+  background: transparent;
   border: none;
-  padding: 0;
-
   cursor: pointer;
+  z-index: 2000; /* important */
 }
 
 .hamburger span {
   height: 3px;
   width: 100%;
-  background-color: #ffffff;
-  border-radius: 2px;
-  transition: transform 0.3s ease;
+  background: #ffffff;
+  border-radius: 3px;
+  box-shadow: 0 0 6px rgba(255,255,255,0.8); /* glow so visible */
 }
+
 
 /* =========================
-   Center Logo
+   Right Buttons (Premium)
 ========================= */
-.center {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-
-  font-size: 1.5rem;
-  font-weight: 700;
+.headerBtn {
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: #ffffff;
-  letter-spacing: 0.5px;
-}
+  padding: 0.45rem 1.1rem;
+  border-radius: 999px;
+  
+  font-size: 0.9rem;
+  letter-spacing: 0.3px;
 
-.brain {
-  margin-left: 4px;
-}
+  backdrop-filter: blur(6px);
 
-/* =========================
-   Right Section
-========================= */
+  transition: all 0.3s ease;
+}
 .right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem; /* button gap */
 }
 
-.headerBtn {
-  background: transparent;
-  border: 1px solid #ffffff;
-  color: #ffffff;
-  text-decoration: none;
-  padding: 0.4rem 0.9rem;
-  border-radius: 6px;
 
-  font-size: 0.9rem;
-  cursor: pointer;
 
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
 
+/* glow hover */
 .headerBtn:hover {
-  background-color: #ffffff;
-  color: #000000;
+  background: linear-gradient(135deg, #7c7cff, #a855f7);
+  border-color: transparent;
+  color: #fff;
+
+  box-shadow:
+    0 0 12px rgba(124, 124, 255, 0.5),
+    0 0 25px rgba(168, 85, 247, 0.35);
+
+  transform: translateY(-2px);
 }
+
 
 /* =========================
-   Drawer / Sidebar
+   Responsive
 ========================= */
-.drawer {
-  position: absolute;
-  top: 100%;
-  left: 0;
+@media (max-width: 768px) {
+  .navbar {
+    width: 94%;
+    padding: 0 1.2rem;
+    height: 4.2rem;
+  }
 
-  width: 100%;
-  padding: 1.5rem;
+  .headerBtn {
+    padding: 0.35rem 0.8rem;
+    font-size: 0.8rem;
+  }
 
-  background-color: rgba(0, 0, 0, 0.85);
-  color: #ffffff;
+  .right {
+    gap: 0.5rem;
+  }
 }
 
-/* Close Button */
-.closeBtn {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-
-  background: transparent;
-  border: none;
-  color: #ffffff;
-
-  font-size: 2rem;
-  cursor: pointer;
-  z-index: 10;
+@media (max-width: 480px) {
+  .headerBtn {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
 }

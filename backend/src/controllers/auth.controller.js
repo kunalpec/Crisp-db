@@ -282,3 +282,4 @@ export const resetPassword = AsyncHandler(async (req, res) => {
     new ApiResponse(HTTP_STATUS.OK, null, 'Password reset successfully')
   );
 });
+

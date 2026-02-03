@@ -16,7 +16,7 @@ import MainDashboard from "../Components/Dashboard/MainDashboard";
 import ForgotPasswordForm from "../Components/signUp_Login/forgot/ForgotPasswordForm";
 import ResetPassword from "../Components/signUp_Login/forgot/ResetPassword";
 
-import ChatBoard from "../Components/AIChatBot/ChatBoard";
+import AiChatbotIntro from "../Components/AIChatBot/AiChatbotIntro";
 export const routes = [
   { path: "/", element: <Main /> },
   { path: "/Pricing", element: <Pricing /> },
@@ -25,12 +25,12 @@ export const routes = [
   { path: "/help", element: <Help /> },
   { path: "/help/:topicName", element: <HelpTopicArticles /> },
 
-  {path: "/chatbot",element:<ChatBoard/>},
   
   // further menu
   { path: "/widget", element: <Widgets /> },
   { path: "/knowledge", element: <KnowledgeBase /> },
 
+  { path: "/chatbot", element: <AiChatbotIntro /> },
   { path: "/signup", element: <SignUpForm /> },
   { path: "/login", element: <LoginForm /> },
   { path: "/inbox", element: <MainDashboard /> },
