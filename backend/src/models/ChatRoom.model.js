@@ -22,8 +22,8 @@ const chatRoomSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ['waiting', 'active', 'closed'],
-      default: 'waiting',
+      enum: ['online', 'both-active', 'closed'],
+      default: 'online',
     },
 
     room_id: {

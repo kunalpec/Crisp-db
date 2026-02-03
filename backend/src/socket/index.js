@@ -15,6 +15,7 @@ import {
   handleVisitorVerification,
   handleVisitorReconnection,
   handleVisitorDisconnection,
+  handleVisitorLeaveChat, // ✅ ADD THIS
 } from "./handlers/visitorHandler.js";
 
 // Message handlers
@@ -83,6 +84,10 @@ export const initSocket = (server) => {
       socket.on("visitor:hello", (data) => {
         handleVisitorReconnection(socket, io, data);
       });
+
+      socket.on("visitor:leave-chat",(data)=>{
+        handleVisitorLeaveChat(socket,io,data);
+      })
     }
 
     // =====================================================
