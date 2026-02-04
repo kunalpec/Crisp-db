@@ -9,96 +9,78 @@ import images from '../../../assets/images';
 const ResetPassword = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { emailForReset } = useSelector(state => state.login);
+
+  // ✅ GET OTP ALSO
+  const { emailForReset, otpForReset } = useSelector(state => state.login);
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resetSuccess, setResetSuccess] = useState(false);
 
-  
-    const boardRef = useRef(null);
-    const lightRef = useRef(null);
-    const robotRef = useRef(null);
-    const overlayRef = useRef(null);
-    
-    useEffect(() => {
-  if (boardRef.current) {
-    boardRef.current.classList.add(styles.animateBoard);
-  }
+  const boardRef = useRef(null);
+  const lightRef = useRef(null);
+  const robotRef = useRef(null);
+  const overlayRef = useRef(null);
 
-  setTimeout(() => {
-    if (lightRef.current) {
-      lightRef.current.classList.add(styles.animateLight);
-    }
-  }, 3200);
+  useEffect(() => {
+    if (boardRef.current) boardRef.current.classList.add(styles.animateBoard);
 
-  setTimeout(() => {
-    if (robotRef.current) {
-      robotRef.current.classList.add(styles.animateRobot);
-    }
-    if (overlayRef.current) {
-      overlayRef.current.classList.add(styles.dimmed);
-    }
-  }, 4600);
-}, []);
+    setTimeout(() => {
+      if (lightRef.current) lightRef.current.classList.add(styles.animateLight);
+    }, 3200);
+
+    setTimeout(() => {
+      if (robotRef.current) robotRef.current.classList.add(styles.animateRobot);
+      if (overlayRef.current) overlayRef.current.classList.add(styles.dimmed);
+    }, 4600);
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'newPassword') {
-      setNewPassword(value);
-    } else if (name === 'confirmPassword') {
-      setConfirmPassword(value);
-    }
+    if (name === 'newPassword') setNewPassword(value);
+    else setConfirmPassword(value);
   };
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    console.log(newPassword)
 
     if (newPassword.length < 6) {
       dispatch(loginActions.setForgotError("Password must be at least 6 characters."));
       return;
     }
+
     if (newPassword !== confirmPassword) {
       dispatch(loginActions.setForgotError("Passwords do not match."));
       return;
     }
 
     try {
-      const response = await axios.post('/api/v1/auth/reset-password',
+      const response = await axios.post(
+        'http://localhost:8000/api/v1/auth/reset-password',
         {
-          email: emailForReset,
-          newPassword: String(newPassword),
+         email: emailForReset.toLowerCase(),
+          otp: otpForReset, // ✅ CRITICAL FIX
+          newPassword,
         },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true
-        }
+        { withCredentials: true }
       );
 
-      console.log("Password Reset Response:", response);
-
       if (response.status === 200) {
-      
-        dispatch(loginActions.updatePassword({ email: emailForReset, newPassword }));
-
         dispatch(loginActions.setForgotSuccessMessage("Password reset successfully!"));
         setResetSuccess(true);
 
         setTimeout(() => {
           dispatch(loginActions.clearForgotPasswordState());
-          navigate('/login');  
+          navigate('/login');
         }, 2000);
-      } else {
-        dispatch(loginActions.setForgotError(response.data.message || "Something went wrong. Please try again."));
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Failed to reset password. Please try again later.";
-      dispatch(loginActions.setForgotError(errorMessage));
+      dispatch(loginActions.setForgotError(
+        error.response?.data?.message || "Failed to reset password"
+      ));
     }
   };
+
 
   return (
     <div className={styles.form_main_div}>

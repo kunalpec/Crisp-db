@@ -1,16 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  firstName: "",
-  lastName: "",
+  companyName: "",
+  companyDomain: "",
+  username: "",
   email: "",
   password: "",
   confirmPassword: "",
-  mobileNo: "",
-  address: "",
-  companyName: "",
-  website: "",
-  goal: "",
+  contactNumber: "",
+  countryCode: "+91",
+
   isAuthenticated: false,
   step1Complete: false,
   error: {},
@@ -22,47 +21,54 @@ const authSlice = createSlice({
   reducers: {
     signupUpdate: (state, action) => {
       const { name, value } = action.payload;
-      state[name] = value.trim();
-      state.error[name] = !value.trim() ? `Enter ${name.replace(/([A-Z])/g, " $1")}` : "";
 
-      if (name === "password" && value.length < 6) {
-        state.error.password = "Password must be at least 6 characters";
+      const safeValue = typeof value === "string" ? value : String(value || "");
+      state[name] = safeValue;
+
+      // clone errors
+      const errors = { ...state.error };
+
+      // required validation
+      if (!safeValue.trim()) {
+        errors[name] = `Enter ${name.replace(/([A-Z])/g, " $1")}`;
+      } else {
+        delete errors[name];
       }
 
-      if (name === "confirmPassword" && value !== state.password) {
-        state.error.confirmPassword = "Passwords do not match";
-      } else if (name === "confirmPassword" && value === state.password) {
-        state.error.confirmPassword = "";
+      // password rule
+      if (name === "password" && safeValue.length < 6) {
+        errors.password = "Password must be at least 6 characters";
       }
+
+      // confirm password validation
+      if (name === "confirmPassword" || name === "password") {
+        if (state.confirmPassword !== state.password) {
+          errors.confirmPassword = "Passwords do not match";
+        } else {
+          delete errors.confirmPassword;
+        }
+      }
+
+      state.error = errors;
     },
 
-    signupValidate: (state, action) => {
-      const { formType } = action.payload;
+    signupValidate: (state) => {
       const errors = {};
 
-      if (formType === "user") {
-        if (!state.firstName) errors.firstName = "Enter first name";
-        if (!state.email) errors.email = "Enter email";
-        if (!state.password) errors.password = "Enter password (min 6 chars)";
-        if (!state.confirmPassword) errors.confirmPassword = "Confirm your password";
-        if (state.confirmPassword !== state.password) errors.confirmPassword = "Passwords do not match";
-        if (!state.mobileNo) errors.mobileNo = "Enter contact number";
-        if (!state.address) errors.address = "Enter address";
-      } else if (formType === "company") {
-        console.log("Validating company step, goal is:", state.goal); // Debug log
-        if (!state.companyName) errors.companyName = "Enter Company Name";
-        if (!state.website) errors.website = "Enter Website Domain";
-        if (!state.goal) errors.goal = "Select a Goal";
-      }
+      if (!state.companyName) errors.companyName = "Enter Company Name";
+      if (!state.companyDomain) errors.companyDomain = "Enter Company Domain";
+      if (!state.username) errors.username = "Enter Username";
+      if (!state.email) errors.email = "Enter Email";
+      if (!state.password) errors.password = "Enter Password";
+      if (!state.confirmPassword) errors.confirmPassword = "Confirm Password";
+      if (state.password !== state.confirmPassword)
+        errors.confirmPassword = "Passwords do not match";
+      if (!state.contactNumber) errors.contactNumber = "Enter Contact Number";
 
       state.error = errors;
 
       if (Object.keys(errors).length === 0) {
-        if (formType === "user") {
-          state.step1Complete = true; // Move to Step 2
-        } else if (formType === "company") {
-          state.isAuthenticated = true; // Complete signup
-        }
+        state.isAuthenticated = true;
       }
     },
 

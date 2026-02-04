@@ -1,15 +1,19 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { loginActions } from "../../../store/loginSlice";
-import styles from './ForgotPasswordForm.module.css';
+import styles from "./ForgotPasswordForm.module.css";
 import axios from "axios";
-import images from '../../../assets/images'
+import images from "../../../assets/images";
+
+const API = "http://localhost:8000/api/v1/auth";
 
 const ForgotPasswordForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { forgotError, forgotSuccessMessage, otpVerified, emailForReset, step } = useSelector((state) => state.login);
+
+  const { forgotError, forgotSuccessMessage, otpVerified, emailForReset, step } =
+    useSelector((state) => state.login);
 
   const [formData, setFormData] = useState({
     email: emailForReset || "",
@@ -18,147 +22,132 @@ const ForgotPasswordForm = () => {
 
   const [message, setMessage] = useState("");
 
-  
+  // animation refs (unchanged UI)
   const boardRef = useRef(null);
   const lightRef = useRef(null);
   const robotRef = useRef(null);
   const overlayRef = useRef(null);
-  
+
   useEffect(() => {
-  if (boardRef.current) {
-    boardRef.current.classList.add(styles.animateBoard);
-  }
+    if (boardRef.current) boardRef.current.classList.add(styles.animateBoard);
 
-  setTimeout(() => {
-    if (lightRef.current) {
-      lightRef.current.classList.add(styles.animateLight);
-    }
-  }, 3200);
+    setTimeout(() => {
+      if (lightRef.current) lightRef.current.classList.add(styles.animateLight);
+    }, 3200);
 
-  setTimeout(() => {
-    if (robotRef.current) {
-      robotRef.current.classList.add(styles.animateRobot);
-    }
-    if (overlayRef.current) {
-      overlayRef.current.classList.add(styles.dimmed);
-    }
-  }, 4600);
-}, []);
-  
+    setTimeout(() => {
+      if (robotRef.current) robotRef.current.classList.add(styles.animateRobot);
+      if (overlayRef.current) overlayRef.current.classList.add(styles.dimmed);
+    }, 4600);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Send OTP
+  // ✅ SEND OTP
   const sendOtp = async () => {
-    const email = formData.email;
     try {
-      const response = await axios.post("/api/v1/auth/forget-password", { recoveryEmail: email }, { withCredentials: true });
+      const res = await axios.post(
+        `${API}/forget-password`,
+        { recoveryEmail: formData.email },
+        { withCredentials: true }
+      );
 
-      const success = response?.data?.message === "OTP sent to email";
-
-      if (success) {
+      if (res.data?.message === "OTP sent to email") {
+        dispatch(loginActions.setResetEmail(formData.email));
         dispatch(loginActions.setStep("otp"));
-        dispatch(loginActions.setResetEmail(email));
-      } else {
-        console.log("Backend response error:", response?.data);
-        setMessage("Failed to send OTP. Try again.");
+        setMessage("OTP sent to email");
       }
     } catch (err) {
-      console.error("Error sending OTP:", err);
-      setMessage("Invalid email.");
+      setMessage(err.response?.data?.message || "Invalid email");
     }
   };
 
-  // Verify OTP
-  const verifyOtp = async () => {
-    if (!formData.otp) {
-      setMessage("OTP is required.");
-      return;
+  // ✅ VERIFY OTP
+ const verifyOtp = async () => {
+  try {
+    const res = await axios.post(
+      `${API}/verify-otp`,
+      {
+        email: formData.email.trim().toLowerCase(), // ✅ FIX
+        otp: formData.otp.trim(), // ✅ FIX
+      },
+      { withCredentials: true }
+    );
+
+    if (res.data?.message === "OTP verified") {
+      dispatch(loginActions.setOTP(formData.otp.trim())); // save OTP
+      dispatch(loginActions.setOTPVerified(true));
     }
+  } catch (err) {
+    console.log("VERIFY ERROR:", err.response?.data);
+    setMessage(err.response?.data?.message || "Invalid OTP");
+  }
+};
 
-    
 
-    try {
-      const response = await axios.post("/api/v1/auth/verify-otp", {
-        email: formData.email,
-        otp: String(formData.otp),
-      }, { withCredentials: true });
-
-      console.log("OTP Verification Response:", response);
-
-      const success = response?.status === 200 && response?.data?.message === "OTP verified successfully";
-
-      if (success) {
-        dispatch(loginActions.setOTPVerified(true));
-      } else {
-        setMessage("Invalid OTP. Please check and try again.");
-      }
-    } catch (err) {
-      console.error("Error verifying OTP:", err);
-      setMessage("Invalid OTP. Please try again.");
-    }
-  };
-
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (step === "email") {
-      sendOtp();
-    } else if (step === "otp") {
-      verifyOtp();
-    }
+    setMessage("");
+
+    if (step === "email") sendOtp();
+    else verifyOtp();
   };
 
-  // Redirect to reset password if OTP verified
+  // redirect after OTP success
   useEffect(() => {
-    if (otpVerified) {
-      navigate('/resetpassword');
-    }
+    if (otpVerified) navigate("/resetpassword");
   }, [otpVerified, navigate]);
 
   return (
     <div className={styles.form_main_div}>
-       {/* Left Side image */}
-   
-<div className={`${styles.form_imgdiv} ${styles.animatescene}`}>
-        {/* <div ref={overlayRef} className={styles.darkOverlay}></div> */}
-        <img src={images.lightanimate} alt="Light" className={styles.lighting} ref={lightRef} />
-        <img src={images.boardanimate} alt="Board" className={styles.board} ref={boardRef} />
-        <img src={images.robotanimate} alt="Robot" className={styles.robot} ref={robotRef} />
+      {/* LEFT ANIMATION SIDE — untouched */}
+      <div className={`${styles.form_imgdiv} ${styles.animatescene}`}>
+        <img
+          src={images.lightanimate}
+          alt="Light"
+          className={styles.lighting}
+          ref={lightRef}
+        />
+        <img
+          src={images.boardanimate}
+          alt="Board"
+          className={styles.board}
+          ref={boardRef}
+        />
+        <img
+          src={images.robotanimate}
+          alt="Robot"
+          className={styles.robot}
+          ref={robotRef}
+        />
       </div>
 
-{/* right section forgot password form */}
+      {/* RIGHT FORM SIDE */}
       <div className={styles.container}>
         <h2 className={styles.forgotheading}>Forgot Password</h2>
-        <form onSubmit={handleSubmit} className={styles.form}>
 
-          <div className={styles.formGroup} >
-            <label htmlFor="email">Registered Email</label>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.formGroup}>
+            <label>Registered Email</label>
             <input
               type="email"
-              id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
               required
-              disabled={step === "otp"} // 🔥 Disable email field in OTP step
+              disabled={step === "otp"}
             />
           </div>
 
-          {/* Only show OTP field if step is otp */}
           {step === "otp" && (
             <div className={styles.formGroup}>
-              <label htmlFor="otp">Enter OTP</label>
+              <label>Enter OTP</label>
               <input
                 type="text"
-                id="otp"
                 name="otp"
                 value={formData.otp}
                 onChange={handleChange}
@@ -174,12 +163,15 @@ const ForgotPasswordForm = () => {
 
           {message && <p className={styles.message}>{message}</p>}
           {forgotError && <p className={styles.error}>{forgotError}</p>}
-          {forgotSuccessMessage && <p className={styles.success}>{forgotSuccessMessage}</p>}
+          {forgotSuccessMessage && (
+            <p className={styles.success}>{forgotSuccessMessage}</p>
+          )}
 
           <p className={styles.forgotPassword}>
-            <a href="/login" className={styles.a}>Back to Login</a>
+            <Link to="/login" className={styles.a}>
+              Back to Login
+            </Link>
           </p>
-
         </form>
       </div>
     </div>
