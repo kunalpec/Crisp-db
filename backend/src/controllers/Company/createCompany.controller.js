@@ -10,7 +10,7 @@ import ApiResponse from '../../utils/ApiResponse.util.js';
 
 // Create Company
 export const createCompany = AsyncHandler(async (req, res) => {
-  const { company_name, company_domain, username, email, password, phone_number, plan_id } =
+  const { company_name, company_domain, username, email, password, phone_number } =
     req.body;
 
   // Validate input
@@ -20,12 +20,13 @@ export const createCompany = AsyncHandler(async (req, res) => {
     !username ||
     !email ||
     !password ||
-    !phone_number ||
-    !plan_id
+    !phone_number
   ) {
     throw new ApiError(400, 'All fields are required');
   }
 
+  const plan_id='6982ee0cf96d47ea6b2e90d2';
+  
   // Validate plan
   const plan = await Plan.findOne({
     _id: plan_id,

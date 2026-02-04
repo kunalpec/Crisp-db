@@ -120,7 +120,7 @@ export const handleVisitorReconnection = async (socket, io, { session_id }) => {
     }
 
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-    
+
     // 2. Find and update the visitor in one go (Atomic)
     const visitor = await Visitor.findOneAndUpdate(
       { session_id, is_verified: true },
@@ -254,6 +254,7 @@ export const handleVisitorDisconnection = async (socket, io) => {
   }
 };
 
+// leave the room *
 export const handleVisitorLeaveChat = async (socket, io, { session_id }) => {
   try {
     const visitor = await Visitor.findOne({ session_id });

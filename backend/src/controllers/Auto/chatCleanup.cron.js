@@ -2,7 +2,7 @@ import cron from 'node-cron';
 import { cleanupAbandonedChats } from './chatCleanup.js';
 
 // run every 1 minute
-cron.schedule('* * * * *', async () => {
+cron.schedule('*/30 * * * *', async () => {
   try {
     await cleanupAbandonedChats();
   } catch (err) {

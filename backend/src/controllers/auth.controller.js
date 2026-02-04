@@ -5,6 +5,7 @@ import ApiResponse from '../utils/ApiResponse.util.js';
 import HTTP_STATUS from '../constants/httpStatusCodes.constant.js';
 import { sendEmailApi } from '../utils/emailService.util.js';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 /**
  * Generate Access and Refresh Tokens
  */
@@ -55,12 +56,11 @@ export const login = AsyncHandler(async (req, res) => {
     user.forgot_password_otp_expiry = null;
     await user.save();
   } else {
-
-  /**
-   * ============================
-   * EMAIL + PASSWORD LOGIN FLOW
-   * ============================
-   */
+    /**
+     * ============================
+     * EMAIL + PASSWORD LOGIN FLOW
+     * ============================
+     */
     user = await CompanyUser.findOne({
       email: email.toLowerCase(),
     });
@@ -80,13 +80,7 @@ export const login = AsyncHandler(async (req, res) => {
    * GENERATE TOKENS
    * ============================
    */
-  const accessToken = user.generateAccessToken();
-  const refreshToken = user.generateRefreshToken();
-
-  // Save refresh token
-  user.refresh_token = refreshToken;
-  await user.save();
-
+  const { accessToken, refreshToken } = await generateTokens(user);
   /**
    * ============================
    * COOKIE OPTIONS (DEV SAFE)
@@ -235,9 +229,9 @@ export const verifyOtp = AsyncHandler(async (req, res) => {
     throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Invalid or expired OTP');
   }
 
-  return res.status(HTTP_STATUS.OK).json(
-    new ApiResponse(HTTP_STATUS.OK, null, 'OTP verified successfully')
-  );
+  return res
+    .status(HTTP_STATUS.OK)
+    .json(new ApiResponse(HTTP_STATUS.OK, null, 'OTP verified successfully'));
 });
 
 /**
@@ -278,8 +272,68 @@ export const resetPassword = AsyncHandler(async (req, res) => {
   user.forgot_password_otp_expiry = null;
   await user.save();
 
-  return res.status(HTTP_STATUS.OK).json(
-    new ApiResponse(HTTP_STATUS.OK, null, 'Password reset successfully')
-  );
+  return res
+    .status(HTTP_STATUS.OK)
+    .json(new ApiResponse(HTTP_STATUS.OK, null, 'Password reset successfully'));
 });
 
+export const refresh_accessToken = AsyncHandler(async (req, res) => {
+  // 1 Get refresh token from cookies
+  const refreshToken = req.cookies?.refreshToken;
+
+  if (!refreshToken) {
+    throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Refresh token missing');
+  }
+
+  // 2 Verify refresh token
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+  } catch (error) {
+    throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Invalid or expired refresh token');
+  }
+
+  // 3 Find user
+  const user = await CompanyUser.findOne({
+    _id: decoded._id,
+    company_id: decoded.company_id, // if included in refresh token
+  });
+
+  if (!user) {
+    throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'User not found');
+  }
+
+  // 4 Match refresh token with DB (IMPORTANT)
+  if (user.refresh_token !== refreshToken) {
+    throw new ApiError(
+      HTTP_STATUS.UNAUTHORIZED,
+      'Refresh token reused or revoked. Please login again'
+    );
+  }
+
+  // 5 Generate new tokens (rotation)
+  const { accessToken, refreshToken: newRefreshToken } = await generateTokens(user);
+
+  // 6 Cookie options
+  const cookieOptions = {
+    httpOnly: true,
+    secure: false, // true in production
+    sameSite: 'lax',
+  };
+
+  // 7 Set new cookies
+  res
+    .cookie('accessToken', accessToken, {
+      ...cookieOptions,
+      maxAge: Number(process.env.ACCESS_COOKIE_MAX_AGE),
+    })
+    .cookie('refreshToken', newRefreshToken, {
+      ...cookieOptions,
+      maxAge: Number(process.env.REFRESH_COOKIE_MAX_AGE),
+    });
+
+  // 8 Response
+  return res
+    .status(HTTP_STATUS.OK)
+    .json(new ApiResponse(HTTP_STATUS.OK, { accessToken }, 'Access token refreshed successfully'));
+});
