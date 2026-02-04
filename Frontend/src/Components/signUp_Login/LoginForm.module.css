@@ -26,7 +26,7 @@
 }
 
 .aiTitle::after {
-  content: "Meditor";
+  content: "Mediator";
   margin-left: 6px;
 
   display: inline-block;
@@ -211,7 +211,7 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  transform: translateY(126px);
+   transform: translateY(0px);
   gap: 20px;
   width: 70%;
   transition: 0.5s;
@@ -237,6 +237,17 @@
   border: 2px solid #fff;
   border-radius: 30px;
 }
+
+@media (hover: hover) {
+  .loginBx {
+    transform: translateY(126px);
+  }
+
+  .box:hover .loginBx {
+    transform: translateY(0px);
+  }
+}
+
 
 /* ===== Side Content (Left Text) ===== */
 .sideContent {
@@ -324,4 +335,79 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* ========================= */
+/* ✅ RESPONSIVE FIXES */
+/* ========================= */
+
+@media (max-width: 1024px) {
+  .form_main_div {
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 40px;
+    text-align: center;
+  }
+
+  .sideContent {
+    max-width: 100%;
+  }
+
+  .sideContent h1 {
+    font-size: 2.4rem;
+  }
+
+  .box {
+    width: 90%;
+    max-width: 380px;
+    height: auto;
+    min-height: 420px;
+  }
+
+  /* Hover disable for touch */
+  .box:hover {
+    width: 90%;
+    height: auto;
+  }
+
+  .login {
+    inset: 30px;
+  }
+
+  .loginBx {
+    transform: translateY(0px);
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .sideContent h1 {
+    font-size: 2rem;
+  }
+
+  .sideContent p {
+    font-size: 1rem;
+  }
+
+  .box {
+    max-width: 320px;
+    min-height: 420px;
+    border-radius: 16px;
+  }
+
+  .login {
+    inset: 20px;
+  }
+
+  .loginBx input {
+    font-size: 0.9rem;
+    padding: 10px 15px;
+  }
+
+  .group {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
 }

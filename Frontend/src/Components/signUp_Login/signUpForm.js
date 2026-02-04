@@ -131,7 +131,7 @@ return (
     {/* LEFT HERO */}
     <div className={activeStyles.leftHero}>
       <h1 className={activeStyles.heroTitle}>
-        Welcome to the Meditor
+        Welcome to the Mediator
       </h1>
 
       <p className={activeStyles.heroText}>
