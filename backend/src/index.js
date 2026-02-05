@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import connectDB from './db/db.js';
 import app from './app.js';
 import { createServer } from 'http';
-import { initSocket } from './socket/index.js';
+// import { initSocket } from './socket/index.js';
 
 // Load environment variables
 dotenv.config();
@@ -16,7 +16,7 @@ const startServer = async () => {
 
     const server = createServer(app);
 
-    initSocket(server); // 🔥 Socket.IO attached here
+    // initSocket(server); // 🔥 Socket.IO attached here
 
     server.on('error', (error) => {
       console.error('Server error:', error);

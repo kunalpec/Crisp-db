@@ -1,33 +1,67 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema(
   {
+    // ChatRoom reference
     conversation_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Conversation',
+      ref: "ChatRoom",
       required: true,
       index: true,
     },
 
+    // Sender type
     sender_type: {
       type: String,
-      enum: ['visitor', 'agent', 'bot'],
+      enum: ["visitor", "agent", "bot", "system"],
       required: true,
     },
 
-    sender_id: { type: mongoose.Schema.Types.ObjectId },
-
-    content: { type: String, required: true },
-
-    message_type: {
-      type: String,
-      enum: ['text', 'image', 'file', 'system'],
-      default: 'text',
+    // Sender ID (agent id, visitor null)
+    sender_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
     },
 
-    metadata: { type: Object },
+    // Message content
+    content: {
+      type: String,
+      default: "",
+    },
+
+    // Type of message
+    message_type: {
+      type: String,
+      enum: ["text", "image", "file", "system"],
+      default: "text",
+    },
+
+    // Extra info (file URL, AI tokens, etc.)
+    metadata: {
+      type: Object,
+      default: {},
+    },
+
+    // Read system
+    is_read: {
+      type: Boolean,
+      default: false,
+    },
+
+    delivered_at: {
+      type: Date,
+      default: null,
+    },
+
+    read_at: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );
 
-export const Message = mongoose.model('Message', messageSchema);
+// Fast message ordering
+messageSchema.index({ conversation_id: 1, createdAt: 1 });
+
+export const Message = mongoose.model("Message", messageSchema);

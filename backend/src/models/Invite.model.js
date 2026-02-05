@@ -1,22 +1,33 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const inviteSchema = new mongoose.Schema(
   {
     email: {
       type: String,
       required: true,
+      lowercase: true,
+      trim: true,
     },
 
     company_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Company',
+      ref: "Company",
       required: true,
+      index: true,
     },
 
+    // Only agents should be invited
     role: {
       type: String,
-      enum: ['company_agent', 'company_admin'],
-      default: 'company_agent',
+      enum: ["company_agent"],
+      default: "company_agent",
+    },
+
+    // Who invited this user
+    invited_by: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CompanyUser",
+      required: true,
     },
 
     token: {
@@ -38,4 +49,13 @@ const inviteSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const Invite = mongoose.model('Invite', inviteSchema);
+// Auto-delete expired invites
+inviteSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+// Prevent duplicate unused invites
+inviteSchema.index(
+  { company_id: 1, email: 1 },
+  { unique: true, partialFilterExpression: { used: false } }
+);
+
+export const Invite = mongoose.model("Invite", inviteSchema);

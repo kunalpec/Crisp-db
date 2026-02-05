@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser';
 
 // cron jobs auto start
 import './controllers/SuperAdmin/AutoCleanPlan.controller.js';
-import './controllers/Auto/chatCleanup.cron.js';
+// import './controllers/Auto/chatCleanup.cron.js';
 
 const app = express();
 
@@ -29,13 +29,17 @@ app.use(cookieParser());
 // routes
 import systemRouter from './routes/system.route.js';
 import authRouter from './routes/auth.route.js';
-import companyRouter from './routes/company.route.js';
-import superadminRouter from './routes/superadmin.route.js';
 
+import bootstrapRouter from "./routes/bootstrap.routes.js";
+import superAdminRouter from "./routes/superAdmin.routes.js"
+import companyRouter from './routes/Company.routes.js';
+
+app.use("/api/bootstrap", bootstrapRouter); // @
 app.use('/api/v1/system', systemRouter);
 app.use('/api/v1/auth', authRouter);
-app.use('/api/v1/superadmin', superadminRouter);
-app.use('/api/v1/company', companyRouter);
+app.use("/api/superadmin", superAdminRouter); //@
+
+app.use('/api/company', companyRouter);
 
 // ✅ ERROR HANDLER MUST BE LAST
 app.use((err, req, res, next) => {

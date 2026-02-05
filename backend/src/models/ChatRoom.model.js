@@ -6,12 +6,48 @@ const chatRoomSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Company',
       required: true,
+      index: true,
+    },
+    // The browser-generated unique ID visitor session
+    session_id: {
+      type: String,
+      required: true,
+      index: true,
     },
 
-    visitor_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Visitor',
+    // --- Presence & Status ---
+    status: {
+      type: String,
+      enum: ['waiting', 'active', 'disconnected', 'closed'],
+      default: 'waiting',
+      index: true,
+    },
+
+    is_visitor_online: {
+      type: Boolean,
+      default: false,
+    },
+
+    is_agent_online: {
+      type: Boolean,
+      default: false,
+    },
+
+    visitor_socket_id: {
+      type: String,
+      default: null,
+    },
+
+    agent_socket_id: {
+      type: String,
+      default: null,
+    },
+
+    // --- Conversation Details ---
+    room_id: {
+      type: String,
       required: true,
+      unique: true,
     },
 
     assigned_agent_id: {
@@ -20,16 +56,27 @@ const chatRoomSchema = new mongoose.Schema(
       default: null,
     },
 
-    status: {
-      type: String,
-      enum: ['online', 'both-active', 'closed'],
-      default: 'online',
-    },
+    bot_enabled: {
+      type: Boolean,
+      default: true,
+    }, 
+    // Added from Conversation logic
+    
+    last_message_at: {
+      type: Date,
+      default: Date.now,
+    }, // Added for sorting chat lists
 
-    room_id: {
+    // --- Verification & Closing ---
+    is_verified: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    closed_by: {
       type: String,
-      required: true,
-      unique: true,
+      enum: ['agent', 'visitor', 'system'],
+      default: null,
     },
     closed_at: {
       type: Date,
@@ -38,5 +85,8 @@ const chatRoomSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Index for performance: finding the current active chat for a visitor
+chatRoomSchema.index({ company_id: 1, session_id: 1, status: 1 });
 
 export const ChatRoom = mongoose.model('ChatRoom', chatRoomSchema);
