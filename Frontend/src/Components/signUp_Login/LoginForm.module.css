@@ -1,286 +1,213 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
-}
-
+/* ===== MAIN WRAPPER ===== */
 .form_main_div {
+  min-height: 100vh;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 8%;
-  min-height: 100vh;
 
-  background: url('../../assets/form/background-login.jpeg') no-repeat center center;
+  background-image: url("../../assets/form/background-login.jpeg");
+  background-position: center;
   background-size: cover;
+  background-repeat: no-repeat;
+
   position: relative;
-}
-.aiTitle {
-  position: relative;
-    display: inline-block; /* lock text + typing in same row */
-
-   align-items: baseline;
-}
-
-.aiTitle::after {
-  content: "Mediator";
-  margin-left: 6px;
-
-  display: inline-block;
-  vertical-align: bottom;
-
   overflow: hidden;
+  font-family: "Poppins", sans-serif;
+}
+
+/* ===== DARK OVERLAY ===== */
+.form_main_div::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 0;
+}
+
+/* Keep content above overlay */
+.sideContent,
+.box {
+  position: relative;
+  z-index: 2;
+}
+
+/* ===== LEFT SIDE CONTENT ===== */
+.sideContent {
+  width: 50%;
+  padding: 80px;
+  color: #fff;
+  animation: fadeInLeft 1s ease-in-out;
+}
+
+.aiTitle {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.highlight {
+  background: linear-gradient(45deg, #00f5a0, #00d9f5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+/* Parent element */
+.typing {
+  display: inline-flex;
+  align-items: center;   /* 👈 Vertical center karega */
+  font-size: 45px;       /* same font-size rakho */
+}
+
+/* ===== Typing Animation ===== */
+.typing::after {
+  content: "Mediator";
+  margin-left: 10px;
+  color: #00f5a0;
+  border-right: 3px solid #00f5a0;
   white-space: nowrap;
-
-  border-right: 1px solid #fff;
-
-  animation:
-    typing 2.5s steps(7, end) infinite,
-    blink 0.8s step-end infinite;
+  overflow: hidden;
+  animation: typing 2.5s steps(8, end) infinite alternate,
+             blink 0.7s step-end infinite;
 }
 
-/* typing letters */
-/* reveal text without resizing */
 @keyframes typing {
-  0% { clip-path: inset(0 100% 0 0); }
-  40% { clip-path: inset(0 0 0 0); }
-  60% { clip-path: inset(0 0 0 0); }
-  100% { clip-path: inset(0 100% 0 0); }
+  from { width: 0 }
+  to { width: 8ch }
 }
 
-
-/* cursor blink */
 @keyframes blink {
   50% { border-color: transparent; }
 }
 
 
-
-.sideContent h1 span {
-  animation: glowPulse 3s ease-in-out infinite;
+.sideContent p {
+  margin-top: 20px;
+  font-size: 18px;
+  opacity: 0.85;
 }
 
-@keyframes glowPulse {
-  0% {
-    text-shadow: 0 0 10px #45f3ff;
-  }
-  50% {
-    text-shadow: 0 0 30px #45f3ff, 0 0 60px rgba(69,243,255,0.6);
-  }
-  100% {
-    text-shadow: 0 0 10px #45f3ff;
-  }
-}
-
-.particles {
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(circle, rgba(69,243,255,0.15) 1px, transparent 1px);
-  background-size: 40px 40px;
-  animation: moveParticles 20s linear infinite;
-  z-index: 0;
-}
-
-@keyframes moveParticles {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 400px 400px;
-  }
-}
-
+/* ===== RIGHT SIDE BOX ===== */
 .box {
-  transform: translateZ(0);
-}
-
-.form_main_div:hover .box {
-  transform: translateY(-6px);
-}
-
-
-/* Rotating gradient animation */
-@keyframes rotating {
-  0% { --a: 0deg; }
-  100% { --a: 360deg; }
-}
-
-.box {
-  position: relative;
-  width: 400px;
-  height: 200px;
-  border-radius: 20px;
-  overflow: hidden;
-  z-index: 1;
+  width: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-.box {
-  position: relative;
-  width: 400px;
-  height: 200px;
-  background: repeating-conic-gradient(
-    from var(--a),
-    #363535 0%,
-    #423f40 5%,
-    transparent 5%,
-    transparent 40%,
-    #4d4145 50%
-  );
-  filter: drop-shadow(0 15px 50px #000);
-  animation: rotating 4s linear infinite;
-  border-radius: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: 0.5s;
+  animation: fadeInRight 1s ease-in-out;
 }
 
-.box:hover {
-  width: 450px;
-  height: 500px;
-}
-
-.form_main_div::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(37,36,50,0.6); /* dark overlay for text contrast */
-  z-index: 0;
-}
-.box::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: repeating-conic-gradient(
-    #5f565a 0% 5%,  /* softer pink */
-    transparent 5% 40%, 
-    #55ccff 40% 50% /* soft cyan/blue */
-  );
-  border-radius: 50%;
-  animation: spin 6s linear infinite; /* slower rotation looks smoother */
-  z-index: 0;
-  opacity: 0.6; /* make glow softer */
-}
-
-
-
-.box::after {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  background: #2d2d39; /* inner dark box */
-  border-radius: 15px;
-  border: 8px solid #25252b;
-  z-index: 1;
-}
-
-/* Login box inside */
+/* ===== Glass Login Card ===== */
 .login {
-  position: absolute;
-  inset: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  border-radius: 10px;
-  background: rgba(0,0,0,0.2);
-  z-index: 1000;
-  box-shadow: inset 0 10px 20px rgba(0,0,0,0.5);
-  border-bottom: 2px solid rgba(255,255,255,0.5);
-  transition: 0.5s;
-  color: #fff;
-  overflow: hidden;
+  width: 400px;
+  padding: 40px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  transition: 0.3s ease;
 }
 
-.box:hover .login {
-  inset: 40px;
-}
-
-.loginBx {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-   transform: translateY(0px);
-  gap: 20px;
-  width: 70%;
-  transition: 0.5s;
-}
-
-.box:hover .loginBx {
-  transform: translateY(0px);
+.login:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5);
 }
 
 .loginBx h2 {
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-weight: 600;
+  text-align: center;
+  margin-bottom: 30px;
+  color: #fff;
 }
 
-.loginBx input {
+/* ===== Input Group ===== */
+.inputGroup {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.inputIcon {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  color: #00f5a0;
+}
+
+.inputGroup input {
   width: 100%;
-  padding: 10px 20px;
+  padding: 12px 12px 12px 45px;
+  border-radius: 10px;
+  border: none;
   outline: none;
-  font-size: 1em;
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
-  background: rgba(0,0,0,0.1);
-  border: 2px solid #fff;
-  border-radius: 30px;
+  transition: 0.3s;
 }
 
-@media (hover: hover) {
-  .loginBx {
-    transform: translateY(126px);
-  }
-
-  .box:hover .loginBx {
-    transform: translateY(0px);
-  }
+.inputGroup input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
 }
 
+.inputGroup input:focus {
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 10px #00f5a0;
+}
 
-/* ===== Side Content (Left Text) ===== */
-.sideContent {
-  max-width: 420px;
+/* ===== Button ===== */
+input[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(45deg, #00f5a0, #00d9f5);
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+input[type="submit"]:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #00f5a0;
+}
+
+/* ===== Links ===== */
+.group {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.group a {
+  color: #00f5a0;
+  font-size: 14px;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.group a:hover {
   color: #fff;
-  z-index: 2;
-  animation: slideFade 1.5s ease forwards;
+  text-shadow: 0 0 10px #00f5a0;
 }
 
-
-.sideContent h1 {
-  font-size: 3rem;
-  font-weight: 700;
-  line-height: 1.2;
+/* ===== Error & Success ===== */
+.error {
+  color: #ff4d4d;
+  font-size: 14px;
+  margin-bottom: 10px;
 }
 
-.sideContent h1 span {
-  color: #45f3ff;
-  text-shadow: 0 0 20px rgba(69,243,255,0.6);
+.success {
+  color: #00ff88;
+  font-size: 14px;
+  margin-top: 10px;
 }
 
-.sideContent p {
-  margin-top: 20px;
-  font-size: 1.1rem;
-  color: #cfd3ff;
-  line-height: 1.6;
-}
-
-/* Animation */
-@keyframes slideFade {
+/* ===== Animations ===== */
+@keyframes fadeInLeft {
   from {
     opacity: 0;
-    transform: translateX(-60px);
+    transform: translateX(-50px);
   }
   to {
     opacity: 1;
@@ -288,126 +215,122 @@
   }
 }
 
-
-.loginBx input::placeholder {
-  color: #999;
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.loginBx input[type="submit"] {
-  background: #45f3ff;
-  border: none;
-  font-weight: 500;
-  color: #111;
-  cursor: pointer;
-  transition: 0.5s;
-}
-
-.loginBx input[type="submit"]:hover {
-  box-shadow: 0 0 10px #45f3ff, 0 0 60px #45f3ff;
-}
-
-.group {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-}
-
-.group a {
-  color: #fff;
-  text-decoration: none;
-}
-
-.group a:nth-child(2) {
-  color: #ff2770;
-  font-weight: 600;
-}
-
-.error {
-  color: #ff2770;
-  font-size: 0.9em;
-}
-
-.success {
-  color: #45f3ff;
-  font-size: 0.9em;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* ========================= */
-/* ✅ RESPONSIVE FIXES */
-/* ========================= */
-
+/* ============================= */
+/* 📱 TABLET (1024px and below) */
+/* ============================= */
 @media (max-width: 1024px) {
   .form_main_div {
     flex-direction: column;
     justify-content: center;
-    padding: 40px 20px;
-    gap: 40px;
-    text-align: center;
   }
 
   .sideContent {
-    max-width: 100%;
+    width: 100%;
+    padding: 50px 30px;
+    text-align: center;
   }
 
-  .sideContent h1 {
-    font-size: 2.4rem;
+  .aiTitle {
+    font-size: 36px;
   }
 
   .box {
-    width: 90%;
-    max-width: 380px;
-    height: auto;
-    min-height: 420px;
-  }
-
-  /* Hover disable for touch */
-  .box:hover {
-    width: 90%;
-    height: auto;
+    width: 100%;
+    padding: 20px;
   }
 
   .login {
-    inset: 30px;
-  }
-
-  .loginBx {
-    transform: translateY(0px);
     width: 100%;
+    max-width: 450px;
   }
 }
 
-@media (max-width: 600px) {
-  .sideContent h1 {
-    font-size: 2rem;
+/* ============================= */
+/* 📱 MOBILE (768px and below) */
+/* ============================= */
+@media (max-width: 768px) {
+  .form_main_div {
+    padding: 20px;
+  }
+
+  .sideContent {
+    padding: 30px 20px;
+  }
+
+  .aiTitle {
+    font-size: 28px;
+    line-height: 1.3;
   }
 
   .sideContent p {
-    font-size: 1rem;
-  }
-
-  .box {
-    max-width: 320px;
-    min-height: 420px;
-    border-radius: 16px;
+    font-size: 16px;
   }
 
   .login {
-    inset: 20px;
+    padding: 30px 20px;
+    border-radius: 15px;
   }
 
-  .loginBx input {
-    font-size: 0.9rem;
-    padding: 10px 15px;
+  .loginBx h2 {
+    font-size: 22px;
+  }
+
+  .inputGroup input {
+    padding: 10px 10px 10px 40px;
+    font-size: 14px;
+  }
+
+  input[type="submit"] {
+    padding: 10px;
+    font-size: 14px;
   }
 
   .group {
     flex-direction: column;
     gap: 10px;
-    text-align: center;
+    align-items: center;
+  }
+}
+
+/* ============================= */
+/* 📱 SMALL MOBILE (480px) */
+/* ============================= */
+@media (max-width: 480px) {
+  .aiTitle {
+    font-size: 22px;
+  }
+
+  .sideContent {
+    padding: 20px 10px;
+  }
+
+  .login {
+    padding: 20px 15px;
+  }
+
+  .inputGroup input {
+    font-size: 13px;
+  }
+
+  input[type="submit"] {
+    font-size: 13px;
+  }
+}
+
+/* ===== FIX MOBILE 100vh ISSUE ===== */
+@supports (-webkit-touch-callout: none) {
+  .form_main_div {
+    min-height: -webkit-fill-available;
   }
 }

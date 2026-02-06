@@ -104,26 +104,7 @@ const ForgotPasswordForm = () => {
   return (
     <div className={styles.form_main_div}>
       {/* LEFT ANIMATION SIDE — untouched */}
-      <div className={`${styles.form_imgdiv} ${styles.animatescene}`}>
-        <img
-          src={images.lightanimate}
-          alt="Light"
-          className={styles.lighting}
-          ref={lightRef}
-        />
-        <img
-          src={images.boardanimate}
-          alt="Board"
-          className={styles.board}
-          ref={boardRef}
-        />
-        <img
-          src={images.robotanimate}
-          alt="Robot"
-          className={styles.robot}
-          ref={robotRef}
-        />
-      </div>
+
 
       {/* RIGHT FORM SIDE */}
       <div className={styles.container}>

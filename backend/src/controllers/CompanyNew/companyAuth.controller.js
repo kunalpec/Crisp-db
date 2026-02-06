@@ -12,13 +12,11 @@ import jwt from "jsonwebtoken";
 
 /**
  * ======================================================
- * ✅ TOKEN GENERATOR
+ * ✅ GENERATE ACCESS & REFRESH TOKENS
  * ======================================================
  */
 export const generateTokens = async (user) => {
-  if (!user) {
-    throw new ApiError(500, "User required for token generation");
-  }
+  if (!user) throw new ApiError(500, "User required for token generation");
 
   const accessToken = user.generateAccessToken();
   const refreshToken = user.generateRefreshToken();
@@ -31,62 +29,30 @@ export const generateTokens = async (user) => {
 
 /**
  * ======================================================
- * ✅ COMPANY REGISTER + OWNER ADMIN CREATE
+ * ✅ REGISTER COMPANY + ADMIN
  * Route: POST /api/company/auth/register
  * ======================================================
  */
 export const registerCompany = AsyncHandler(async (req, res) => {
-  const {
-    company_name,
-    company_domain,
-    username,
-    email,
-    password,
-    phone_number,
-  } = req.body;
+  const { company_name, company_domain, username, email, password, phone_number } = req.body;
 
-  if (!company_name || !company_domain || !username || !email || !password) {
+  if (!company_name || !company_domain || !username || !email || !password || !phone_number?.number || !phone_number?.country_code) {
     throw new ApiError(400, "All required fields must be provided");
   }
 
-  // ✅ Phone validation
-  if (
-    !phone_number ||
-    !phone_number.country_code ||
-    !phone_number.number
-  ) {
-    throw new ApiError(400, "Phone number is required");
-  }
+  // Check if company exists
+  const existingCompany = await Company.findOne({ domain: company_domain.toLowerCase() });
+  if (existingCompany) throw new ApiError(400, "Company already exists with this domain");
 
-  // ✅ Check company exists
-  const existingCompany = await Company.findOne({
-    domain: company_domain.toLowerCase(),
-  });
+  // Check if email exists globally
+  const existingUser = await CompanyUser.findOne({ email: email.toLowerCase() });
+  if (existingUser) throw new ApiError(400, "User already exists with this email");
 
-  if (existingCompany) {
-    throw new ApiError(400, "Company already exists with this domain");
-  }
+  // Get default plan
+  const defaultPlan = await Plan.findOne({ is_default: true, is_active: true });
+  if (!defaultPlan) throw new ApiError(500, "Default plan not found");
 
-  // ✅ Check email already exists globally
-  const existingUser = await CompanyUser.findOne({
-    email: email.toLowerCase(),
-  });
-
-  if (existingUser) {
-    throw new ApiError(400, "User already exists with this email");
-  }
-
-  // ✅ Get default plan
-  const defaultPlan = await Plan.findOne({
-    is_default: true,
-    is_active: true,
-  });
-
-  if (!defaultPlan) {
-    throw new ApiError(500, "Default plan not found");
-  }
-
-  // ✅ Create company
+  // Create company
   const company = await Company.create({
     name: company_name.trim(),
     domain: company_domain.toLowerCase().trim(),
@@ -94,109 +60,42 @@ export const registerCompany = AsyncHandler(async (req, res) => {
     subscription_status: "trial",
   });
 
-  // ✅ Create owner admin user (password auto-hash in schema)
+  // Create owner admin user (password auto-hashed in schema)
   const adminUser = await CompanyUser.create({
     company_id: company._id,
     username: username.trim(),
     email: email.toLowerCase(),
-    password: password,
+    password,
     phone_number,
     role: "company_admin",
   });
 
-  // ✅ Assign owner
+  // Assign owner
   company.owner_user_id = adminUser._id;
   await company.save();
 
-  return res.status(201).json(
-    new ApiResponse(
-      201,
-      { company, adminUser },
-      "Company registered successfully"
-    )
-  );
+  return res.status(201).json(new ApiResponse(201, { company, adminUser }, "Company registered successfully"));
 });
 
 /**
  * ======================================================
- * ✅ EMPLOYEE SIGNUP (AGENT)
- * Route: POST /api/company/auth/employee-signup
- * ======================================================
- */
-export const employeeSignup = AsyncHandler(async (req, res) => {
-  const { company_domain, username, email, password, phone_number } = req.body;
-
-  if (!company_domain || !username || !email || !password) {
-    throw new ApiError(400, "All fields required");
-  }
-
-  // ✅ Find company
-  const company = await Company.findOne({
-    domain: company_domain.toLowerCase(),
-  });
-
-  if (!company) {
-    throw new ApiError(404, "Company not found");
-  }
-
-  // ✅ Check duplicate user inside company
-  const existingUser = await CompanyUser.findOne({
-    company_id: company._id,
-    email: email.toLowerCase(),
-  });
-
-  if (existingUser) {
-    throw new ApiError(400, "User already exists in this company");
-  }
-
-  // ✅ Create employee agent
-  const employee = await CompanyUser.create({
-    company_id: company._id,
-    username: username.trim(),
-    email: email.toLowerCase(),
-    password: password,
-    phone_number,
-    role: "company_agent",
-  });
-
-  return res.status(201).json(
-    new ApiResponse(201, employee, "Employee registered successfully")
-  );
-});
-
-/**
- * ======================================================
- * ✅ LOGIN (ADMIN + AGENT BOTH)
+ * ✅ LOGIN (ADMIN + AGENT)
  * Route: POST /api/company/auth/login
  * ======================================================
  */
 export const login = AsyncHandler(async (req, res) => {
   const { email, password } = req.body;
+  if (!email || !password) throw new ApiError(400, "Email and password required");
 
-  if (!email || !password) {
-    throw new ApiError(400, "Email and password required");
-  }
+  const user = await CompanyUser.findOne({ email: email.toLowerCase() }).select("+password");
+  if (!user) throw new ApiError(401, "Invalid credentials");
 
-  // ✅ Find user (include password field)
-  const user = await CompanyUser.findOne({
-    email: email.toLowerCase(),
-  }).select("+password");
-
-  if (!user) {
-    throw new ApiError(401, "Invalid credentials");
-  }
-
-  // ✅ Check password
   const valid = await user.isPasswordCorrect(password);
+  if (!valid) throw new ApiError(401, "Invalid credentials");
 
-  if (!valid) {
-    throw new ApiError(401, "Invalid credentials");
-  }
-
-  // ✅ Generate Tokens
   const { accessToken, refreshToken } = await generateTokens(user);
 
-  // ✅ Secure Cookies
+  // Set secure cookies
   const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -204,29 +103,19 @@ export const login = AsyncHandler(async (req, res) => {
     path: "/",
   };
 
-  res.cookie("accessToken", accessToken, {
-    ...cookieOptions,
-    maxAge: 15 * 60 * 1000,
-  });
+  res.cookie("accessToken", accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 });
+  res.cookie("refreshToken", refreshToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
 
-  res.cookie("refreshToken", refreshToken, {
-    ...cookieOptions,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
-
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        company_id: user.company_id,
-      },
-      "Login successful"
-    )
-  );
+  return res.status(200).json(new ApiResponse(200, {
+    user: {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      company_id: user.company_id,
+    },
+    accessToken,
+  }, "Login successful"));
 });
 
 /**
@@ -237,10 +126,9 @@ export const login = AsyncHandler(async (req, res) => {
  */
 export const logout = AsyncHandler(async (req, res) => {
   const user = req.user;
+  if (!user) throw new ApiError(401, "Not authenticated");
 
-  await CompanyUser.findByIdAndUpdate(user._id, {
-    refresh_token: null,
-  });
+  await CompanyUser.findByIdAndUpdate(user._id, { refresh_token: null });
 
   res.clearCookie("accessToken");
   res.clearCookie("refreshToken");
@@ -250,23 +138,18 @@ export const logout = AsyncHandler(async (req, res) => {
 
 /**
  * ======================================================
- * ✅ FORGOT PASSWORD OTP SEND
+ * ✅ FORGOT PASSWORD OTP
  * Route: POST /api/company/auth/forgot-password
  * ======================================================
  */
 export const forgetPassword = AsyncHandler(async (req, res) => {
   const { recoveryEmail } = req.body;
-
   if (!recoveryEmail) throw new ApiError(400, "Email required");
 
-  const user = await CompanyUser.findOne({
-    email: recoveryEmail.toLowerCase(),
-  });
-
+  const user = await CompanyUser.findOne({ email: recoveryEmail.toLowerCase() });
   if (!user) throw new ApiError(404, "User not found");
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
   user.forgot_password_otp = otp;
   user.forgot_password_otp_expiry = new Date(Date.now() + 10 * 60 * 1000);
 
@@ -289,10 +172,7 @@ export const forgetPassword = AsyncHandler(async (req, res) => {
  */
 export const resetPassword = AsyncHandler(async (req, res) => {
   const { email, otp, newPassword } = req.body;
-
-  if (!email || !otp || !newPassword) {
-    throw new ApiError(400, "All fields required");
-  }
+  if (!email || !otp || !newPassword) throw new ApiError(400, "All fields required");
 
   const user = await CompanyUser.findOne({
     email: email.toLowerCase(),
@@ -302,9 +182,7 @@ export const resetPassword = AsyncHandler(async (req, res) => {
 
   if (!user) throw new ApiError(401, "Invalid OTP");
 
-  // ✅ Correct field
   user.password = newPassword;
-
   user.forgot_password_otp = null;
   user.forgot_password_otp_expiry = null;
 
@@ -319,9 +197,8 @@ export const resetPassword = AsyncHandler(async (req, res) => {
  * Route: GET /api/company/auth/refresh
  * ======================================================
  */
-export const refresh_accessToken = AsyncHandler(async (req, res) => {
+export const refreshAccessToken = AsyncHandler(async (req, res) => {
   const refreshToken = req.cookies?.refreshToken;
-
   if (!refreshToken) throw new ApiError(401, "Refresh token missing");
 
   let decoded;
@@ -332,18 +209,12 @@ export const refresh_accessToken = AsyncHandler(async (req, res) => {
   }
 
   const user = await CompanyUser.findById(decoded._id);
+  if (!user || user.refresh_token !== refreshToken) throw new ApiError(401, "Token revoked");
 
-  if (!user || user.refresh_token !== refreshToken) {
-    throw new ApiError(401, "Token revoked");
-  }
-
-  const { accessToken, refreshToken: newRefresh } =
-    await generateTokens(user);
+  const { accessToken, refreshToken: newRefresh } = await generateTokens(user);
 
   res.cookie("accessToken", accessToken);
   res.cookie("refreshToken", newRefresh);
 
-  return res.json(
-    new ApiResponse(200, { accessToken }, "Token refreshed")
-  );
+  return res.json(new ApiResponse(200, { accessToken }, "Token refreshed"));
 });

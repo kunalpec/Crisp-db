@@ -86,14 +86,6 @@ const ResetPassword = () => {
     <div className={styles.form_main_div}>
              {/* Left Side image */}
    
-
-             <div className={`${styles.form_imgdiv} ${styles.animatescene}`}>
-        {/* <div ref={overlayRef} className={styles.darkOverlay}></div> */}
-        <img src={images.lightanimate} alt="Light" className={styles.lighting} ref={lightRef} />
-        <img src={images.boardanimate} alt="Board" className={styles.board} ref={boardRef} />
-        <img src={images.robotanimate} alt="Robot" className={styles.robot} ref={robotRef} />
-      </div>
-
     <div className={styles.container}>
     <h2 className={styles.resetheading}>Reset Password</h2>
 

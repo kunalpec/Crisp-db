@@ -48,6 +48,7 @@
   padding-right: 60px;
   overflow: hidden;
   perspective: 800px;
+  
 }
 
 .heroTitle {
@@ -78,6 +79,35 @@
   background: radial-gradient(circle, #45f3ff, transparent 70%);
   filter: blur(18px);
 }
+
+/* Parent element */
+.typing {
+  display: inline-flex;
+  align-items: center;   /* 👈 Vertical center karega */
+  font-size: 45px;       /* same font-size rakho */
+}
+
+/* ===== Typing Animation ===== */
+.typing::after {
+  content: "Mediator";
+  margin-left: 10px;
+  color: #ebf0ee;
+  border-right: 3px solid #e7eceb;
+  white-space: nowrap;
+  overflow: hidden;
+  animation: typing 2.5s steps(8, end) infinite alternate,
+             blink 0.7s step-end infinite;
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 8ch }
+}
+
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+
 
 /* Robot Animation Background */
 .leftHero::before {
@@ -214,19 +244,186 @@
 /* PHONE GROUP FIX */
 /* ========================= */
 
-.phoneGroup {
+
+ .formGroup {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.formGroup label {
+  color: #cbd5e1;
+  font-size: 14px;
+  /* margin-bottom: 2px; */
+  font-weight: 500;
+} 
+
+/* .phoneRow {
+  display: flex;
+  gap: 12px;
 }
 
 .countrySelect {
-  width: 95px;
+  width: 38%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: white;
+  outline: none;
 }
 
 .phoneInput {
   flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: white;
+  outline: none;
+}  */
+
+.phoneGroup {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 18px;
+} 
+
+.countrySelect {
+  flex: 0 0 130px;  /* thoda vadda fixed width */
+  padding: 14px 16px;
+  border-radius: 30px;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  outline: none;
+  font-size: 0.95rem;
+  transition: 0.3s ease;
+
+}
+
+.phoneInput {
+  flex: 1 1 auto;   /* proper stretch */
+  min-width: 0;     /* prevent flex shrink bug */
+  padding: 14px 18px;
+  border-radius: 30px;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  outline: none;
+  font-size: 0.95rem;
+  transition: 0.3s ease;
+      margin-left: 20px;
+     width: 350px;
+}
+
+/* Focus glow */
+.countrySelect:focus,
+.phoneInput:focus {
+  border-color: #00e0ff;
+  box-shadow: 0 0 14px rgba(0, 224, 255, 0.6);
+}
+
+@media (max-width: 600px) {
+  .phoneGroup {
+    flex-direction: column;
+    gap: 35px;
+  }
+
+  .countrySelect{
+    width:100%;
+  }
+  .phoneInput {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+
+/* Focus Premium Glow */
+.countrySelect:focus,
+.phoneInput:focus {
+  border-color: #00e0ff;
+  box-shadow: 0 0 15px rgba(0, 224, 255, 0.6);
+}
+
+
+/* ===== Input Wrapper ===== */
+.inputWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.inputWrapper input {
+  width: 100%;
+  padding: 10px 14px 10px 42px;
+  border-radius: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  outline: none;
+  font-size: 0.85rem;
+  transition: 0.3s ease;
+}
+
+.inputWrapper input:focus {
+  border-color: #45f3ff;
+  box-shadow: 0 0 10px #45f3ff;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+/* ===== Phone Row ===== */
+.phoneRow {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.countrySelect {
+  flex: 0 0 120px;
+  padding: 10px 12px;
+  border-radius: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  outline: none;
+  font-size: 0.85rem;
+}
+
+/* ===== Password Row ===== */
+.rowGroup {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.rowGroup .formGroup {
+  flex: 1;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .rowGroup {
+    flex-direction: column;
+  }
+
+  .phoneRow {
+    flex-direction: column;
+  }
+
+  .countrySelect {
+    width: 100%;
+  }
 }
 
 /* ========================= */

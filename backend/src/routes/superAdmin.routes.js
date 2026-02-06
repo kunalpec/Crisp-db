@@ -1,6 +1,9 @@
 import express from "express";
 
-// Super Admin auth controllers
+/* ===============================
+   SUPER ADMIN AUTH CONTROLLERS
+=============================== */
+
 import {
   loginSuperAdmin,
   logoutSuperAdmin,
@@ -9,7 +12,10 @@ import {
   refreshTokenSuperAdmin,
 } from "../controllers/SuperAdminNew/superAdminAuth.controller.js";
 
-// Super Admin company controllers
+/* ===============================
+   SUPER ADMIN COMPANY CONTROLLERS
+=============================== */
+
 import {
   getAllActiveCompanies,
   getCompanyById,
@@ -17,6 +23,9 @@ import {
   deleteCompany,
 } from "../controllers/SuperAdminNew/superAdminCompany.controller.js";
 
+/* ===============================
+   SUPER ADMIN PLAN CONTROLLERS
+=============================== */
 
 import {
   createPlan,
@@ -29,48 +38,52 @@ import {
   getAllPlans,
 } from "../controllers/SuperAdminNew/superAdminPlan.controller.js";
 
-// Super Admin auth middleware
+/* ===============================
+   MIDDLEWARE
+=============================== */
+
 import { verifySuperAdminJWT } from "../middlewares/superAdminAuth.middleware.js";
 
 const router = express.Router();
 
-// ============================
-// Super Admin Auth Routes
-// ============================
+/* =====================================================
+   AUTH ROUTES
+===================================================== */
 
-// Login super admin
-router.post("/login", loginSuperAdmin);
+// Login
+router.post("/auth/login", loginSuperAdmin);
 
-// Logout super admin (protected)
-router.post("/logout", verifySuperAdminJWT, logoutSuperAdmin);
+// Logout (Protected)
+router.post("/auth/logout", verifySuperAdminJWT, logoutSuperAdmin);
 
-// Send OTP for forgot password
-router.post("/forgot-password", forgotPasswordSuperAdmin);
+// Forgot password
+router.post("/auth/forgot-password", forgotPasswordSuperAdmin);
 
-// Reset password using OTP
-router.post("/reset-password", resetPasswordSuperAdmin);
+// Reset password
+router.post("/auth/reset-password", resetPasswordSuperAdmin);
 
-// Refresh access token
-router.get("/refresh", refreshTokenSuperAdmin);
+// Refresh token
+router.get("/auth/refresh", refreshTokenSuperAdmin);
 
-// ============================
-// Super Admin Company Routes
-// ============================
 
-// Get all active companies (protected)
+/* =====================================================
+   COMPANY MANAGEMENT ROUTES
+===================================================== */
+
+// Get all active companies (Protected)
 router.get("/companies", verifySuperAdminJWT, getAllActiveCompanies);
 
-// Get company by ID (protected)
+// Get company by ID (Protected)
 router.get("/companies/:companyId", verifySuperAdminJWT, getCompanyById);
 
-// Update company status (protected)
+// Update company status (Protected)
 router.patch(
   "/companies/:companyId/status",
   verifySuperAdminJWT,
   updateCompanyStatus
 );
 
-// Delete company (protected)
+// Delete company (Protected)
 router.delete(
   "/companies/:companyId",
   verifySuperAdminJWT,
@@ -78,26 +91,40 @@ router.delete(
 );
 
 
+/* =====================================================
+   PLAN MANAGEMENT ROUTES
+===================================================== */
 
+// Create new plan (Protected)
+router.post("/plans", verifySuperAdminJWT, createPlan);
 
+// Update plan (Protected)
+router.patch("/plans/:planId", verifySuperAdminJWT, updatePlan);
 
-/**
- * SUPER ADMIN PLAN ROUTES
- */
-router.post("/create-plan", verifySuperAdminJWT, createPlan);
+// Deactivate plan (Protected)
+router.patch(
+  "/plans/:planId/deactivate",
+  verifySuperAdminJWT,
+  deactivatePlan
+);
 
-router.patch("/plan:planId", verifySuperAdminJWT, updatePlan);
+// Activate plan (Protected)
+router.patch(
+  "/plans/:planId/activate",
+  verifySuperAdminJWT,
+  activatePlan
+);
 
-router.patch("/plan:planId/deactivate", verifySuperAdminJWT, deactivatePlan);
+// Delete plan (Protected)
+router.delete("/plans/:planId", verifySuperAdminJWT, deletePlan);
 
-router.patch("/plan:planId/activate", verifySuperAdminJWT, activatePlan);
+// Get active plans (Public)
+router.get("/plans/active", getActivePlans);
 
-router.delete("/plan:planId", verifySuperAdminJWT, deletePlan);
+// Get plan by ID (Public)
+router.get("/plans/:planId", getPlanById);
 
-router.get("/plan-active", getActivePlans);
-
-router.get("/plan:planId", getPlanById);
-
-router.get("/getall-plans", verifySuperAdminJWT, getAllPlans);
+// Get all plans (Protected)
+router.get("/plans", verifySuperAdminJWT, getAllPlans);
 
 export default router;

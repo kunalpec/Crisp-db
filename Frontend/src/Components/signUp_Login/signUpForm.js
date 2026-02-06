@@ -4,7 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { authActions } from "../../store/authSlice";
 import styles from "./Signup.module.css";
 import axios from "axios";
-import images from "../../assets/images";
+import {
+  FaUser,
+  FaEnvelope,
+  FaLock,
+  FaPhone,
+  FaBuilding,
+  FaGlobe,
+} from "react-icons/fa";
 
 const SignUpForm = () => {
   const dispatch = useDispatch();
@@ -95,7 +102,7 @@ const SignUpForm = () => {
       };
 
       const res = await axios.post(
-        "http://localhost:8000/api/v1/company/create-company",
+        "http://localhost:8000/api/company/auth/register",
         payload,
         {
           headers: { "Content-Type": "application/json" },
@@ -120,7 +127,10 @@ const SignUpForm = () => {
     <div className={activeStyles.form_main_div}>
       {/* LEFT HERO */}
       <div className={activeStyles.leftHero}>
-        <h1 className={activeStyles.heroTitle}>Welcome to the Mediator</h1>
+       <h1 className={styles.aiTitle}>
+                 Welcome to <span className={styles.highlight}>AI Platform</span>
+                 <span className={styles.typing}></span>
+               </h1>
 
         <p className={activeStyles.heroText}>
           Build AI powered conversations, automate workflows,
@@ -135,10 +145,12 @@ const SignUpForm = () => {
         <h1 className={activeStyles.signupTitle}>Sign Up</h1>
 
         <form className={activeStyles.form} onSubmit={handleSignup}>
-          <>
-            {/* Company Name */}
-            <div className={activeStyles.formGroup}>
-              <label>Company Name</label>
+
+          {/* Company Name */}
+          <div className={activeStyles.formGroup}>
+            <label>Company Name</label>
+            <div className={activeStyles.inputWrapper}>
+              <FaBuilding className={activeStyles.inputIcon} />
               <input
                 type="text"
                 name="companyName"
@@ -147,10 +159,13 @@ const SignUpForm = () => {
                 placeholder="Enter Company Name"
               />
             </div>
+          </div>
 
-            {/* Company Domain */}
-            <div className={activeStyles.formGroup}>
-              <label>Company Domain</label>
+          {/* Company Domain */}
+          <div className={activeStyles.formGroup}>
+            <label>Company Domain</label>
+            <div className={activeStyles.inputWrapper}>
+              <FaGlobe className={activeStyles.inputIcon} />
               <input
                 type="text"
                 name="companyDomain"
@@ -159,10 +174,13 @@ const SignUpForm = () => {
                 placeholder="example.com"
               />
             </div>
+          </div>
 
-            {/* Username */}
-            <div className={activeStyles.formGroup}>
-              <label>Username</label>
+          {/* Username */}
+          <div className={activeStyles.formGroup}>
+            <label>Username</label>
+            <div className={activeStyles.inputWrapper}>
+              <FaUser className={activeStyles.inputIcon} />
               <input
                 type="text"
                 name="username"
@@ -171,10 +189,13 @@ const SignUpForm = () => {
                 placeholder="Enter Username"
               />
             </div>
+          </div>
 
-            {/* Email */}
-            <div className={activeStyles.formGroup}>
-              <label>Email</label>
+          {/* Email */}
+          <div className={activeStyles.formGroup}>
+            <label>Email</label>
+            <div className={activeStyles.inputWrapper}>
+              <FaEnvelope className={activeStyles.inputIcon} />
               <input
                 type="email"
                 name="email"
@@ -183,9 +204,12 @@ const SignUpForm = () => {
                 placeholder="Enter Email Address"
               />
             </div>
+          </div>
 
-            {/* Phone */}
-            <div className={activeStyles.phoneGroup}>
+          {/* Phone */}
+          <div className={activeStyles.formGroup}>
+            <label>Phone Number</label>
+            <div className={activeStyles.phoneRow}>
               <select
                 name="countryCode"
                 value={formData.countryCode || "+91"}
@@ -199,20 +223,25 @@ const SignUpForm = () => {
                 <option value="+92">🇵🇰 +92</option>
               </select>
 
-              <input
-                type="tel"
-                name="contactNumber"
-                value={formData.contactNumber || ""}
-                onChange={handleChange}
-                placeholder="Enter Contact Number"
-                className={activeStyles.phoneInput}
-              />
+              <div className={activeStyles.inputWrapper}>
+                <FaPhone className={activeStyles.inputIcon} />
+                <input
+                  type="tel"
+                  name="contactNumber"
+                  value={formData.contactNumber || ""}
+                  onChange={handleChange}
+                  placeholder="Enter Contact Number"
+                />
+              </div>
             </div>
+          </div>
 
-            {/* Password row */}
-            <div className={activeStyles.rowGroup}>
-              <div className={activeStyles.formGroup}>
-                <label>Password</label>
+          {/* Password Row */}
+          <div className={activeStyles.rowGroup}>
+            <div className={activeStyles.formGroup}>
+              <label>Password</label>
+              <div className={activeStyles.inputWrapper}>
+                <FaLock className={activeStyles.inputIcon} />
                 <input
                   type="password"
                   name="password"
@@ -221,9 +250,12 @@ const SignUpForm = () => {
                   placeholder="Enter Password"
                 />
               </div>
+            </div>
 
-              <div className={activeStyles.formGroup}>
-                <label>Confirm Password</label>
+            <div className={activeStyles.formGroup}>
+              <label>Confirm Password</label>
+              <div className={activeStyles.inputWrapper}>
+                <FaLock className={activeStyles.inputIcon} />
                 <input
                   type="password"
                   name="confirmPassword"
@@ -233,17 +265,18 @@ const SignUpForm = () => {
                 />
               </div>
             </div>
+          </div>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className={activeStyles.submitButton}
-            >
-              {loading ? "Registering..." : "Register"}
-            </button>
-          </>
+          <button
+            type="submit"
+            disabled={loading}
+            className={activeStyles.submitButton}
+          >
+            {loading ? "Registering..." : "Register"}
+          </button>
+
         </form>
+
 
         <h2 className={activeStyles.signupHeading}>
           Create a new account now
