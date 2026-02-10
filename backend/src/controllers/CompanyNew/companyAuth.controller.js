@@ -1,7 +1,8 @@
 import { Company } from "../../models/Company.model.js";
 import { CompanyUser } from "../../models/CompanyUser.model.js";
 import { Plan } from "../../models/Plan.model.js";
-
+import { generateRawApiKey, hashApiKey } from "../../utils/apiKey.util.js";
+import { ApiKey } from "../../models/ApiKey.model.js";
 import AsyncHandler from "../../utils/AsyncHandler.util.js";
 import ApiError from "../../utils/ApiError.util.js";
 import ApiResponse from "../../utils/ApiResponse.util.js";
@@ -267,4 +268,55 @@ export const refreshAccessToken = AsyncHandler(async (req, res) => {
   res.cookie("refreshToken", newRefresh);
 
   return res.json(new ApiResponse(200, { accessToken }, "Token refreshed"));
+});
+
+// **
+//  * ======================================================
+//  * ✅ GENERATE OR REGENERATE API KEY
+//  * Route: POST /api/company/apikey/generate
+//  * ======================================================
+//  */
+export const generateCompanyApiKey = AsyncHandler(async (req, res) => {
+  const user = req.user;
+
+  if (!user) throw new ApiError(401, "Unauthorized");
+
+  const company = await Company.findById(user.company_id);
+  if (!company) throw new ApiError(404, "Company not found");
+
+  // 🔐 Only company admin can generate
+  if (user.role !== "company_admin")
+    throw new ApiError(403, "Only admin can generate API key");
+
+  // Generate new raw key
+  const rawApiKey = generateRawApiKey();
+
+  // Hash it
+  const apiKeyHash = await hashApiKey(rawApiKey);
+
+  // If existing key → delete old one
+  if (company.api_key_id) {
+    await ApiKey.findByIdAndDelete(company.api_key_id);
+  }
+
+  // Create new API key document
+  const apiKeyDoc = await ApiKey.create({
+    company_id: company._id,
+    api_key_hash: apiKeyHash,
+    key_name: "default",
+  });
+
+  // Update company reference
+  company.api_key_id = apiKeyDoc._id;
+  await company.save();
+
+  return res.status(201).json(
+    new ApiResponse(
+      201,
+      {
+        api_key: rawApiKey, // ⚠️ send only once
+      },
+      "API key generated successfully"
+    )
+  );
 });

@@ -1,247 +1,242 @@
-import { CompanyUser } from '../../models/CompanyUser.model.js';
-import { ChatRoom } from '../../models/ChatRoom.model.js';
-import { Visitor } from '../../models/Visitors.model.js';
-import { getCompanyRoomId } from '../rooms.js';
+// employee connection to company
+// reconnect 1-if connected to visitor room or 2-if not connecyed t visitor room
+// disconnected to 1-if in visitor room or 2-not in visitor room
+// leave the room 1-if in visitor room
 
-// Handle employee connection & reconnection *
-export const handleEmployeeConnection = async (socket, io) => {
+import { CompanyUser } from "../../models/CompanyUser.model.js";
+import { ChatRoom } from "../../models/ChatRoom.model.js";
+
+/* ===================================================
+   EMPLOYEE CONNECT / RECONNECT
+=================================================== */
+
+export const handleEmployeeConnect = async (io, socket) => {
   try {
-    const { _id: userId, company_id: companyId, role, email } = socket.user;
+    if (!socket.user) return;
 
-    // 1. Mark employee online (Atomic update)
-    await CompanyUser.findByIdAndUpdate(userId, {
+    const { _id, company_id, role } = socket.user;
+
+    if (!["company_agent", "company_admin"].includes(role)) return;
+
+    await CompanyUser.findByIdAndUpdate(_id, {
       is_online: true,
       socket_id: socket.id,
     });
 
-    // 2. Join company-wide room for dashboard updates
-    const companyRoomId = getCompanyRoomId(companyId);
-    await socket.join(companyRoomId);
+    socket.join(`company_${company_id}`);
 
-    // 3. Find active chats to reconnect
-    const reconnectRooms = await ChatRoom.find({
-      assigned_agent_id: userId,
-      status: { $ne: 'closed' }, // More robust than checking specific statuses
-      closed_at: null,
+    const activeChat = await ChatRoom.findOne({
+      company_id,
+      assigned_agent_id: _id,
+      status: "active",
     });
 
-    // Use Promise.all if you have many rooms, or keep the loop for clarity
-    for (const room of reconnectRooms) {
-      await socket.join(room.room_id);
+    if (activeChat) {
+      socket.join(activeChat.room_id);
 
-      // Restore state
-      room.status = 'both-active';
-      await room.save();
+      activeChat.agent_socket_id = socket.id;
+      activeChat.is_agent_online = true;
+      await activeChat.save();
 
-      // Notify the employee UI to open this chat tab
-      socket.emit('employee:reconnected-room', {
-        room_id: room.room_id,
-        visitor_id: room.visitor_id
-      });
-
-      // Notify visitor ONLY (socket.to excludes the sender)
-      socket.to(room.room_id).emit('visitor:agent-reconnected', {
-        room_id: room.room_id,
-        message: 'Agent is back online',
-      });
+      // 🔥 Notify visitor that agent reconnected
+      if (activeChat.is_visitor_online && activeChat.visitor_socket_id) {
+        io.to(activeChat.visitor_socket_id).emit(
+          "visitor:agent-reconnected"
+        );
+      }
     }
 
-    // 4. Notify other dashboard users that this agent is online
-    io.to(companyRoomId).emit('employee:connected', { userId, email });
-
-    console.log(`Employee synced: ${email}`);
-  } catch (error) {
-    console.error('Connection Error:', error);
-    socket.emit('error', { message: 'Failed to sync employee state' });
+  } catch (err) {
+    console.error("handleEmployeeConnect error:", err.message);
   }
 };
 
-// Handle employee disconnection *
-export const handleEmployeeDisconnection = async (socket) => {
+export const handleEmployeeDisconnect = async (io, socket) => {
   try {
     if (!socket.user) return;
 
-    const userId = socket.user._id;
-    const companyId = socket.user.company_id;
+    const { _id, company_id } = socket.user;
 
-    await CompanyUser.findByIdAndUpdate(userId, {
+    await CompanyUser.findByIdAndUpdate(_id, {
       is_online: false,
       socket_id: null,
     });
 
-    /**
-     * Grace mode:
-     * visitor online, agent reserved
-     */
-    await ChatRoom.updateMany(
+    const chatRoom = await ChatRoom.findOne({
+      company_id,
+      assigned_agent_id: _id,
+      status: "active",
+    });
+
+    if (!chatRoom) return;
+
+    chatRoom.is_agent_online = false;
+    chatRoom.agent_socket_id = null;
+    chatRoom.status = "waiting";
+    chatRoom.assigned_agent_id = null;
+
+    await chatRoom.save();
+
+    /* 🔥 Notify Visitor */
+    if (chatRoom.is_visitor_online && chatRoom.visitor_socket_id) {
+      io.to(chatRoom.visitor_socket_id).emit(
+        "visitor:agent-disconnected"
+      );
+    }
+
+    /* 🔥 Notify Company Dashboard */
+    io.to(`company_${chatRoom.company_id}`).emit(
+      "employee:chat-back-to-queue",
       {
-        company_id: companyId,
-        assigned_agent_id: userId,
-        status: 'both-active',
-      },
-      {
-        $set: { status: 'online' },
+        room_id: chatRoom.room_id,
+        chatRoomId: chatRoom._id,
       }
     );
 
-    const companyRoomId = getCompanyRoomId(companyId);
-    socket.to(companyRoomId).emit('employee:disconnected', {
-      userId,
-      companyId,
-    });
-
-    console.log(`Employee ${userId} disconnected (grace mode)`);
-  } catch (error) {
-    console.error('Employee disconnection error:', error);
+  } catch (err) {
+    console.error("handleEmployeeDisconnect error:", err.message);
   }
 };
 
-// employee leave room *
-export const handleLeaveVisitorRoom = async (socket, io, { visitorSessionId }) => {
+export const handleEmployeeLeaveRoom = async (io, socket, payload) => {
   try {
-    const userId = socket.user._id;
-    const companyId = socket.user.company_id;
-    const roomId = `visitor_${visitorSessionId}`;
+    if (!socket.user) return;
 
-    // 1 Leave socket room
-    socket.leave(roomId);
+    const { room_id } = payload;
+    const { _id, company_id } = socket.user;
 
-    // 2 Update DB (IMPORTANT)
-    await ChatRoom.updateOne(
+    if (!room_id) return;
+
+    const chatRoom = await ChatRoom.findOne({
+      company_id,
+      room_id,
+      assigned_agent_id: _id,
+      status: "active",
+    });
+
+    if (!chatRoom) return;
+
+    chatRoom.status = "waiting";
+    chatRoom.assigned_agent_id = null;
+    chatRoom.agent_socket_id = null;
+    chatRoom.is_agent_online = false;
+
+    await chatRoom.save();
+
+    socket.leave(room_id);
+
+    /* 🔥 Notify Visitor */
+    if (chatRoom.is_visitor_online && chatRoom.visitor_socket_id) {
+      io.to(chatRoom.visitor_socket_id).emit(
+        "visitor:agent-left"
+      );
+    }
+
+    /* 🔥 Notify Dashboard */
+    io.to(`company_${chatRoom.company_id}`).emit(
+      "employee:chat-back-to-queue",
       {
-        company_id: companyId,
-        room_id: roomId,
-        assigned_agent_id: userId,
-      },
-      {
-        $set: {
-          assigned_agent_id: null,
-          status: "online", // visitor waiting
-        },
+        room_id,
+        chatRoomId: chatRoom._id,
       }
     );
 
-    // 3 Notify visitor
-    io.to(roomId).emit("employee:left-room", {
-      system: true,
-      message: "Agent left the chat",
-    });
-
-    // 4️ Notify employees (waiting list)
-    io.to(getCompanyRoomId(companyId)).emit("visitor:back-to-waiting", {
-      visitorSessionId,
-    });
-
-    // 5 send the room leave notification to employee
-    socket.emit("employee:left-room-success");
-
-    console.log(` Agent ${userId} LEFT room ${roomId}`);
-  } catch (error) {
-    console.error(error);
-    socket.emit("error", { message: "Leave failed" });
+  } catch (err) {
+    console.error("handleEmployeeLeaveRoom error:", err.message);
   }
 };
 
-// handle the join of employee
-export const handleJoinVisitorRoom = async (socket, io, { visitorSessionId }) => {
+/* ===================================================
+   1️⃣ JOIN VISITOR CHATROOM (ASSIGN CHAT)
+=================================================== */
+export const handleEmployeeJoinVisitorRoom = async (
+  io,
+  socket,
+  payload
+) => {
   try {
-    const userId = socket.user._id;
-    const companyId = socket.user.company_id;
+    if (!socket.user) return;
 
-    if (!visitorSessionId) {
-      return socket.emit("error", { message: "Visitor session ID required" });
-    }
+    const { room_id } = payload;
+    const { _id, company_id } = socket.user;
 
-    // 1. Find the visitor
-    const visitor = await Visitor.findOne({
-      session_id: visitorSessionId,
-      company_id: companyId,
-    });
+    if (!room_id) return;
 
-    if (!visitor) {
-      return socket.emit("error", { message: "Visitor not found" });
-    }
-
-    // 2. Find the room and ensure it's not already taken (using findOneAndUpdate for atomicity)
-    // We check status: "online" and assigned_agent_id: null to prevent race conditions
+    // 🔒 Atomic assignment → prevent double assignment
     const chatRoom = await ChatRoom.findOneAndUpdate(
       {
-        company_id: companyId,
-        visitor_id: visitor._id,
-        status: "online",
-        assigned_agent_id: null, // Critical check
-        closed_at: null,
+        company_id,
+        room_id,
+        status: "waiting",
+        assigned_agent_id: null,
       },
       {
-        $set: {
-          assigned_agent_id: userId,
-          status: "both-active",
-        },
+        status: "active",
+        assigned_agent_id: _id,
+        agent_socket_id: socket.id,
+        is_agent_online: true,
       },
-      { new: true } // Returns the updated document
+      { new: true }
     );
 
     if (!chatRoom) {
-      return socket.emit("error", { message: "Visitor is no longer available or already assigned" });
+      socket.emit("employee:room-already-assigned");
+      return;
     }
 
-    // 3. Join the socket room
-    // Use the exact room_id stored in the DB
-    socket.join(chatRoom.room_id);
+    // Join socket room
+    socket.join(room_id);
 
-    // 4. Success notification to the JOINING agent
-    socket.emit("employee:joined-room-success", {
-      roomId: chatRoom.room_id,
-      visitorSessionId,
+    /* 🔥 Notify Visitor */
+    if (chatRoom.is_visitor_online && chatRoom.visitor_socket_id) {
+      io.to(chatRoom.visitor_socket_id).emit(
+        "visitor:agent-joined",
+        { room_id }
+      );
+    }
 
-    });
+    /* 🔥 Notify Dashboard (remove from waiting list) */
+    io.to(`company_${company_id}`).emit(
+      "employee:visitor-assigned",
+      {
+        session_id: chatRoom.session_id,
+        room_id: chatRoom.room_id,
+      }
+    );
 
-    // 5. Notify the Visitor (and anyone else in the room)
-    // We use io.to() because the visitor is already in this room
-    io.to(chatRoom.room_id).emit("employee:joined-room", {
-      employeeId: userId,
-      roomId: chatRoom.room_id,
-      agentpresent:true,
-    });
-
-    // 6. BROADCAST to all other employees in the company dashboard
-    // This tells their UI to REMOVE this visitor from the "Waiting" list
-    const companyRoomId = getCompanyRoomId(companyId);
-    socket.to(companyRoomId).emit("visitor:assigned", {
-      visitorSessionId,
-      assignedAgentId: userId,
-    });
-
-    console.log(`✅ Employee ${userId} joined Room ${chatRoom.room_id}`);
-  } catch (error) {
-    console.error("Join Room Error:", error);
-    socket.emit("error", { message: "An unexpected error occurred while joining" });
+  } catch (err) {
+    console.error(
+      "handleEmployeeJoinVisitorRoom error:",
+      err.message
+    );
   }
 };
 
-export const handleGetWaitingVisitors = async (socket, io) => {
+/* ===================================================
+   2️⃣ SEND WAITING CHATS TO EMPLOYEE
+   (Used on employee connect / refresh)
+=================================================== */
+export const handleSendWaitingToEmployee = async (
+  io,
+  socket
+) => {
   try {
-    const companyId = socket.user.company_id;
+    if (!socket.user) return;
 
-    const waitingRooms = await ChatRoom.find({
-      company_id: companyId,
-      status: 'online',
-      assigned_agent_id: null,
-      closed_at: null,
-    })
-      .populate('visitor_id', 'session_id')
-      .lean();
+    const { company_id } = socket.user;
 
-    // ✅ Extract ONLY session_id
-    const sessionIds = waitingRooms
-      .map(room => room.visitor_id?.session_id)
-      .filter(Boolean); // safety
+    // Get all waiting chats
+    const waitingChats = await ChatRoom.find({
+      company_id,
+      status: "waiting",
+    }).select("session_id room_id");
 
-    io.to(getCompanyRoomId(companyId))
-      .emit('employee:waiting-rooms', sessionIds);
+    socket.emit("employee:waiting-list", waitingChats);
 
-  } catch (error) {
-    console.error(error);
-    socket.emit('error', { message: 'Failed to load waiting visitors' });
+  } catch (err) {
+    console.error(
+      "handleSendWaitingToEmployee error:",
+      err.message
+    );
   }
 };

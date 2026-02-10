@@ -1,0 +1,34 @@
+.chatboard-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  font-family: Arial, sans-serif;
+}
+
+.chatboard-box {
+  text-align: center;
+}
+
+.chatboard-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.chatboard-btn {
+  padding: 10px 20px;
+  border: 1px solid #000;
+  background-color: #ffffff;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.chatboard-btn:hover {
+  background-color: #000;
+  color: #ffffff;
+}

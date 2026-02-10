@@ -9,6 +9,7 @@ import {
   resetPassword,
   refreshAccessToken, 
   verifyOtp,
+  generateCompanyApiKey 
 } from "../controllers/CompanyNew/companyAuth.controller.js";
 
 /* ================= DASHBOARD CONTROLLERS ================= */
@@ -56,6 +57,7 @@ router.post("/auth/forgot-password", forgetPassword);
 router.post("/auth/verify-otp", verifyOtp);
 router.post("/auth/reset-password", resetPassword);
 router.get("/auth/refresh", refreshAccessToken );
+router.get("/auth/get-apiKey",authenticate,generateCompanyApiKey);
 
 /* =====================================================
    DASHBOARD ROUTES

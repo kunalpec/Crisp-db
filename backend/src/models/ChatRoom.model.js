@@ -1,19 +1,44 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const chatRoomSchema = new mongoose.Schema(
   {
     company_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Company",
+      ref: 'Company',
+      required: true,
+    },
+
+    session_id: {
+      type: String,
       required: true,
       index: true,
     },
 
-    visitor_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Visitor",
-      required: true,
+    status: {
+      type: String,
+      enum: ['waiting', 'active', 'disconnected', 'closed'],
+      default: 'waiting',
       index: true,
+    },
+
+    is_visitor_online: {
+      type: Boolean,
+      default: false,
+    },
+
+    is_agent_online: {
+      type: Boolean,
+      default: false,
+    },
+
+    visitor_socket_id: {
+      type: String,
+      default: null,
+    },
+
+    agent_socket_id: {
+      type: String,
+      default: null,
     },
 
     room_id: {
@@ -43,6 +68,11 @@ const chatRoomSchema = new mongoose.Schema(
     last_message_at: {
       type: Date,
       default: Date.now,
+    },
+
+    is_verified: {
+      type: Boolean,
+      default: false,
       index: true,
     },
 
@@ -60,14 +90,19 @@ const chatRoomSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/**
- * One active room per visitor per company
- */
+// Performance index
+chatRoomSchema.index({ company_id: 1, session_id: 1, status: 1 });
+
+/* ===================================================
+   TTL INDEX → Auto delete 30 mins after closed
+=================================================== */
+
 chatRoomSchema.index(
-  { company_id: 1, visitor_id: 1, status: 1 }
+  { closed_at: 1 },
+  {
+    expireAfterSeconds: 1800, // 30 minutes
+    partialFilterExpression: { status: "closed" },
+  }
 );
 
-export const ChatRoom = mongoose.model(
-  "ChatRoom",
-  chatRoomSchema
-);
+export const ChatRoom = mongoose.model('ChatRoom', chatRoomSchema);

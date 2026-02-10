@@ -11,12 +11,12 @@ export const companyRoutes = [
   { path: "/forgotpassword", element: <ForgotPasswordForm /> },
   { path: "/resetpassword", element: <ResetPassword /> },
 
-  {
-    path: "/dashboard",
-    element: (
-      <CompanyPrivateRoute>
-        <Dashboard />
-      </CompanyPrivateRoute>
-    ),
-  },
+  // {
+  //   path: "/dashboard",
+  //   element: (
+  //     <CompanyPrivateRoute>
+  //       <Dashboard />
+  //     </CompanyPrivateRoute>
+  //   ),
+  // },
 ];

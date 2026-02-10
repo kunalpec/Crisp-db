@@ -6,28 +6,39 @@ const TestLogin = () => {
   const [message, setMessage] = useState("");
 
   const handleLogin = async () => {
-    try {
-      const res = await fetch("http://localhost:8000/api/v1/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // 🍪 receive cookies
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+    if (!email.trim() || !password.trim()) {
+      setMessage("Email and password required");
+      return;
+    }
 
-      const data = await res.json();
-      console.log(data);
+    try {
+      const res = await fetch(
+        "http://localhost:8000/api/company/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // 🍪 receive cookies
+          body: JSON.stringify({
+            email: email.trim(),
+            password,
+          }),
+        }
+      );
+
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {}
 
       if (!res.ok) {
         setMessage(data.message || "Login failed");
         return;
       }
 
-      setMessage("Login successful");
+      setMessage("Login successful ✅");
+      setPassword(""); // clear password
     } catch (err) {
       console.error(err);
       setMessage("Server error");
@@ -36,20 +47,25 @@ const TestLogin = () => {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/auth/logout", {
-        method: "POST",
-        credentials: "include", // 🍪 send cookies
-      });
+      const res = await fetch(
+        "http://localhost:8000/api/company/auth/logout",
+        {
+          method: "POST",
+          credentials: "include", // 🍪 send cookies
+        }
+      );
 
-      const data = await res.json();
-      console.log(data);
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {}
 
       if (!res.ok) {
         setMessage(data.message || "Logout failed");
         return;
       }
 
-      setMessage("Logout successful");
+      setMessage("Logout successful ✅");
     } catch (err) {
       console.error(err);
       setMessage("Server error");

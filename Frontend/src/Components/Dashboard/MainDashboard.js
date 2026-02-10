@@ -56,17 +56,20 @@ const MainDashboard = ({ dashboardData }) => {
   // ===============================
   // REALTIME MESSAGE LISTENER
   // ===============================
-  useEffect(() => {
-    socket.on("message:received", (data) => {
-      if (data.roomId === selectedRoom) {
-        setMessages((prev) => [...prev, data]);
-      }
-    });
+useEffect(() => {
+  const handler = (data) => {
+    if (data.roomId === selectedRoom) {
+      setMessages((prev) => [...prev, data]);
+    }
+  };
 
-    return () => {
-      socket.off("message:received");
-    };
-  }, [selectedRoom]);
+  socket.on("message:received", handler);
+
+  return () => {
+    socket.off("message:received", handler);
+  };
+}, [selectedRoom]);
+
 
   // ===============================
   // SEND MESSAGE (SOCKET)

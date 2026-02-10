@@ -5,7 +5,7 @@ import { Company } from "../models/Company.model.js";
 
 export const SocketAuth = async (socket, next) => {
   try {
-    const rawCookie = socket.handshake.headers.cookie;
+    const rawCookie = socket.handshake.headers?.cookie;
 
     // No cookie → visitor
     if (!rawCookie) {
@@ -28,15 +28,15 @@ export const SocketAuth = async (socket, next) => {
       process.env.ACCESS_TOKEN_SECRET
     );
 
-    // 🔐 Fetch user from DB (DO NOT trust token fully)
+    // 🔐 Fetch fresh user from DB
     const user = await CompanyUser.findById(decoded._id)
-      .select("_id role company_id is_active");
+      .select("_id role company_id is_active email");
 
     if (!user || !user.is_active) {
       return next(new Error("USER_INACTIVE"));
     }
 
-    // 🔐 Check company status
+    // 🔐 Check company
     const company = await Company.findById(user.company_id)
       .select("status subscription_status subscription_expiry");
 
@@ -44,6 +44,15 @@ export const SocketAuth = async (socket, next) => {
       return next(new Error("COMPANY_INACTIVE"));
     }
 
+    // Check subscription status first
+    if (
+      company.subscription_status !== "active" &&
+      company.subscription_status !== "trial"
+    ) {
+      return next(new Error("SUBSCRIPTION_NOT_ACTIVE"));
+    }
+
+    // Extra expiry validation
     if (
       company.subscription_expiry &&
       company.subscription_expiry < new Date()
@@ -56,6 +65,7 @@ export const SocketAuth = async (socket, next) => {
       _id: user._id,
       role: user.role,
       company_id: user.company_id,
+      email: user.email,
     };
 
     socket.role = user.role;

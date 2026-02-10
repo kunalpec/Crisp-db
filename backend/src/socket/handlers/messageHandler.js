@@ -1,118 +1,73 @@
-import { Message } from "../../models/Message.model.js";
 import { ChatRoom } from "../../models/ChatRoom.model.js";
-import { Visitor } from "../../models/Visitors.model.js";
+import { Message } from "../../models/Message.model.js";
 
-export const handleSendMessage = async (socket, io, payload) => {
+export const handleSendMessage = async (io, socket, payload) => {
   try {
-    const { roomId, message } = payload;
+    const {
+      msg_id,
+      msg_content,
+      msg_type,
+      room_id,
+      send_at,
+    } = payload;
 
-    if (!roomId || !message || !message.trim()) {
-      return socket.emit("error", { message: "Invalid message" });
+    if (!room_id || !msg_content) return;
+
+    const chatRoom = await ChatRoom.findOne({ room_id });
+
+    if (!chatRoom || chatRoom.status === "closed") return;
+
+    /* ==========================================
+       DETERMINE SENDER (NEVER TRUST FRONTEND)
+    ========================================== */
+
+    let sender_type = "visitor";
+    let sender_id = null;
+
+    if (socket.role !== "visitor") {
+      sender_type = "agent";
+      sender_id = socket.user?._id || null;
     }
 
-    console.log("📩 Message received:", payload);
-    console.log("📢 Emitting to room:", roomId);
+    /* ==========================================
+       SAVE MESSAGE
+    ========================================== */
 
-
-    const trimmedMessage = message.trim();
-
-    // 🔎 Strict Room Validation
-    const room = await ChatRoom.findOne({
-      room_id: roomId,
-      status: { $ne: "closed" },
+    const message = await Message.create({
+      chatRoom_id: chatRoom._id, // ✅ UPDATED
+      sender_type,
+      sender_id,
+      content: msg_content,
+      message_type: "text",
+      metadata: {
+        client_msg_id: msg_id,
+        client_send_time: send_at,
+      },
+      delivered_at: new Date(),
     });
 
-    if (!room) {
-      return socket.emit("error", { message: "Room not active" });
-    }
+    /* ==========================================
+       UPDATE CHATROOM
+    ========================================== */
 
-    let senderType;
-    let senderId = null;
+    chatRoom.last_message_at = new Date();
+    await chatRoom.save();
 
-    // ===============================
-    // EMPLOYEE MESSAGE
-    // ===============================
-    if (socket.user) {
+    /* ==========================================
+       EMIT TO ROOM
+    ========================================== */
 
-      if (
-        room.company_id.toString() !==
-        socket.user.company_id.toString()
-      ) {
-        return socket.emit("error", { message: "Unauthorized company access" });
-      }
-
-      if (
-        room.assigned_agent_id &&
-        room.assigned_agent_id.toString() !== socket.user._id.toString()
-      ) {
-        return socket.emit("error", { message: "Room assigned to another agent" });
-      }
-
-      senderType = "agent";
-      senderId = socket.user._id;
-    }
-
-    // ===============================
-    // VISITOR MESSAGE
-    // ===============================
-    else {
-
-      const visitor = await Visitor.findOne({
-        _id: room.visitor_id,
-        socket_id: socket.id,
-        is_verified: true,
-      });
-
-      if (!visitor) {
-        return socket.emit("error", { message: "Unauthorized visitor" });
-      }
-
-      senderType = "visitor";
-      senderId = visitor._id;
-    }
-
-    // ===============================
-    // SAVE MESSAGE
-    // ===============================
-    const newMessage = await Message.create({
-      conversation_id: room._id,
-      sender_id: senderId,
-      sender_type: senderType,
-      content: trimmedMessage,
+    io.to(room_id).emit("chat:new-message", {
+      msg_id,
+      db_id: message._id,
+      room_id,
+      sender_type,
+      sender_id,
+      msg_content,
+      send_at: message.createdAt,
     });
 
-    // Atomic last message update
-    await ChatRoom.updateOne(
-      { _id: room._id },
-      { $set: { last_message_at: new Date() } }
-    );
-
-    // ===============================
-    // EMIT MESSAGE
-    // ===============================
-io.to(roomId).emit("message:received", {
-  _id: newMessage._id,
-  roomId: roomId, // 🔥 ADD THIS
-  content: newMessage.content,
-  sender_type: senderType,
-  sender_id: senderId,
-  createdAt: newMessage.createdAt,
-});
-
-
-
-  } catch (error) {
-    console.error("Message Error:", error);
-    socket.emit("error", { message: "Message failed" });
+  } catch (err) {
+    console.error("handleSendMessage error:", err.message);
   }
-};
-
-export const handleTyping = (socket, io, { roomId }) => {
-  if (!roomId) return;
-  socket.to(roomId).emit("typing", { user: socket.user?._id || "visitor" });
-};
-
-export const handleStopTyping = (socket, io, { roomId }) => {
-  if (!roomId) return;
-  socket.to(roomId).emit("stopTyping");
 };

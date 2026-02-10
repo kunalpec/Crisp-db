@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import MainDashboard from "./MainDashboard";
 import { socket } from "../../socket.js"; // ✅ ADD THIS
+import { Socket } from "socket.io-client";
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
@@ -50,6 +51,7 @@ const Dashboard = () => {
     });
 
     return () => {
+      socket.disconnect();
       socket.off("connect");
       socket.off("disconnect");
       console.log("Socket cleaned up");
