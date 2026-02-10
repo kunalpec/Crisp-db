@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import styles from "./LoginForm.module.css";
+import styles from "./SuperAdminLogin.module.css";
 import { loginActions } from "../../store/loginSlice";
 import { FaUser, FaLock } from "react-icons/fa";
 
-const LoginForm = () => {
+const SuperAdminLogin = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -22,11 +22,17 @@ const LoginForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((p) => ({ ...p, [name]: value }));
 
-    if (name === "password" && value.length < 6)
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (name === "password" && value.length < 6) {
       setLocalError("Password must be at least 6 characters");
-    else setLocalError("");
+    } else {
+      setLocalError("");
+    }
   };
 
   const handleLoginSubmit = async (e) => {
@@ -45,13 +51,22 @@ const LoginForm = () => {
       };
 
       const res = await axios.post(
-        "http://localhost:8000/api/company/auth/login",
+        "http://localhost:8000/api/superadmin/auth-superadmin/login",
         payload,
         { withCredentials: true }
       );
 
-      dispatch(loginActions.loginSuccess(res.data.data));
+      const user = res.data.data;
 
+      // 🔐 Role Safety Check
+      if (user.role !== "SUPER_ADMIN") {
+        setServerSuccess(false);
+        setServerMessage("Unauthorized access");
+        return;
+      }
+
+      // ✅ Use correct reducer
+      dispatch(loginActions.adminLoginSuccess(user));
 
       setFormData({
         usernameOrEmail: "",
@@ -59,16 +74,17 @@ const LoginForm = () => {
       });
 
       setServerSuccess(true);
-      setServerMessage("Login successful!");
+      setServerMessage("Super Admin login successful!");
 
-      navigate("/dashboard");
+      navigate("/admin/dashboard");
 
     } catch (err) {
       setServerSuccess(false);
       setServerMessage(
         err.response?.data?.message || "Invalid email or password"
       );
-      dispatch(loginActions.loginFailure());
+
+      dispatch(loginActions.adminLoginFailure());
     } finally {
       setLoading(false);
     }
@@ -78,28 +94,27 @@ const LoginForm = () => {
     <div className={styles.form_main_div}>
       <div className={styles.sideContent}>
         <h1 className={styles.aiTitle}>
-          Welcome to <span className={styles.highlight}>AI Platform</span>
-          <span className={styles.typing}></span>
+          Super Admin <span className={styles.highlight}>Portal</span>
         </h1>
 
         <p>
-          Smart. Secure. Fast.
+          Secure access to platform control panel.
           <br />
-          Experience next-generation AI powered communication.
+          Manage companies, plans, and system settings.
         </p>
       </div>
 
       <div className={styles.box}>
         <div className={styles.login}>
           <form className={styles.loginBx} onSubmit={handleLoginSubmit}>
-            <h2>Login</h2>
+            <h2>Super Admin Login</h2>
 
             <div className={styles.inputGroup}>
               <FaUser className={styles.inputIcon} />
               <input
                 type="text"
                 name="usernameOrEmail"
-                placeholder="Username or Email"
+                placeholder="Email"
                 value={formData.usernameOrEmail}
                 onChange={handleChange}
                 required
@@ -127,8 +142,7 @@ const LoginForm = () => {
             />
 
             <div className={styles.group}>
-              <Link to="/forgotpassword">Forgot Password</Link>
-              <Link to="/signup">Sign Up</Link>
+              <Link to="/admin/forgotpassword">Forgot Password</Link>
             </div>
 
             {serverMessage && (
@@ -143,4 +157,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default SuperAdminLogin;

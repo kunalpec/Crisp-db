@@ -100,7 +100,6 @@ export const login = AsyncHandler(async (req, res) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    path: "/",
   };
 
   res.cookie("accessToken", accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 });
@@ -144,25 +143,72 @@ export const logout = AsyncHandler(async (req, res) => {
  */
 export const forgetPassword = AsyncHandler(async (req, res) => {
   const { recoveryEmail } = req.body;
-  if (!recoveryEmail) throw new ApiError(400, "Email required");
 
-  const user = await CompanyUser.findOne({ email: recoveryEmail.toLowerCase() });
-  if (!user) throw new ApiError(404, "User not found");
+  if (!recoveryEmail)
+    throw new ApiError(400, "Email required");
+
+  const user = await CompanyUser.findOne({
+    email: recoveryEmail.toLowerCase(),
+  });
+
+  // 🔐 Security: Do not reveal if email exists
+  if (!user) {
+    return res.json(
+      new ApiResponse(200, null, "If email exists, OTP sent")
+    );
+  }
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
   user.forgot_password_otp = otp;
   user.forgot_password_otp_expiry = new Date(Date.now() + 10 * 60 * 1000);
+  user.is_otp_verified = false; // new field
 
   await user.save();
 
   await sendEmailApi({
+    from: `"Support" <${process.env.EMAIL_USER}>`,
     to: recoveryEmail,
     subject: "Password Reset OTP",
     html: `<h2>Your OTP is ${otp}</h2><p>Valid for 10 minutes.</p>`,
   });
 
-  return res.json(new ApiResponse(200, null, "OTP sent successfully"));
+  return res.json(
+    new ApiResponse(200, null, "OTP sent successfully")
+  );
 });
+
+/**
+ * ======================================================
+ * ✅ verify OTP
+ * Route: POST /api/company/auth/verify-otp
+ * ======================================================
+ */
+
+export const verifyOtp = AsyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp)
+    throw new ApiError(400, "Email and OTP required");
+
+  const user = await CompanyUser.findOne({
+    email: email.toLowerCase(),
+    forgot_password_otp: otp,
+    forgot_password_otp_expiry: { $gt: new Date() },
+  });
+
+  if (!user)
+    throw new ApiError(400, "Invalid or expired OTP");
+
+  user.is_otp_verified = true;
+  await user.save();
+
+  return res.json(
+    new ApiResponse(200, null, "OTP verified successfully")
+  );
+});
+
+
 
 /**
  * ======================================================
@@ -171,24 +217,28 @@ export const forgetPassword = AsyncHandler(async (req, res) => {
  * ======================================================
  */
 export const resetPassword = AsyncHandler(async (req, res) => {
-  const { email, otp, newPassword } = req.body;
-  if (!email || !otp || !newPassword) throw new ApiError(400, "All fields required");
+  const { email, newPassword } = req.body;
+
+  if (!email || !newPassword)
+    throw new ApiError(400, "All fields required");
 
   const user = await CompanyUser.findOne({
     email: email.toLowerCase(),
-    forgot_password_otp: otp,
-    forgot_password_otp_expiry: { $gt: new Date() },
   });
 
-  if (!user) throw new ApiError(401, "Invalid OTP");
+  if (!user || !user.is_otp_verified)
+    throw new ApiError(400, "OTP verification required");
 
-  user.password = newPassword;
+  user.password = newPassword; // auto hashed
   user.forgot_password_otp = null;
   user.forgot_password_otp_expiry = null;
+  user.is_otp_verified = false;
 
   await user.save();
 
-  return res.json(new ApiResponse(200, null, "Password reset successful"));
+  return res.json(
+    new ApiResponse(200, null, "Password reset successful")
+  );
 });
 
 /**

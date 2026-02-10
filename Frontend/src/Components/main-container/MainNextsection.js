@@ -9,6 +9,7 @@ import industry2 from '../../assets/home/industry-img2.png'
 import industry3 from '../../assets/home/industry-img3.png'
 import industry4 from '../../assets/home/industry-img4.png'
 import Homefeature from './Homefeature'
+import { useEffect } from "react";
 
 
 
@@ -28,6 +29,31 @@ const MainNextSection = () => {
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
   };
+
+  useEffect(() => {
+  const reveals = document.querySelectorAll(`.${styles.featureBox}`);
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry, index) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add(styles.activeReveal);
+          }, index * 150);
+        }
+      });
+    },
+    { threshold: 0.2 }
+  );
+
+  reveals.forEach((el) => {
+    el.classList.add(styles.reveal);
+    observer.observe(el);
+  });
+
+  return () => observer.disconnect();
+}, []);
+
 
   
 

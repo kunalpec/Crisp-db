@@ -4,15 +4,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { loginActions } from "../../../store/loginSlice";
 import styles from "./ForgotPasswordForm.module.css";
 import axios from "axios";
-import images from "../../../assets/images";
 
-const API = "http://localhost:8000/api/v1/auth";
+const API = "http://localhost:8000/api/company/auth";
 
 const ForgotPasswordForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { forgotError, forgotSuccessMessage, otpVerified, emailForReset, step } =
+  const { otpVerified, emailForReset, step } =
     useSelector((state) => state.login);
 
   const [formData, setFormData] = useState({
@@ -21,8 +20,11 @@ const ForgotPasswordForm = () => {
   });
 
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // animation refs (unchanged UI)
+  // ==============================
+  // UI Animations (unchanged)
+  // ==============================
   const boardRef = useRef(null);
   const lightRef = useRef(null);
   const robotRef = useRef(null);
@@ -41,72 +43,91 @@ const ForgotPasswordForm = () => {
     }, 4600);
   }, []);
 
+  // ==============================
+  // Handle Input Change
+  // ==============================
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ SEND OTP
+  // ==============================
+  // SEND OTP
+  // ==============================
   const sendOtp = async () => {
     try {
+      setLoading(true);
+      setMessage("");
+
       const res = await axios.post(
-        `${API}/forget-password`,
-        { recoveryEmail: formData.email },
-        { withCredentials: true }
+        `${API}/forgot-password`,
+        { recoveryEmail: formData.email.trim().toLowerCase() }
       );
 
-      if (res.data?.message === "OTP sent to email") {
-        dispatch(loginActions.setResetEmail(formData.email));
-        dispatch(loginActions.setStep("otp"));
-        setMessage("OTP sent to email");
-      }
+      setMessage(res.data?.message || "OTP sent successfully");
+
+      dispatch(loginActions.setResetEmail(formData.email));
+      dispatch(loginActions.setStep("otp"));
     } catch (err) {
-      setMessage(err.response?.data?.message || "Invalid email");
+      setMessage(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ✅ VERIFY OTP
- const verifyOtp = async () => {
-  try {
-    const res = await axios.post(
-      `${API}/verify-otp`,
-      {
-        email: formData.email.trim().toLowerCase(), // ✅ FIX
-        otp: formData.otp.trim(), // ✅ FIX
-      },
-      { withCredentials: true }
-    );
+  // ==============================
+  // VERIFY OTP
+  // ==============================
+  const verifyOtp = async () => {
+    try {
+      setLoading(true);
+      setMessage("");
 
-    if (res.data?.message === "OTP verified") {
-      dispatch(loginActions.setOTP(formData.otp.trim())); // save OTP
+      const res = await axios.post(
+        `${API}/verify-otp`,
+        {
+          email: formData.email.trim().toLowerCase(),
+          otp: formData.otp.trim(),
+        }
+      );
+
+      setMessage(res.data?.message || "OTP verified");
+
+      dispatch(loginActions.setOTP(formData.otp.trim()));
       dispatch(loginActions.setOTPVerified(true));
+    } catch (err) {
+      setMessage(err.response?.data?.message || "Invalid or expired OTP");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.log("VERIFY ERROR:", err.response?.data);
-    setMessage(err.response?.data?.message || "Invalid OTP");
-  }
-};
+  };
 
-
+  // ==============================
+  // FORM SUBMIT
+  // ==============================
   const handleSubmit = (e) => {
     e.preventDefault();
-    setMessage("");
 
-    if (step === "email") sendOtp();
-    else verifyOtp();
+    if (loading) return;
+
+    if (step === "email") {
+      sendOtp();
+    } else {
+      verifyOtp();
+    }
   };
 
-  // redirect after OTP success
+  // ==============================
+  // Redirect After OTP Verified
+  // ==============================
   useEffect(() => {
-    if (otpVerified) navigate("/resetpassword");
+    if (otpVerified) {
+      navigate("/resetpassword");
+    }
   }, [otpVerified, navigate]);
 
   return (
     <div className={styles.form_main_div}>
-      {/* LEFT ANIMATION SIDE — untouched */}
-
-
-      {/* RIGHT FORM SIDE */}
       <div className={styles.container}>
         <h2 className={styles.forgotheading}>Forgot Password</h2>
 
@@ -138,15 +159,15 @@ const ForgotPasswordForm = () => {
             </div>
           )}
 
-          <button type="submit" className={styles.submitButton}>
-            {step === "otp" ? "Validate OTP" : "Send OTP"}
+          <button type="submit" className={styles.submitButton} disabled={loading}>
+            {loading
+              ? "Please wait..."
+              : step === "otp"
+              ? "Verify OTP"
+              : "Send OTP"}
           </button>
 
           {message && <p className={styles.message}>{message}</p>}
-          {forgotError && <p className={styles.error}>{forgotError}</p>}
-          {forgotSuccessMessage && (
-            <p className={styles.success}>{forgotSuccessMessage}</p>
-          )}
 
           <p className={styles.forgotPassword}>
             <Link to="/login" className={styles.a}>

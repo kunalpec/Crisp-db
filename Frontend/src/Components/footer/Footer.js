@@ -30,7 +30,7 @@ const Footer = () => {
 
       {/* About */}
       <div className={styles.section}>
-        <p className={styles.headingabout}>About Us</p>
+        <p className={styles.heading}>About Us</p>
         <p>Careers</p>
         <p>Brand Assets</p>
         <p>Partnerships</p>
@@ -38,7 +38,7 @@ const Footer = () => {
 
       {/* Resources */}
       <div className={styles.section}>
-        <p className={styles.headingabout}>Resources</p>
+        <p className={styles.heading}>Resources</p>
         <p>Read Our Blog</p>
         <p>Help Center</p>
         <p>Security</p>
@@ -46,9 +46,14 @@ const Footer = () => {
 
       {/* Legal */}
       <div className={styles.section}>
-        <p className={styles.headingabout}>Legal</p>
+        <p className={styles.heading}>Legal</p>
         <p>Terms of Use</p>
         <p>Privacy Policy</p>
+      </div>
+
+      {/* Bottom */}
+      <div className={styles.footerBottom}>
+        © {new Date().getFullYear()} CRISP. All rights reserved.
       </div>
     </footer>
   );

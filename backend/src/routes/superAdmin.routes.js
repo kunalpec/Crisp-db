@@ -51,19 +51,19 @@ const router = express.Router();
 ===================================================== */
 
 // Login
-router.post("/auth/login", loginSuperAdmin);
+router.post("/auth-superadmin/login", loginSuperAdmin);
 
 // Logout (Protected)
-router.post("/auth/logout", verifySuperAdminJWT, logoutSuperAdmin);
+router.post("/auth-superadmin/logout", verifySuperAdminJWT, logoutSuperAdmin);
 
 // Forgot password
-router.post("/auth/forgot-password", forgotPasswordSuperAdmin);
+router.post("/auth-superadmin/forgot-password", forgotPasswordSuperAdmin);
 
 // Reset password
-router.post("/auth/reset-password", resetPasswordSuperAdmin);
+router.post("/auth-superadmin/reset-password", resetPasswordSuperAdmin);
 
 // Refresh token
-router.get("/auth/refresh", refreshTokenSuperAdmin);
+router.get("/auth-superadmin/refresh", refreshTokenSuperAdmin);
 
 
 /* =====================================================

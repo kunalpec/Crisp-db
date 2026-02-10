@@ -1,110 +1,102 @@
-import React, { useState, useEffect } from 'react';
-import DashboardNav from './DashboardNav';
-import styles from './main-dashboard.module.css';
-import DashboardChats from './DashboardChats';
-import Dashboard_MessageView from './Dashboard_MessageView';
+import React, { useState, useEffect } from "react";
+import DashboardNav from "./DashboardNav";
+import styles from "./main-dashboard.module.css";
+import DashboardChats from "./DashboardChats";
+import Dashboard_MessageView from "./Dashboard_MessageView";
+import axios from "axios";
+import { socket } from "../../socket";
 
-const MainDashboard = () => {
-  const [conversations, setConversations] = useState([]);
-  const [selectedConversationId, setSelectedConversationId] = useState(null);
-  const userId = '664c29b268463489c3f6dd4f'; // Consistent with seedChats.js
+const MainDashboard = ({ dashboardData }) => {
 
-  // Fetch chats from backend
+  // ===============================
+  // STATES
+  // ===============================
+  const [chatRooms, setChatRooms] = useState([]);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [messages, setMessages] = useState([]);
+
+  // ===============================
+  // FETCH COMPANY CHAT ROOMS
+  // ===============================
   useEffect(() => {
-    const fetchChats = async () => {
+    const fetchRooms = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/chat/get-chat/${userId}`);
-        const data = await response.json();
-        if (data && Array.isArray(data)) {
-          // Map backend data to frontend format
-          const formattedConversations = data.map((chat, index) => ({
-            id: chat._id,
-            sender: 'ChatBot', // Static for now, can be dynamic if user data is available
-            messages: chat.messages.map((msg, msgIndex) => ({
-              id: msgIndex + 1,
-              text: msg.text,
-              sender: msg.Sender,
-            })),
-            date: new Date(chat.updatedAt).toLocaleDateString(),
-          }));
-          setConversations(formattedConversations);
-        } else if (data && data._id) {
-          // Handle single chat case
-          const formattedConversations = [{
-            id: data._id,
-            sender: 'ChatBot',
-            messages: data.messages.map((msg, msgIndex) => ({
-              id: msgIndex + 1,
-              text: msg.text,
-              sender: msg.Sender,
-            })),
-            date: new Date(data.updatedAt).toLocaleDateString(),
-          }];
-          setConversations(formattedConversations);
-        }
+        const res = await axios.get(
+          "http://localhost:8000/api/company/chatrooms",
+
+          { withCredentials:true }
+        );
+
+        setChatRooms(res.data.data);
       } catch (err) {
-        console.error('Error fetching chats:', err);
+        console.error("Room fetch error:", err);
       }
     };
-    fetchChats();
+
+    fetchRooms();
   }, []);
 
-  const selectedConversation = conversations.find(c => c.id === selectedConversationId);
-
-  const handleAddMessage = async (text) => {
-    if (!selectedConversation) return;
-
+  // ===============================
+  // LOAD ROOM MESSAGES
+  // ===============================
+  const loadMessages = async (roomId) => {
     try {
-      const response = await fetch('http://localhost:5000/api/chat/add-message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          text,
-          sender: 'user',
-        }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        const updatedConversations = conversations.map(conv => {
-          if (conv.id === selectedConversationId) {
-            return {
-              ...conv,
-              messages: [
-                ...conv.messages,
-                {
-                  id: conv.messages.length + 1,
-                  text: data.chat.messages[data.chat.messages.length - 1].text,
-                  sender: 'user',
-                },
-              ],
-              date: new Date(data.chat.updatedAt).toLocaleDateString(),
-            };
-          }
-          return conv;
-        });
-        setConversations(updatedConversations);
-      }
+      const res = await axios.get(
+        `http://localhost:8000/api/company/chatrooms/${roomId}/messages`,
+        { withCredentials: true }
+      );
+
+      setMessages(res.data.data);
+      setSelectedRoom(roomId);
     } catch (err) {
-      console.error('Error adding message:', err);
+      console.error("Message fetch error:", err);
     }
+  };
+
+  // ===============================
+  // REALTIME MESSAGE LISTENER
+  // ===============================
+  useEffect(() => {
+    socket.on("message:received", (data) => {
+      if (data.roomId === selectedRoom) {
+        setMessages((prev) => [...prev, data]);
+      }
+    });
+
+    return () => {
+      socket.off("message:received");
+    };
+  }, [selectedRoom]);
+
+  // ===============================
+  // SEND MESSAGE (SOCKET)
+  // ===============================
+  const handleSendMessage = (text) => {
+    if (!selectedRoom) return;
+
+    socket.emit("message:send", {
+      roomId: selectedRoom,
+      message: text,
+    });
   };
 
   return (
     <div className={styles.mainDashboard}>
       <div className={styles.dashNav}>
-        <DashboardNav />
+        <DashboardNav dashboardData={dashboardData} />
       </div>
+
       <div className={styles.dashChat}>
-        <DashboardChats 
-          conversations={conversations} 
-          onMessageClick={(conv) => setSelectedConversationId(conv.id)} 
+        <DashboardChats
+          rooms={chatRooms}
+          onRoomClick={(room) => loadMessages(room.room_id)}
         />
       </div>
+
       <div className={styles.dashMsgView}>
-        <Dashboard_MessageView 
-          message={selectedConversation} 
-          onSendMessage={handleAddMessage} 
+        <Dashboard_MessageView
+          messages={messages}
+          onSendMessage={handleSendMessage}
         />
       </div>
     </div>

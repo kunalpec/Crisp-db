@@ -2,71 +2,67 @@ import mongoose from "mongoose";
 
 const companySchema = new mongoose.Schema(
   {
-    // Company Name
     name: {
       type: String,
       required: true,
       trim: true,
     },
 
-    // Domain (unique per company)
     domain: {
       type: String,
       unique: true,
       sparse: true,
       lowercase: true,
       trim: true,
+      index: true,
     },
 
-    // Owner (Company Admin)
     owner_user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "CompanyUser",
       default: null,
+      index: true,
     },
 
-    // Plan Reference
     plan_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Plan",
       default: null,
+      index: true,
     },
 
-    // Subscription Status
     subscription_status: {
       type: String,
       enum: ["trial", "active", "expired", "cancelled"],
       default: "trial",
+      index: true,
     },
 
-    // Expiry Date
     subscription_expiry: {
       type: Date,
       default: null,
+      index: true,
     },
 
-    // API Key Reference
     api_key_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ApiKey",
       default: null,
     },
 
-    // System Company (Crisp internal)
     is_system: {
       type: Boolean,
       default: false,
       index: true,
     },
 
-    // Company Status (admin control)
     status: {
       type: String,
       enum: ["active", "inactive", "suspended", "blocked"],
       default: "active",
+      index: true,
     },
 
-    // Billing (Future Stripe support)
     billing_customer_id: {
       type: String,
       default: null,
@@ -74,5 +70,35 @@ const companySchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+/**
+ * Compound index for admin filtering
+ */
+companySchema.index({
+  status: 1,
+  subscription_status: 1,
+});
+
+/**
+ * Normalize domain before save
+ */
+companySchema.pre("save", function (next) {
+  if (this.domain) {
+    this.domain = this.domain.trim().toLowerCase();
+  }
+  next();
+});
+
+/**
+ * Auto expire subscription
+ */
+companySchema.methods.checkSubscriptionStatus = function () {
+  if (
+    this.subscription_expiry &&
+    this.subscription_expiry < new Date()
+  ) {
+    this.subscription_status = "expired";
+  }
+};
 
 export const Company = mongoose.model("Company", companySchema);

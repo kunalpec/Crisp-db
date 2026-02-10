@@ -1,53 +1,56 @@
-import React, { useState, useEffect, useRef } from 'react';
-import styles from './dashboardMessageView.module.css';
-import { IoMdSend } from 'react-icons/io';
+import React, { useState, useEffect, useRef } from "react";
+import styles from "./dashboardMessageView.module.css";
+import { IoMdSend } from "react-icons/io";
 
-const Dashboard_MessageView = ({ message, onSendMessage }) => {
-  const [newMessage, setNewMessage] = useState('');
+const Dashboard_MessageView = ({ messages, onSendMessage }) => {
+  const [newMessage, setNewMessage] = useState("");
   const messageAreaRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Auto-scroll to bottom when new messages arrive
+  // ===============================
+  // AUTO SCROLL
+  // ===============================
   useEffect(() => {
-    if (messageAreaRef.current && message) {
-      messageAreaRef.current.scrollTop = messageAreaRef.current.scrollHeight;
+    if (messageAreaRef.current) {
+      messageAreaRef.current.scrollTop =
+        messageAreaRef.current.scrollHeight;
     }
-  }, [message]);
+  }, [messages]);
 
-  // Focus input when message is selected
+  // ===============================
+  // FOCUS INPUT
+  // ===============================
   useEffect(() => {
-    if (message && inputRef.current) {
-      // Small delay to ensure smooth transition
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
+    if (inputRef.current) {
+      inputRef.current.focus();
     }
-  }, [message]);
+  }, [messages]);
 
-  if (!message) {
+  // ===============================
+  // NO ROOM SELECTED
+  // ===============================
+  if (!messages) {
     return (
       <div className={styles.container}>
         <div className={styles.messageview}>
-          <p>Select a conversation to view messages</p>
+          <p>Select a chat room to view messages</p>
         </div>
       </div>
     );
   }
 
+  // ===============================
+  // SEND MESSAGE
+  // ===============================
   const handleSend = () => {
-    if (newMessage.trim() === '') return;
+    if (!newMessage.trim()) return;
 
     onSendMessage(newMessage);
-    setNewMessage('');
-    
-    // Keep focus on input after sending
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 50);
+    setNewMessage("");
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -55,24 +58,19 @@ const Dashboard_MessageView = ({ message, onSendMessage }) => {
 
   return (
     <div className={styles.container}>
-      {/* Sticky Header */}
-      <div className={styles.metaHeader}>
-        <span className={styles.dateTag}>
-          {message.date || new Date().toLocaleDateString()}
-        </span>
-      </div>
-
       {/* Scrollable Message Area */}
       <div className={styles.messageArea} ref={messageAreaRef}>
-        {message.messages && message.messages.length > 0 ? (
-          message.messages.map((msg) => (
+        {messages.length > 0 ? (
+          messages.map((msg) => (
             <div
-              key={msg.id}
+              key={msg._id || Math.random()}
               className={
-                msg.sender === 'user' ? styles.outgoingMsg : styles.incomingMsg
+                msg.sender_type === "agent"
+                  ? styles.outgoingMsg
+                  : styles.incomingMsg
               }
             >
-              {msg.text}
+              {msg.content}
             </div>
           ))
         ) : (
@@ -82,7 +80,7 @@ const Dashboard_MessageView = ({ message, onSendMessage }) => {
         )}
       </div>
 
-      {/* Sticky Input Bar */}
+      {/* Input */}
       <div className={styles.replyBar}>
         <div className={styles.inputSection}>
           <input
@@ -92,13 +90,10 @@ const Dashboard_MessageView = ({ message, onSendMessage }) => {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            aria-label="Message input"
           />
-          <button 
+          <button
             onClick={handleSend}
             disabled={!newMessage.trim()}
-            aria-label="Send message"
-            title="Send message"
           >
             <IoMdSend />
           </button>

@@ -56,7 +56,7 @@ const ResetPassword = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:8000/api/v1/auth/reset-password',
+        'http://localhost:8000/api/company/auth/reset-password',
         {
          email: emailForReset.toLowerCase(),
           otp: otpForReset, // ✅ CRITICAL FIX
@@ -134,7 +134,7 @@ const ResetPassword = () => {
           <div className={styles.successMessage}>
             <p>Password reset successfully!</p>
             <p>
-              <a href="/login">Click here to login</a>
+              <a href="/">Click here</a>
             </p>
           </div>
         )}

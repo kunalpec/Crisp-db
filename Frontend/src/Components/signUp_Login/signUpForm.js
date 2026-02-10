@@ -112,7 +112,7 @@ const SignUpForm = () => {
       console.log("Signup success:", res.data);
 
       alert("Company registered successfully!");
-      navigate("/login");
+      navigate("/");
     } catch (err) {
       console.error("Signup failed:", err.response?.data || err.message);
       alert(err.response?.data?.message || "Signup failed");

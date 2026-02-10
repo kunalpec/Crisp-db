@@ -2,9 +2,8 @@ import dotenv from 'dotenv';
 import connectDB from './db/db.js';
 import app from './app.js';
 import { createServer } from 'http';
-// import { initSocket } from './socket/index.js';
+import { initSocket } from './socket/index.js'; // ✅ IMPORT BACK
 
-// Load environment variables
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
@@ -16,7 +15,8 @@ const startServer = async () => {
 
     const server = createServer(app);
 
-    // initSocket(server); // 🔥 Socket.IO attached here
+    // 🔥 ATTACH SOCKET HERE
+    initSocket(server);
 
     server.on('error', (error) => {
       console.error('Server error:', error);
@@ -27,10 +27,6 @@ const startServer = async () => {
       console.log(`Server is running on port : ${PORT}`);
     });
 
-    process.on('SIGINT', () => {
-      console.log('Shutting down server...');
-      server.close(() => process.exit(0));
-    });
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);

@@ -4,7 +4,9 @@ import jwt from "jsonwebtoken";
 
 const companyUserSchema = new mongoose.Schema(
   {
-    // Company reference (required for all company users)
+    // ==============================
+    // Company Reference
+    // ==============================
     company_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
@@ -12,7 +14,9 @@ const companyUserSchema = new mongoose.Schema(
       index: true,
     },
 
+    // ==============================
     // Basic Info
+    // ==============================
     username: {
       type: String,
       required: true,
@@ -26,14 +30,15 @@ const companyUserSchema = new mongoose.Schema(
       trim: true,
     },
 
-    // Store password securely (hashed automatically)
     password: {
       type: String,
       required: true,
       select: false,
     },
 
-    // Phone Number (unique per company, not globally)
+    // ==============================
+    // Phone Number
+    // ==============================
     phone_number: {
       country_code: {
         type: String,
@@ -45,20 +50,26 @@ const companyUserSchema = new mongoose.Schema(
       },
     },
 
-    // Role inside company
+    // ==============================
+    // Role
+    // ==============================
     role: {
       type: String,
       enum: ["company_admin", "company_agent"],
       default: "company_admin",
     },
 
+    // ==============================
     // Account Status
+    // ==============================
     is_active: {
       type: Boolean,
       default: true,
     },
 
-    // Online Tracking (for realtime chat)
+    // ==============================
+    // Realtime Tracking
+    // ==============================
     is_online: {
       type: Boolean,
       default: false,
@@ -69,14 +80,18 @@ const companyUserSchema = new mongoose.Schema(
       default: null,
     },
 
-    // Refresh Token (hidden for security)
+    // ==============================
+    // Tokens
+    // ==============================
     refresh_token: {
       type: String,
       default: null,
       select: false,
     },
 
-    // Forgot Password OTP System
+    // ==============================
+    // 🔐 Forgot Password OTP System
+    // ==============================
     forgot_password_otp: {
       type: String,
       default: null,
@@ -86,6 +101,16 @@ const companyUserSchema = new mongoose.Schema(
     forgot_password_otp_expiry: {
       type: Date,
       default: null,
+    },
+
+    is_otp_verified: {
+      type: Boolean,
+      default: false,
+    },
+
+    otp_attempts: {
+      type: Number,
+      default: 0,
     },
   },
   {
@@ -97,10 +122,13 @@ const companyUserSchema = new mongoose.Schema(
 // ✅ INDEXES
 //
 
-// Email must be unique per company
-companyUserSchema.index({ company_id: 1, email: 1 }, { unique: true });
+// Email unique per company
+companyUserSchema.index(
+  { company_id: 1, email: 1 },
+  { unique: true }
+);
 
-// Phone number must be unique per company
+// Phone unique per company
 companyUserSchema.index(
   { company_id: 1, "phone_number.number": 1 },
   { unique: true }
@@ -156,4 +184,17 @@ companyUserSchema.methods.generateRefreshToken = function () {
   );
 };
 
-export const CompanyUser = mongoose.model("CompanyUser", companyUserSchema);
+//
+// ✅ RESET OTP METHOD (Clean Reset Utility)
+//
+companyUserSchema.methods.resetOTPState = function () {
+  this.forgot_password_otp = null;
+  this.forgot_password_otp_expiry = null;
+  this.is_otp_verified = false;
+  this.otp_attempts = 0;
+};
+
+export const CompanyUser = mongoose.model(
+  "CompanyUser",
+  companyUserSchema
+);

@@ -1,59 +1,62 @@
 /* ======================================================
-   GLOBAL MOTION TOKENS
+   GLOBAL THEME – MATCH NAVBAR
 ====================================================== */
 :root {
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --bg-main: #0b1120;
+  --bg-card: rgba(255, 255, 255, 0.06);
+  --border-glass: rgba(255, 255, 255, 0.08);
+
+  --primary: #4f46e5;
+  --accent: #06b6d4;
+
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
 }
 
 /* ======================================================
-   CARD SECTION
+   CARD SECTION – MATCHING DARK FUTURE UI
 ====================================================== */
 .cardContainer {
-  position: relative;
   width: 100%;
-  padding: 2rem 1rem;
-
+  padding: 6rem 3rem;
   display: flex;
-  justify-content: space-evenly;
-  gap: 2rem;
-
-  overflow: hidden;
-  background: #ffffff;
+  justify-content: center;
+  gap: 3rem;
+  background: linear-gradient(180deg, #0f172a, #0b1120);
 }
 
 .card {
-  padding: 0 2rem;
-  margin: 2rem;
+  width: 360px;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
 
-  border-radius: 14px;
-  background: #ffffff;
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
 
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-glass);
 
-  transition:
-    transform 0.35s var(--ease-soft),
-    box-shadow 0.35s var(--ease-soft);
+  transition: all 0.4s ease;
 }
 
+/* Soft hover glow */
 .card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+  transform: translateY(-12px);
+  box-shadow:
+    0 20px 50px rgba(79, 70, 229, 0.25),
+    0 0 30px rgba(6, 182, 212, 0.15);
 }
 
 .cardImage {
-  width: 100%;
-  height: 200px;
+  height: 220px;
   overflow: hidden;
-  border-radius: 10px;
 }
 
 .cardImage img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-
-  transition: transform 0.5s var(--ease-soft);
+  transition: transform 0.6s ease;
 }
 
 .card:hover .cardImage img {
@@ -61,216 +64,307 @@
 }
 
 .cardContent {
-  padding: 20px;
+  padding: 2rem;
 }
 
 .title {
   font-size: 1.5rem;
-  margin-bottom: 10px;
-  color: #2c2c2c;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 12px;
 }
 
 .description {
-  font-size: 1rem;
+  font-size: 0.95rem;
+  color: var(--text-muted);
   line-height: 1.6;
-  color: #666;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .button {
-  background: linear-gradient(135deg, #007bff, #0056b3);
-  color: #fff;
-
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
   border: none;
-  padding: 10px 22px;
+  padding: 12px 26px;
   border-radius: 999px;
-
-  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-
-  transition:
-    transform 0.25s var(--ease-smooth),
-    box-shadow 0.25s var(--ease-smooth);
+  transition: all 0.3s ease;
 }
 
 .button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.35);
+  box-shadow: 0 0 25px rgba(79,70,229,0.6);
+  transform: translateY(-3px);
 }
 
 /* ======================================================
-   INDUSTRY LAYOUT
+   INDUSTRY SECTION – MATCHED GLASS STYLE
 ====================================================== */
 .industry {
   display: flex;
-  gap: 2rem;
-
-  width: 80%;
-  margin: 4rem auto;
-  padding: 20px;
+  gap: 4rem;
+  width: 85%;
+  margin: 9rem auto;
+  color: #f8fafc;
 }
 
+/* Sidebar */
 .sidebar {
-  width: 300px;
-  background: #ffffff;
+  width: 320px;
+  padding: 2rem;
+  border-radius: 18px;
 
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  background: #111827; /* solid dark instead of heavy glass */
+  border: 1px solid rgba(255,255,255,0.06);
+
+  box-shadow: 0 15px 40px rgba(0,0,0,0.3);
 }
 
+/* Category */
 .category {
   display: flex;
   align-items: center;
   gap: 1rem;
-
-  padding: 2rem;
-  margin-bottom: 1rem;
-
-  border-radius: 10px;
+  padding: 1.2rem;
+  border-radius: 12px;
   cursor: pointer;
-
-  transition:
-    background 0.3s var(--ease-soft),
-    transform 0.3s var(--ease-soft);
+  transition: all 0.3s ease;
 }
 
 .category:hover {
-  background: rgba(0, 123, 255, 0.08);
+  background: rgba(79,70,229,0.15);
   transform: translateX(6px);
 }
 
-.icon {
-  font-size: 1.5rem;
+.active {
+  background: linear-gradient(90deg, rgba(124,58,237,0.25), transparent);
+  border-left: 3px solid #7c3aed;
 }
 
+/* Titles */
 .categoryTitle {
-  font-size: 1.2rem;
-  color: #333;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #f1f5f9;
 }
 
 .categorySubtitle {
-  font-size: 0.9rem;
-  color: #666;
+  font-size: 0.85rem;
+  color: #94a3b8;
 }
 
-.active {
-  background: rgba(0, 123, 255, 0.15);
-}
-
+/* Right content */
 .mainContent {
   flex: 1;
-  padding: 2rem;
+  padding: 3rem;
+  border-radius: 18px;
 
-  background: #ffffff;
-  border-radius: 12px;
+  background: #111827;
+  border: 1px solid rgba(255,255,255,0.06);
 
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.3);
 }
 
-.illustration {
-  margin-top: 20px;
+.mainContent h1 {
+  color: #f8fafc;
+  margin-bottom: 1rem;
 }
 
-.imagePlaceholder {
-  width: 100%;
-  height: 400px;
-
-  border-radius: 12px;
-  background: #ecf0f1;
+.mainContent p {
+  color: #94a3b8;
+  line-height: 1.7;
 }
 
+/* Illustration */
 .industryimage {
-  width: 90%;
-  object-fit: contain;
-
-  transition: transform 0.6s var(--ease-soft);
+  width: 100%;
+  max-width: 500px;
+  margin-top: 2rem;
+  transition: transform 0.5s ease;
 }
 
 .industryimage:hover {
   transform: scale(1.04);
 }
 
-/* ======================================================
-   BENEFITS / FEATURES SECTION
-====================================================== */
-.pageWrapper {
-  min-height: 100vh;
-  padding: 40px 20px;
 
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
-  color: #ffffff;
+/* ======================================================
+   GEN AI SECTION – ULTRA PRODUCTION LEVEL
+====================================================== */
+
+.pageWrapper {
+  position: relative;
+  padding: 10rem 3rem;
+  background: #0b1120;
+  color: #f8fafc;
+  overflow: hidden;
+}
+
+/* Subtle background grid texture */
+.pageWrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* Soft radial glow */
+.pageWrapper::after {
+  content: "";
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(124,58,237,0.25), transparent 70%);
+  top: -200px;
+  right: -200px;
+  filter: blur(120px);
+  pointer-events: none;
 }
 
 .headerSection {
   text-align: center;
-  margin-bottom: 3rem;
-}
-
-.mainHeading {
-  font-size: 2.5rem;
-  line-height: 1.2;
+  margin-bottom: 6rem;
+  position: relative;
+  z-index: 2;
 }
 
 .categoryLabel {
-  margin-top: 10px;
-  font-size: 1.2rem;
-  color: #ffd700;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #22d3ee;
+  display: inline-block;
+  margin-bottom: 15px;
 }
 
+.mainHeading {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1.2;
+  background: linear-gradient(90deg, #8b5cf6, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Content Grid */
 .contentArea {
   max-width: 1200px;
   margin: auto;
-
-  display: grid;
-  gap: 2rem;
-}
-
-.featureBox {
-  padding: 2rem;
-  border-radius: 14px;
-
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(8px);
-
-  transition:
-    transform 0.35s var(--ease-soft),
-    background 0.35s var(--ease-soft);
-}
-
-.featureBox:hover {
-  transform: translateY(-6px);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.featureIcon {
-  font-size: 2rem;
-  margin-bottom: 10px;
-}
-
-.featureTitle {
-  font-size: 1.5rem;
-  color: #ffd700;
-}
-
-.featureDescription {
-  color: #ccc;
-  line-height: 1.6;
-}
-
-.actionLink {
-  color: #4a90e2;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.actionLink:hover {
-  text-decoration: underline;
+  position: relative;
+  z-index: 2;
 }
 
 .featurecontent {
   display: flex;
   gap: 2rem;
+  margin-bottom: 2rem;
 }
+
+/* Feature Card */
+.featureBox {
+  flex: 1;
+  padding: 2.8rem;
+  border-radius: 22px;
+  background: #111827;
+  border: 1px solid rgba(255,255,255,0.06);
+
+  transition: all 0.35s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Soft glow line on hover */
+.featureBox::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(34,211,238,0.2));
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.featureBox:hover::before {
+  opacity: 1;
+}
+
+.featureBox:hover {
+  transform: translateY(-12px);
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.4),
+    0 0 40px rgba(139,92,246,0.3);
+}
+
+.featureIcon {
+  font-size: 2.2rem;
+  margin-bottom: 18px;
+}
+
+.featureTitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #f8fafc;
+  margin-bottom: 12px;
+}
+
+.featureDescription {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.actionLink {
+  color: #22d3ee;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.actionLink:hover {
+  color: #ffffff;
+}
+
+
+/* ======================================================
+   SCROLL REVEAL ANIMATION
+====================================================== */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger effect */
+.featureBox {
+  transition: 
+    transform 0.4s ease,
+    box-shadow 0.4s ease,
+    opacity 0.8s ease,
+    transform 0.8s ease;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(60px);
+}
+
+.activeReveal {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 
 /* ======================================================
    RESPONSIVE
@@ -279,16 +373,170 @@
   .cardContainer,
   .industry,
   .featurecontent {
-    display: block;
+    flex-direction: column;
+    align-items: center;
   }
 
   .industry {
+    width: 95%;
+  }
+
+  .sidebar {
     width: 100%;
   }
 }
 
-@media (max-width: 768px) {
+/* ======================================================
+   RESPONSIVE – FULL PRODUCTION FIX
+====================================================== */
+
+/* ===== LARGE TABLET ===== */
+@media (max-width: 1200px) {
+  .cardContainer {
+    gap: 2rem;
+    padding: 5rem 2rem;
+  }
+
+  .industry {
+    gap: 2.5rem;
+  }
+}
+
+/* ===== TABLET ===== */
+@media (max-width: 992px) {
+
+  /* Cards */
+  .cardContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 500px;
+  }
+
+  /* Industry */
+  .industry {
+    flex-direction: column;
+    width: 95%;
+    margin: 6rem auto;
+  }
+
   .sidebar {
     width: 100%;
+  }
+
+  .mainContent {
+    padding: 2rem;
+  }
+
+  /* Gen AI */
+  .featurecontent {
+    flex-direction: column;
+  }
+
+  .featureBox {
+    padding: 2.2rem;
+  }
+
+  .mainHeading {
+    font-size: 2.4rem;
+  }
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+
+  .cardContainer {
+    padding: 4rem 1.5rem;
+  }
+
+  .card {
+    max-width: 100%;
+  }
+
+  .cardImage {
+    height: 200px;
+  }
+
+  .industry {
+    margin: 4rem auto;
+  }
+
+  .category {
+    padding: 1rem;
+  }
+
+  .mainContent {
+    padding: 1.8rem;
+  }
+
+  .pageWrapper {
+    padding: 6rem 1.5rem;
+  }
+
+  .mainHeading {
+    font-size: 2rem;
+  }
+
+  .featureBox {
+    padding: 2rem;
+  }
+
+  .featureTitle {
+    font-size: 1.2rem;
+  }
+}
+
+/* ===== SMALL MOBILE ===== */
+@media (max-width: 480px) {
+
+  .cardContainer {
+    padding: 3rem 1rem;
+  }
+
+  .cardContent {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .description {
+    font-size: 0.9rem;
+  }
+
+  .pageWrapper {
+    padding: 4rem 1rem;
+  }
+
+  .mainHeading {
+    font-size: 1.7rem;
+  }
+
+  .featureBox {
+    padding: 1.6rem;
+  }
+
+  .featureDescription {
+    font-size: 0.9rem;
+  }
+}
+
+/* ===== FIX OVERFLOW SAFETY ===== */
+.cardContainer,
+.pageWrapper,
+.industry {
+  overflow-x: hidden;
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+  .featureBox,
+  .card,
+  .reveal {
+    transition: none !important;
   }
 }

@@ -2,10 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
-// cron jobs auto start
-import './controllers/SuperAdmin/AutoCleanPlan.controller.js';
-// import './controllers/Auto/chatCleanup.cron.js';
-
 const app = express();
 
 // CORS
@@ -27,20 +23,17 @@ app.use(express.static('public'));
 app.use(cookieParser());
 
 // routes
-import systemRouter from './routes/system.route.js';
-import authRouter from './routes/auth.route.js';
 
 import bootstrapRouter from "./routes/bootstrap.routes.js";
 import superAdminRouter from "./routes/superAdmin.routes.js"
 import companyRouter from './routes/Company.routes.js';
+import companyChatRouter from "./routes/companyChat.routes.js";
 
 app.use("/api/bootstrap", bootstrapRouter); // @
-app.use('/api/v1/system', systemRouter);
-app.use('/api/v1/auth', authRouter);
 app.use("/api/superadmin", superAdminRouter); //@
-
 app.use('/api/company', companyRouter);
 
+app.use("/api/company", companyChatRouter);
 // ✅ ERROR HANDLER MUST BE LAST
 app.use((err, req, res, next) => {
   console.error("🔥 Global Error:", err);

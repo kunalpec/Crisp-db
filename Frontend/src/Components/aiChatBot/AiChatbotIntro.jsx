@@ -46,7 +46,7 @@ export default function AiChatbotIntro() {
             <Button
               size="lg"
               className={styles.primaryBtn}
-              onClick={() => navigate("/inbox")}
+              onClick={() => navigate("/dashboard")}
             >
               Get Started
             </Button>

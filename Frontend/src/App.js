@@ -1,14 +1,20 @@
-import { Routes, Route } from "react-router-dom";
-import { routes } from "./routing/routing";
+import { useRoutes } from "react-router-dom";
+
+import { publicRoutes } from "./routing/publicRoutes";
+import { companyRoutes } from "./routing/companyRoutes";
+import { adminRoutes } from "./routing/adminRoutes";
 
 function App() {
+
+  const allRoutes = useRoutes([
+    ...publicRoutes,
+    ...companyRoutes,
+    ...adminRoutes,
+  ]);
+
   return (
     <div className="App">
-      <Routes>
-        {routes.map((route, index) => (
-          <Route key={index} path={route.path} element={route.element} />
-        ))}
-      </Routes>
+      {allRoutes}
     </div>
   );
 }

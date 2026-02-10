@@ -7,7 +7,8 @@ import {
   logout,
   forgetPassword,
   resetPassword,
-  refreshAccessToken ,
+  refreshAccessToken, 
+  verifyOtp,
 } from "../controllers/CompanyNew/companyAuth.controller.js";
 
 /* ================= DASHBOARD CONTROLLERS ================= */
@@ -52,6 +53,7 @@ router.post("/auth/register", registerCompany);
 router.post("/auth/login", login);
 router.post("/auth/logout", authenticate, logout);
 router.post("/auth/forgot-password", forgetPassword);
+router.post("/auth/verify-otp", verifyOtp);
 router.post("/auth/reset-password", resetPassword);
 router.get("/auth/refresh", refreshAccessToken );
 

@@ -1,153 +1,254 @@
+/* ======================================================
+   CHATBOT SECTION – PRODUCTION LEVEL
+====================================================== */
+
 .chatbotContainer {
-    background-color: #fff;
-    min-height: 100vh;
-    position: relative;
-    padding: 20px;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    overflow: hidden;
-    margin-top: 3rem;
-  }
-  
-  .integrationLabel {
-    color: #d3a8b6;
-    font-size: 0.9rem;
-    margin-bottom: 10px;
-    margin-left: 2rem;
-    text-align: justify;
-  }
-  .mediatordiv{
-    display: flex;
-    justify-content: space-evenly;
-  }
-  .mediatertext{
-    font-size: 2rem;
-    text-align: justify;
-  }
-  
+  position: relative;
+  background: #0b1120;
+  min-height: 100vh;
+  padding: 6rem 2rem;
+  text-align: center;
+  overflow: hidden;
+  color: #f8fafc;
+}
+
+/* subtle background grid */
+.chatbotContainer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* soft radial glow */
+.chatbotContainer::after {
+  content: "";
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(124,58,237,0.3), transparent 70%);
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  filter: blur(120px);
+  pointer-events: none;
+}
+
+/* Top content */
+.mediatordiv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: auto;
+  margin-bottom: 4rem;
+  position: relative;
+  z-index: 2;
+}
+
+.integrationLabel {
+  color: #22d3ee;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.chatbotTitle {
+  font-size: 3rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #8b5cf6, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.mediatertext {
+  max-width: 500px;
+}
+
+.placeholderText {
+  font-size: 1.1rem;
+  color: #94a3b8;
+  line-height: 1.7;
+}
+
+/* Huge background word */
+.skillabText {
+  font-size: 12rem;
+  font-weight: 800;
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.03);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ======================================================
+   INTEGRATION GRID
+====================================================== */
+
+.integrationGrid {
+  position: relative;
+  height: 600px;
+  max-width: 1000px;
+  margin: auto;
+  z-index: 2;
+}
+
+/* floating app container */
+.appdiv {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: float 6s ease-in-out infinite;
+}
+
+/* app icon */
+.app {
+  width: 3.2rem;
+  height: 3.2rem;
+  transition: transform 0.3s ease;
+}
+
+.app:hover {
+  transform: scale(1.1);
+}
+
+/* button style */
+.integrationButton {
+  padding: 0.8rem 1.8rem;
+  background: #111827;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  font-size: 0.95rem;
+  color: #f8fafc;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.integrationButton:hover {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  box-shadow: 0 0 25px rgba(124,58,237,0.4);
+}
+
+/* floating animation */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0px); }
+}
+
+/* ======================================================
+   RESPONSIVE
+====================================================== */
+
+/* ======================================================
+   RESPONSIVE – FIXED & PRODUCTION READY
+====================================================== */
+
+/* ===== TABLET ===== */
+@media (max-width: 1024px) {
   .chatbotTitle {
-    font-size: 3rem;
-    color: #d3a8b6;
-    margin: 0;
-    line-height: 1.2;
-    margin-right: 2rem;
+    font-size: 2.4rem;
   }
-  
-  .skillabText {
-    font-size: 10rem;
-    font-weight: bold;
-    color: #fff;
-    background: linear-gradient(45deg, #ff6b6b, #ff8e53);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    position: absolute;
-    top: 20%;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1;
-    opacity: 0.1;
-    pointer-events: none;
-  }
-  
-  .placeholderText {
-    font-size: 1.2rem;
-    color: #666;
-    max-width: 40rem;
-    /* margin: 20px auto; */
-    line-height: 1.5;
-  }
-  
+
   .integrationGrid {
-    position: relative;
-    height: 500px; /* Adjust height as needed */
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
+    height: 500px;
   }
-  
-  .integrationButton {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    padding: 1rem 2rem;
-    background: #fff;
-    border: none;
-    border-radius: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    font-size: 1rem;
-    color: #333;
-    cursor: pointer;
-    transition: transform 0.3s;
+
+  .skillabText {
+    font-size: 8rem;
   }
-  
-  .integrationButton:hover {
-    transform: scale(1.1);
+}
+
+/* ===== TABLET SMALL ===== */
+@media (max-width: 992px) {
+  .mediatordiv {
+    flex-direction: column;
+    text-align: center;
+    gap: 2.5rem;
   }
-  
-  .icon {
-    font-size: 1.2rem;
-    color: #1a1a3d;
+
+  .mediatertext {
+    max-width: 100%;
   }
-  .app{
-    height: 3rem;
-    width: 3rem;
-  }
-  .app:hover{
-    transition: 0.5s ease-in-out;
-    transform: scale(1.1);    
-  }
-  .appdiv{
-    position: absolute;
+
+  .integrationGrid {
     height: auto;
-    width: 22rem;
-    gap: 1rem;
-    animation: wave 1s infinite ease-in;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+    padding-top: 3rem;
   }
 
-  @keyframes wave {
-    0%{
-      
-      transform: translateY(0%);
-     }
-     
-    50%{
-      transform: translateY(10%);
+  .appdiv {
+    position: relative;
+    justify-content: center;
+    animation: none;
+  }
 
-    }
+  .skillabText {
+    font-size: 6rem;
+    top: 30%;
+  }
+}
 
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  .chatbotContainer {
+    padding: 4rem 1.5rem;
   }
-  
-  /* Responsive Adjustments */
-  @media (min-width: 768px) {
-    
-    .chatbotTitle {
-      font-size: 3rem;
-    }
-    .skillabText {
-      font-size: 12rem;
-      top: 25%;
-    }
-    .integrationGrid {
-      height: 600px;
-    }
-    
+
+  .chatbotTitle {
+    font-size: 2rem;
   }
-  @media(max-width: 768px){
-    .chatbotContainer{
-      display: none;
-    }
+
+  .integrationLabel {
+    font-size: 0.8rem;
   }
-  
-  @media (min-width: 1024px) {
-    .chatbotContainer {
-      padding: 40px;
-    }
-    .skillabText {
-      font-size: 15rem;
-      top: 30%;
-    }
-    .integrationGrid {
-      height: 700px;
-    }
+
+  .placeholderText {
+    font-size: 1rem;
   }
+
+  .integrationGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .skillabText {
+    font-size: 3.5rem;
+    top: 40%;
+  }
+
+  .integrationButton {
+    width: 100%;
+  }
+}
+
+/* ===== SMALL MOBILE ===== */
+@media (max-width: 480px) {
+  .chatbotContainer {
+    padding: 3rem 1rem;
+  }
+
+  .chatbotTitle {
+    font-size: 1.7rem;
+  }
+
+  .skillabText {
+    font-size: 2.5rem;
+  }
+
+  .app {
+    width: 2.8rem;
+    height: 2.8rem;
+  }
+}

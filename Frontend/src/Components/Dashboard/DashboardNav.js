@@ -1,27 +1,29 @@
 import React from 'react';
 import styles from './dashboardNav.module.css';
 // import 'react-icons/fa'
-import { FaGift, FaSearch, FaUserFriends, FaGlobe, FaUsers, FaRobot,FaBook,FaChartBar,FaBan} from 'react-icons/fa';
-import { IoMdMail  } from 'react-icons/io';
+import { FaGift, FaSearch, FaUserFriends, FaGlobe, FaUsers, FaRobot, FaBook, FaChartBar, FaBan } from 'react-icons/fa';
+import { IoMdMail } from 'react-icons/io';
 import { MdSettings } from 'react-icons/md';
 // import { BiBookBookmark } from 'react-icons/bi';
 
 
 
-const DashboardNav = () => {
+const DashboardNav = ({ dashboardData }) => {
+  const { company } = dashboardData;
+
   return (
     <div className={styles['dashboardNav-container']}>
       <div className={styles['dashboardNav-header']}>
         <div className={styles['dashboardNav-companyIcon']}></div>
         <div>
-          <div className={styles['dashboardNav-Name']}>company name</div>
-          <div className={styles['dashboardNav-Domain']}>domain</div>
+          <div className={styles['dashboardNav-Name']}>{company.name}</div>
+          <div className={styles['dashboardNav-Domain']}>{company.domain}</div>
         </div>
       </div>
 
       <button className={styles['dashboardNav-getStarted']}>
         <FaGift />
-         Get Started <span className={styles['dashboardNav-notificationbadge']}>8</span>
+        Get Started <span className={styles['dashboardNav-notificationbadge']}>0</span>
       </button>
 
       <div className={styles['dashboardNav-section']}>
@@ -40,53 +42,53 @@ const DashboardNav = () => {
         <div className={styles['dashboardNav-newSubInbox']}>+ New sub-inbox</div>
 
         <div className={styles['dashboardNav-subtitle']}>Other Inboxes</div>
-        <div className={styles['dashboardNav-otherInbox']}><FaBan/>Spam</div>
+        <div className={styles['dashboardNav-otherInbox']}><FaBan />Spam</div>
         <div className={styles['dashboardNav-otherInbox']}>
           <FaGlobe />
-           Visitors
+          Visitors
         </div>
         <div className={styles['dashboardNav-otherInbox']}>
           <FaUsers />
-           Contacts
+          Contacts
         </div>
-        
+
         <div className={styles['dashboardNav-otherInbox']}>
-          <FaRobot  />
+          <FaRobot />
           AI Automations
         </div>
         <div className={styles['dashboardNav-otherInbox']}>
           <FaBook />
-        Knowledge Base
+          Knowledge Base
         </div>
         <div className={styles['dashboardNav-otherInbox']}>
           <FaChartBar />
-         Analytics
+          Analytics
         </div>
       </div>
       <hr></hr>
 
       <div className={styles['dashboardNav-bottom']}>
         <div className={styles['dashboardNav-option']}>
-            <FaSearch />
-             Search</div>
+          <FaSearch />
+          Search</div>
         <div className={styles['dashboardNav-option']}>
-            <FaUserFriends />
-             Plugins</div>
+          <FaUserFriends />
+          Plugins</div>
         <div className={styles['dashboardNav-option']}>
-            <MdSettings />
-             Settings</div>
+          <MdSettings />
+          Settings</div>
       </div>
 
       <div className={styles['dashboardNav-user']}>
         <div className={styles['dashboardNav-userIcon']}></div>
         <div>
-          <div className={styles['dashboardNav-userName']}>username</div>
-          <div className={styles['dashboardNav-userEmail']}>userEmail.gmail.com</div>
+          <div className={styles['dashboardNav-userName']}> {company.owner_user_id?.username}</div>
+          <div className={styles['dashboardNav-userEmail']}>{company.owner_user_id?.email}</div>
         </div>
       </div>
 
-  
- 
+
+
     </div>
   );
 };
