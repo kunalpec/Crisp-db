@@ -18,7 +18,7 @@ const Dashboard_MessageView = ({ messages, onSendMessage }) => {
   }, [messages]);
 
   // ===============================
-  // FOCUS INPUT
+  // AUTO FOCUS INPUT
   // ===============================
   useEffect(() => {
     if (inputRef.current) {
@@ -61,9 +61,9 @@ const Dashboard_MessageView = ({ messages, onSendMessage }) => {
       {/* Scrollable Message Area */}
       <div className={styles.messageArea} ref={messageAreaRef}>
         {messages.length > 0 ? (
-          messages.map((msg) => (
+          messages.map((msg, index) => (
             <div
-              key={msg._id || Math.random()}
+              key={msg._id || msg.msg_id || index}
               className={
                 msg.sender_type === "agent"
                   ? styles.outgoingMsg
@@ -80,7 +80,7 @@ const Dashboard_MessageView = ({ messages, onSendMessage }) => {
         )}
       </div>
 
-      {/* Input */}
+      {/* Input Section */}
       <div className={styles.replyBar}>
         <div className={styles.inputSection}>
           <input
@@ -91,10 +91,8 @@ const Dashboard_MessageView = ({ messages, onSendMessage }) => {
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={handleKeyDown}
           />
-          <button
-            onClick={handleSend}
-            disabled={!newMessage.trim()}
-          >
+
+          <button onClick={handleSend} disabled={!newMessage.trim()}>
             <IoMdSend />
           </button>
         </div>

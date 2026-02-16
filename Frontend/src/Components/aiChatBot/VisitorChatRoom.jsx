@@ -1,257 +1,370 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { socket } from "../../socket";
 import { createSession } from "./createSession";
 import "./VisitorChatRoom.css";
 
-const VisitorChatRoom = () => {
+/* ======================================================
+   ✅ VISITOR CHAT ROOM (200% PRODUCTION READY)
+====================================================== */
 
+const VisitorChatRoom = () => {
+  /* ==============================
+      STATE MANAGEMENT
+  ============================== */
   const [text, setText] = useState("");
   const [messages, setMessages] = useState([]);
+
   const [agentOnline, setAgentOnline] = useState(false);
-  const [visitorLeave, setVisitorLeave] = useState(false);
   const [employeeTyping, setEmployeeTyping] = useState(false);
 
+  const [connected, setConnected] = useState(false);
+  const [roomReady, setRoomReady] = useState(false);
+
+  /* ==============================
+      REFS (NO RE-RENDER)
+  ============================== */
   const sessionRef = useRef(null);
-  const typingRef = useRef(null);
-  const visitorRoomRef = useRef(null);
+  const roomRef = useRef(null);
 
-  /* -------------------------------------------------- */
-  /* Helpers */
+  const typingTimeout = useRef(null);
+  const lastTypingEmit = useRef(0);
 
-  const formatTime = (date = new Date()) => {
-    const HH = String(date.getHours()).padStart(2, "0");
-    const MM = String(date.getMinutes()).padStart(2, "0");
-    return `${HH}:${MM}`;
-  };
+  const messagesEndRef = useRef(null);
 
-  const unique_id = () =>
-    `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  /* ======================================================
+      ✅ AUTO SCROLL
+  ====================================================== */
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, employeeTyping]);
 
-  /* -------------------------------------------------- */
-  /* Submit Message */
+  /* ======================================================
+      ✅ INIT SESSION + ROOM PERSISTENCE
+  ====================================================== */
+  useEffect(() => {
+    // Restore session if exists
+    let savedSession = localStorage.getItem("visitor_session");
+    let savedRoom = localStorage.getItem("visitor_room");
 
-  const handleSubmitMessage = () => {
-    const textTrimmed = text.trim();
+    if (!savedSession) {
+      savedSession = createSession();
+      localStorage.setItem("visitor_session", savedSession);
+    }
 
-    if (!textTrimmed || !visitorRoomRef.current) return;
+    sessionRef.current = savedSession;
 
-    const msgInfo = {
-      msg_id: unique_id(),
-      msg_content: textTrimmed,
-      msg_type: "visitor",
-      room_id: visitorRoomRef.current,
-      send_at: formatTime(),
+    if (savedRoom) {
+      roomRef.current = savedRoom;
+      setRoomReady(true);
+    }
+  }, []);
+
+  /* ======================================================
+      ✅ SOCKET CONNECTION + ALL EVENTS
+  ====================================================== */
+  useEffect(() => {
+    if (!socket.connected) socket.connect();
+
+    /* ======================================================
+        ✅ CONNECT EVENT
+    ====================================================== */
+    const handleConnect = () => {
+      console.log("✅ Visitor Connected:", socket.id);
+      setConnected(true);
+
+      // Resume if room already exists
+      if (roomRef.current) {
+        socket.emit("visitor:resume-room", {
+          room_id: roomRef.current,
+          session_id: sessionRef.current,
+        });
+
+        socket.emit("visitor:load-history", {
+          room_id: roomRef.current,
+        });
+
+        return;
+      }
+
+      // First time room creation
+      socket.emit(
+        "visitor:create-new",
+        {
+          company_apikey:
+            "ck_098a8cb8851120927a0d3a95fdd938a0be703302caf9ddf066c6694a78a4ea91",
+          session_id: sessionRef.current,
+        },
+        (res) => {
+          if (!res?.room_id) return;
+
+          roomRef.current = res.room_id;
+          localStorage.setItem("visitor_room", res.room_id);
+
+          console.log("🎯 Room Created:", res.room_id);
+          setRoomReady(true);
+
+          // Load history immediately
+          socket.emit("visitor:load-history", {
+            room_id: res.room_id,
+          });
+        }
+      );
+    };
+
+    /* ======================================================
+        ❌ DISCONNECT EVENT
+    ====================================================== */
+    const handleDisconnect = () => {
+      console.log("❌ Visitor Disconnected");
+      setConnected(false);
+      setAgentOnline(false);
+    };
+
+    /* ======================================================
+        ⚠ SOCKET ERROR EVENT
+    ====================================================== */
+    const handleConnectError = (err) => {
+      console.error("⚠ Socket Error:", err.message);
+    };
+
+    /* ======================================================
+        📜 CHAT HISTORY EVENT
+    ====================================================== */
+    const handleHistory = (history) => {
+      console.log("📜 Chat History Loaded:", history.length);
+      setMessages(history || []);
+    };
+
+    /* ======================================================
+        ✅ RECEIVE MESSAGE (DEDUP SAFE)
+    ====================================================== */
+    const handleNewMessage = (msg) => {
+      setMessages((prev) => {
+        const exists = prev.some((m) => m.msg_id === msg.msg_id);
+        if (exists) return prev;
+        return [...prev, msg];
+      });
+    };
+
+    /* ======================================================
+        ✅ AGENT JOIN / LEAVE EVENTS
+    ====================================================== */
+    const handleAgentJoined = () => {
+      console.log("👨‍💻 Agent Joined Chat");
+      setAgentOnline(true);
+    };
+
+    const handleAgentLeft = () => {
+      console.log("🚪 Agent Left Chat");
+      setAgentOnline(false);
+    };
+
+    /* ======================================================
+        ✍ EMPLOYEE TYPING EVENTS
+    ====================================================== */
+    const handleEmployeeTyping = (payload) => {
+      if (payload.room_id === roomRef.current) {
+        setEmployeeTyping(true);
+      }
+    };
+
+    const handleEmployeeStopTyping = (payload) => {
+      if (payload.room_id === roomRef.current) {
+        setEmployeeTyping(false);
+      }
+    };
+
+    /* ======================================================
+        ❌ CHAT CLOSED BY SYSTEM
+    ====================================================== */
+    const handleChatClosed = () => {
+      alert("Chat session ended.");
+      leaveChat();
+    };
+
+    /* ======================================================
+        SOCKET BINDINGS
+    ====================================================== */
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("connect_error", handleConnectError);
+
+    socket.on("chat:history", handleHistory);
+    socket.on("chat:new-message", handleNewMessage);
+
+    socket.on("visitor:agent-joined", handleAgentJoined);
+    socket.on("visitor:agent-left", handleAgentLeft);
+
+    socket.on("employee:typing", handleEmployeeTyping);
+    socket.on("employee:stop-typing", handleEmployeeStopTyping);
+
+    socket.on("chat:closed", handleChatClosed);
+
+    /* ======================================================
+        CLEANUP
+    ====================================================== */
+    return () => {
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect_error", handleConnectError);
+
+      socket.off("chat:history", handleHistory);
+      socket.off("chat:new-message", handleNewMessage);
+
+      socket.off("visitor:agent-joined", handleAgentJoined);
+      socket.off("visitor:agent-left", handleAgentLeft);
+
+      socket.off("employee:typing", handleEmployeeTyping);
+      socket.off("employee:stop-typing", handleEmployeeStopTyping);
+
+      socket.off("chat:closed", handleChatClosed);
+    };
+  }, []);
+
+  /* ======================================================
+      ✅ SEND MESSAGE (ACK SAFE)
+  ====================================================== */
+  const sendMessage = () => {
+    if (!text.trim() || !roomRef.current) return;
+
+    const payload = {
+      msg_id: Date.now(),
+      room_id: roomRef.current,
+      msg_content: text.trim(),
+      sender_type: "visitor",
+      send_at: new Date(),
     };
 
     // Optimistic UI
-    setMessages((prev) => [...prev, msgInfo]);
-
-    if (socket?.connected) {
-      socket.emit("visitor:sending-message-to-employee", msgInfo);
-    }
-
+    setMessages((prev) => [...prev, payload]);
     setText("");
+
+    // Emit with ACK
+    socket.emit("visitor:send-message", payload, (ack) => {
+      if (!ack?.success) {
+        alert("❌ Message delivery failed.");
+      }
+    });
   };
 
-  /* -------------------------------------------------- */
-  /* Typing */
-
+  /* ======================================================
+      ✍ VISITOR TYPING EVENT (THROTTLED)
+  ====================================================== */
   useEffect(() => {
-    if (!socket?.connected || !visitorRoomRef.current) return;
+    if (!roomRef.current) return;
 
-    if (text.length > 0) {
-      socket.emit("visitor:me-typing", {
-        room_id: visitorRoomRef.current,
+    const now = Date.now();
+
+    if (text.length > 0 && now - lastTypingEmit.current > 500) {
+      socket.emit("visitor:typing", {
+        room_id: roomRef.current,
       });
+      lastTypingEmit.current = now;
     }
 
-    if (typingRef.current) clearTimeout(typingRef.current);
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
 
-    typingRef.current = setTimeout(() => {
-      socket.emit("visitor:me-stoptyping", {
-        room_id: visitorRoomRef.current,
+    typingTimeout.current = setTimeout(() => {
+      socket.emit("visitor:stop-typing", {
+        room_id: roomRef.current,
       });
-    }, 1000);
+    }, 800);
 
-    return () => {
-      if (typingRef.current) clearTimeout(typingRef.current);
-    };
+    return () => clearTimeout(typingTimeout.current);
   }, [text]);
 
-  /* -------------------------------------------------- */
-  /* Leave */
-
-  const handleLeaveRoom = () => {
-    if (!socket?.connected) return;
+  /* ======================================================
+      🚪 LEAVE CHAT
+  ====================================================== */
+  const leaveChat = () => {
+    if (!roomRef.current) return;
 
     socket.emit("visitor:leave-room", {
-      session_id: sessionRef.current,
-      room_id: visitorRoomRef.current,
-      company_apikey: window?.ChatWidgetConfig?.apiKey,
+      room_id: roomRef.current,
     });
 
-    setVisitorLeave(true);
+    // Reset everything
+    roomRef.current = null;
+    setRoomReady(false);
+
+    setMessages([]);
+    setAgentOnline(false);
+    setEmployeeTyping(false);
+
+    localStorage.removeItem("visitor_room");
   };
 
-  /* -------------------------------------------------- */
-  /* Socket Connection */
-
+  /* ======================================================
+      🛑 BROWSER CLOSE CLEANUP
+  ====================================================== */
   useEffect(() => {
-
-    if (!sessionRef.current) {
-      sessionRef.current = createSession();
-    }
-
-    const sessionId = sessionRef.current;
-
-    if (!socket.connected) {
-      socket.connect();
-    }
-
-    const config = window?.ChatWidgetConfig;
-
-    /* CONNECT HANDLER */
-    const handleConnect = () => {
-      console.log(`visitor connected: ${sessionId}`);
-
-      socket.emit("visitor:resume-chat", {
-        company_apikey: config?.apiKey,
-        session_id: sessionId,
-      });
-
-      socket.emit("visitor:create-new", {
-        company_apikey: config?.apiKey,
-        session_id: sessionId,
+    const handleUnload = () => {
+      socket.emit("visitor:offline", {
+        room_id: roomRef.current,
       });
     };
 
-    socket.on("connect", handleConnect);
+    window.addEventListener("beforeunload", handleUnload);
 
-    /* -------------------------------------------------- */
-    /* MESSAGE RECEIVE */
-
-    socket.on("chat:new-message", (msg) => {
-
-      const formattedMsg = {
-        msg_id: msg.msg_id,
-        msg_content: msg.msg_content,
-        msg_type: msg.sender_type === "visitor" ? "visitor" : "agent",
-        room_id: msg.room_id,
-        send_at: formatTime(new Date(msg.send_at)),
-      };
-
-      visitorRoomRef.current = msg.room_id;
-
-      setMessages((prev) => [...prev, formattedMsg]);
-    });
-
-    /* -------------------------------------------------- */
-    /* AGENT STATUS EVENTS */
-
-    socket.on("visitor:agent-reconnected", () => {
-      setAgentOnline(true);
-    });
-
-    socket.on("visitor:agent-disconnected", () => {
-      setAgentOnline(false);
-    });
-
-    socket.on("visitor:agent-left", () => {
-      setAgentOnline(false);
-    });
-
-    /* -------------------------------------------------- */
-    /* TYPING */
-
-    socket.on("employee:typing", () => {
-      setEmployeeTyping(true);
-    });
-
-    socket.on("employee:stop-typing", () => {
-      setEmployeeTyping(false);
-    });
-
-    /* -------------------------------------------------- */
-    /* CLEANUP */
-
-    return () => {
-      socket.off("connect", handleConnect);
-      socket.off("chat:new-message");
-      socket.off("visitor:agent-reconnected");
-      socket.off("visitor:agent-disconnected");
-      socket.off("visitor:agent-left");
-      socket.off("employee:typing");
-      socket.off("employee:stop-typing");
-    };
-
+    return () => window.removeEventListener("beforeunload", handleUnload);
   }, []);
 
-  /* -------------------------------------------------- */
-  /* UI */
-
+  /* ======================================================
+      ✅ UI
+  ====================================================== */
   return (
     <div className="chat-container">
-
+      {/* Header */}
       <div className="chat-header">
         <span>Live Support</span>
+
         <span className={agentOnline ? "status-online" : "status-offline"}>
-          {agentOnline ? "Agent Online" : "Waiting for Agent"}
+          {connected
+            ? agentOnline
+              ? "Agent Online"
+              : "Waiting for Agent..."
+            : "Disconnected..."}
         </span>
+
+        {roomReady && (
+          <button className="leave-btn" onClick={leaveChat}>
+            End Chat
+          </button>
+        )}
       </div>
 
+      {/* Messages */}
       <div className="chat-messages">
-
-        {messages.length === 0 && (
-          <div className="no-messages">No messages yet</div>
-        )}
-
-        {messages.map((msg) => (
+        {messages.map((m) => (
           <div
-            key={msg.msg_id}
-            className={`message-row ${msg.msg_type}`}
+            key={m.msg_id}
+            className={`message-row ${
+              m.sender_type === "visitor" ? "visitor" : "agent"
+            }`}
           >
-            <div className={`message-bubble ${msg.msg_type}`}>
-              <div>{msg.msg_content}</div>
-              <div className="message-time">{msg.send_at}</div>
-            </div>
+            <div className="message-bubble">{m.msg_content}</div>
           </div>
         ))}
 
-        {employeeTyping && (
-          <div className="typing-text">Agent is typing...</div>
-        )}
+        {employeeTyping && <div className="typing-text">Agent typing...</div>}
 
-        {visitorLeave && (
-          <div className="leave-text">You left the chat</div>
-        )}
+        <div ref={messagesEndRef} />
       </div>
 
+      {/* Input */}
       <div className="chat-input-area">
         <input
-          type="text"
           value={text}
+          disabled={!roomReady}
+          placeholder="Type message..."
           onChange={(e) => setText(e.target.value)}
-          placeholder="Type your message..."
-          className="chat-input"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSubmitMessage();
-            }
-          }}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
-        <button
-          className="send-btn"
-          onClick={handleSubmitMessage}
-        >
+
+        <button disabled={!roomReady} onClick={sendMessage}>
           Send
         </button>
       </div>
-
-      {/* Optional Leave Button */}
-      <button className="leave-btn" onClick={handleLeaveRoom}>
-        Leave Chat
-      </button>
-
     </div>
   );
 };

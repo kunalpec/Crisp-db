@@ -1,61 +1,63 @@
 import express from "express";
+
 import {
-  getCompanyChatRooms,
-  getRoomMessages,
+  getWaitingVisitors,
+  getActiveChatRoom,
 } from "../controllers/ChatNew/chatRoom.controller.js";
 
 import {
-  sendMessageHTTP,
+  getChatMessages,
 } from "../controllers/ChatNew/message.controller.js";
 
 import { authenticate } from "../middlewares/Auth.middleware.js";
 import { authorize } from "../middlewares/role.middleware.js";
+
 const router = express.Router();
 
 /**
  * ======================================================
- * All routes below require authentication
+ * ✅ AUTH REQUIRED FOR ALL CHAT ROUTES
  * ======================================================
  */
 router.use(authenticate);
 
 /**
  * ======================================================
- * GET ALL ACTIVE CHAT ROOMS
- * GET /api/company/chatrooms
+ * ✅ 1. GET WAITING VISITORS (EMPLOYEE DASHBOARD)
+ * Route: GET /api/chat/waiting
  * Access: company_admin, company_agent
  * ======================================================
  */
 router.get(
-  "/chatrooms",
+  "/waiting",
   authorize("company_admin", "company_agent"),
-  getCompanyChatRooms
+  getWaitingVisitors
 );
 
 /**
  * ======================================================
- * GET ROOM MESSAGES
- * GET /api/company/chatrooms/:roomId/messages
+ * ✅ 2. GET ACTIVE CHAT ROOM DETAILS
+ * Route: GET /api/chat/rooms/:room_id
  * Access: company_admin, company_agent
  * ======================================================
  */
 router.get(
-  "/chatrooms/:roomId/messages",
+  "/rooms/:room_id",
   authorize("company_admin", "company_agent"),
-  getRoomMessages
+  getActiveChatRoom
 );
 
 /**
  * ======================================================
- * SEND MESSAGE (HTTP fallback)
- * POST /api/company/chatrooms/:roomId/message
+ * ✅ 3. GET CHAT MESSAGES (CHAT HISTORY)
+ * Route: GET /api/chat/rooms/:room_id/messages
  * Access: company_admin, company_agent
  * ======================================================
  */
-router.post(
-  "/chatrooms/:roomId/message",
+router.get(
+  "/rooms/:room_id/messages",
   authorize("company_admin", "company_agent"),
-  sendMessageHTTP
+  getChatMessages
 );
 
 export default router;

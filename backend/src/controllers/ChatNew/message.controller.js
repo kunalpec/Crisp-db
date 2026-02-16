@@ -1,36 +1,34 @@
-import { Message } from "../../models/Message.model.js";
 import { ChatRoom } from "../../models/ChatRoom.model.js";
-import AsyncHandler from "../../utils/AsyncHandler.util.js";
-import ApiResponse from "../../utils/ApiResponse.util.js";
-import ApiError from "../../utils/ApiError.util.js";
+import { Message } from "../../models/Message.model.js";
 
-/**
- * ======================================================
- * MANUAL MESSAGE SEND (Fallback HTTP)
- * POST /api/company/chatrooms/:roomId/message
- * ======================================================
- */
-export const sendMessageHTTP = AsyncHandler(async (req, res) => {
-  const { roomId } = req.params;
-  const { content } = req.body;
+/* ===================================================
+   ✅ LOAD CHAT HISTORY
+=================================================== */
+export const getChatMessages = async (req, res) => {
+  try {
+    const { room_id } = req.params;
 
-  if (!content?.trim())
-    throw new ApiError(400, "Message content required");
+    const chatRoom = await ChatRoom.findOne({ room_id });
 
-  const room = await ChatRoom.findOne({ room_id: roomId });
-  if (!room) throw new ApiError(404, "Room not found");
+    if (!chatRoom) {
+      return res.status(404).json({
+        success: false,
+        message: "ChatRoom not found",
+      });
+    }
 
-  const message = await Message.create({
-    conversation_id: room._id,
-    sender_type: "agent",
-    sender_id: req.user._id,
-    content,
-  });
+    const messages = await Message.find({
+      conversation_id: chatRoom._id,
+    }).sort({ createdAt: 1 });
 
-  room.last_message_at = new Date();
-  await room.save();
-
-  return res
-    .status(201)
-    .json(new ApiResponse(201, message, "Message sent"));
-});
+    return res.json({
+      success: true,
+      messages,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};

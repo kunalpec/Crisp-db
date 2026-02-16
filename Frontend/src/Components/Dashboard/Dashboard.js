@@ -1,28 +1,26 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import MainDashboard from "./MainDashboard";
-import { socket } from "../../socket.js"; // ✅ ADD THIS
-import { Socket } from "socket.io-client";
+import { socket } from "../../socket";
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ==============================
+  // ============================
   // FETCH DASHBOARD DATA
-  // ==============================
+  // ============================
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
         const res = await axios.get(
           "http://localhost:8000/api/company/dashboard",
-          
           { withCredentials: true }
         );
 
         setDashboardData(res.data.data);
       } catch (err) {
-        console.log(err);
+        console.log("Dashboard Error:", err);
       } finally {
         setLoading(false);
       }
@@ -31,36 +29,35 @@ const Dashboard = () => {
     fetchDashboard();
   }, []);
 
-  // ==============================
-  // SOCKET CONNECT AFTER AUTH
-  // ==============================
+  // ============================
+  // SOCKET CONNECT ONCE
+  // ============================
   useEffect(() => {
     if (!dashboardData) return;
 
-    // Connect only once
-    socket.connect();
+    if (!socket.connected) {
+      socket.connect();
+      console.log("🟢 Socket Connecting...");
+    }
 
-    console.log("🟢 Socket connecting...");
-
-    socket.on("connect", () => {
+    const onConnect = () =>
       console.log("✅ Socket Connected:", socket.id);
-    });
 
-    socket.on("disconnect", () => {
+    const onDisconnect = () =>
       console.log("🔴 Socket Disconnected");
-    });
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
 
     return () => {
-      socket.disconnect();
-      socket.off("connect");
-      socket.off("disconnect");
-      console.log("Socket cleaned up");
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
     };
   }, [dashboardData]);
 
-  // ==============================
+  // ============================
   // UI STATES
-  // ==============================
+  // ============================
   if (loading) return <div>Loading...</div>;
   if (!dashboardData) return <div>Unauthorized</div>;
 

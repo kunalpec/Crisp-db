@@ -1,127 +1,168 @@
-import { Server } from 'socket.io';
-import { SocketAuth } from '../middlewares/SocketAuth.middleware.js';
+import { Server } from "socket.io";
+import { SocketAuth } from "../middlewares/SocketAuth.middleware.js";
 
-import {
-  handleEmployeeConnect,
-  handleEmployeeDisconnect,
-  handleEmployeeLeaveRoom,
-  handleEmployeeJoinVisitorRoom,
-  handleSendWaitingToEmployee,
-} from './handlers/companyHandler.js';
-
+/* ================================
+   VISITOR HANDLERS
+================================ */
 import {
   createNewVisitor,
-  resumeVisitorChat,
-  handleVisitorDisconnect,
-  handleVisitorLeave,
-} from './handlers/visitorHandler.js';
+  resumeVisitorRoom,
+  visitorLoadHistory,
+  visitorTyping,
+  visitorStopTyping,
+  visitorLeaveRoom,
+  visitorOffline,
+} from "./handlers/visitorHandler.js";
 
-import { handleSendMessage } from './handlers/messageHandler.js';
+/* ================================
+   EMPLOYEE HANDLERS
+================================ */
+import {
+  handleEmployeeConnect,
+  employeeReady,
+  employeeJoinRoom,
+  employeeResumeRoom,
+  employeeLoadHistory,
+  employeeTyping,
+  employeeStopTyping,
+  employeeLeaveRoom,
+  employeeOffline,
+} from "./handlers/companyHandler.js";
 
-let io;
+/* ================================
+   MESSAGE HANDLER
+================================ */
+import { handleSendMessage } from "./handlers/messageHandler.js";
 
-const initSocket = (server) => {
-  io = new Server(server, {
+/* ======================================================
+   ✅ INIT SOCKET SERVER
+====================================================== */
+export const initSocket = (server) => {
+  const io = new Server(server, {
     cors: {
-      origin: '*',
-      methods: ['GET', 'POST'],
+      origin: "*",
       credentials: true,
     },
   });
 
-  console.log('Socket.io initialized');
-
+  /* ======================================================
+     ✅ SOCKET AUTH
+  ====================================================== */
   io.use(SocketAuth);
 
-  io.on('connection', async (socket) => {
-    console.log('Socket connected:', socket.id, socket.role);
+  /* ======================================================
+     ✅ MAIN CONNECTION
+  ====================================================== */
+  io.on("connection", (socket) => {
+    console.log("✅ Connected:", socket.id, "| Role:", socket.role);
 
-    /* ===================================================
-       VISITOR SOCKET
-    =================================================== */
+    /* ======================================================
+       ================= VISITOR SOCKET =====================
+    ====================================================== */
+    if (socket.role === "visitor") {
+      console.log("👤 Visitor Connected");
 
-    if (socket.role === 'visitor') {
-      socket.on('visitor:create-new', async (payload) => {
-        await createNewVisitor(io, socket, payload);
-      });
+      socket.on("visitor:create-new", (payload, cb) =>{
+        createNewVisitor(io, socket, payload, cb)
+        console.log("visitor ban rha ha");}
+      );
 
-      socket.on('visitor:resume-chat', async (payload) => {
-        await resumeVisitorChat(io, socket, payload);
-      });
+      socket.on("visitor:resume-room", (payload) =>
+        resumeVisitorRoom(io, socket, payload)
+      );
 
-      socket.on('visitor:sending-message-to-employee', async (payload) => {
-        await handleSendMessage(io, socket, payload);
-      });
+      socket.on("visitor:load-history", (payload) =>
+        visitorLoadHistory(io, socket, payload)
+      );
 
-      socket.on('visitor:me-typing', ({ room_id }) => {
-        socket.to(room_id).emit('visitor:typing');
-      });
+      socket.on("visitor:send-message", (payload, cb) =>
+        handleSendMessage(io, socket, payload, cb)
+      );
 
-      socket.on('visitor:me-stoptyping', ({ room_id }) => {
-        socket.to(room_id).emit('visitor:stop-typing');
-      });
+      /* ✅ FIXED TYPING EVENTS */
+      socket.on("visitor:me-typing", (payload) =>
+        visitorTyping(io, socket, payload)
+      );
 
-      socket.on('visitor:leave-room', async (payload) => {
-        await handleVisitorLeave(io, socket, payload);
-      });
-    } else if (
+      socket.on("visitor:me-stoptyping", (payload) =>
+        visitorStopTyping(io, socket, payload)
+      );
 
-    /* ===================================================
-       EMPLOYEE SOCKET
-    =================================================== */
-      socket.role === 'company_agent' ||
-      socket.role === 'company_admin' ||
-      socket.role === 'super_admin'
-    ) {
-      /* 🔥 CONNECT / RECONNECT */
-      await handleEmployeeConnect(io, socket);
-
-      /* 🔥 SEND WAITING LIST ON CONNECT */
-      await handleSendWaitingToEmployee(io, socket);
-
-      /* 🔥 JOIN VISITOR ROOM (ASSIGN) */
-      socket.on('employee:join-room', async (payload) => {
-        await handleEmployeeJoinVisitorRoom(io, socket, payload);
-      });
-
-      /* 🔥 SEND MESSAGE */
-      socket.on('employee:sending-message-to-visitor', async (payload) => {
-        await handleSendMessage(io, socket, payload);
-      });
-
-      /* 🔥 TYPING */
-      socket.on('employee:me-typing', ({ room_id }) => {
-        socket.to(room_id).emit('employee:typing');
-      });
-
-      socket.on('employee:me-stoptyping', ({ room_id }) => {
-        socket.to(room_id).emit('employee:stop-typing');
-      });
-
-      /* 🔥 MANUAL LEAVE */
-      socket.on('employee:leave-room', async (payload) => {
-        await handleEmployeeLeaveRoom(io, socket, payload);
-      });
+      socket.on("visitor:leave-room", (payload) =>
+        visitorLeaveRoom(io, socket, payload)
+      );
     }
 
-    /* ===================================================
-       GLOBAL DISCONNECT
-    =================================================== */
+    /* ======================================================
+       ================= EMPLOYEE SOCKET =====================
+    ====================================================== */
+    else if (socket.role === "employee") {
+      console.log("👨‍💻 Employee Connected");
 
-    socket.on('disconnect', async () => {
-      console.log('Socket disconnected:', socket.id,socket.role);
+      handleEmployeeConnect(io, socket);
 
-      if (socket.role === 'visitor') {
-        await handleVisitorDisconnect(io, socket);
-      } else if (
-        socket.role === 'company_agent' ||
-        socket.role === 'company_admin' ||
-        socket.role === 'super_admin'
-      ) {
-        await handleEmployeeDisconnect(io, socket);
+      socket.on("employee:ready", () =>
+        employeeReady(io, socket)
+      );
+
+      socket.on("employee:join-room", (payload) =>
+        employeeJoinRoom(io, socket, payload)
+      );
+
+      socket.on("employee:resume-room", (payload) =>
+        employeeResumeRoom(io, socket, payload)
+      );
+
+      socket.on("employee:load-history", (payload) =>
+        employeeLoadHistory(io, socket, payload)
+      );
+
+      socket.on("employee:send-message", (payload, cb) =>
+        handleSendMessage(io, socket, payload, cb)
+      );
+
+      socket.on("employee:typing", (payload) =>
+        employeeTyping(io, socket, payload)
+      );
+
+      socket.on("employee:stop-typing", (payload) =>
+        employeeStopTyping(io, socket, payload)
+      );
+
+      socket.on("employee:leave-room", (payload) =>
+        employeeLeaveRoom(io, socket, payload)
+      );
+    }
+
+    /* ======================================================
+       ❌ UNKNOWN ROLE SAFETY
+    ====================================================== */
+    else {
+      console.log("❌ Unknown socket role:", socket.role);
+      socket.disconnect();
+    }
+
+    /* ======================================================
+       ✅ GLOBAL DISCONNECT HANDLER (MOST IMPORTANT)
+    ====================================================== */
+    socket.on("disconnect", async () => {
+      console.log("❌ Socket Disconnected:", socket.id);
+
+      try {
+        if (socket.role === "visitor") {
+          await visitorOffline(io, socket, {
+            room_id: socket.room_id,
+          });
+        }
+
+        if (socket.role === "employee") {
+          await employeeOffline(io, socket);
+        }
+      } catch (err) {
+        console.log("disconnect cleanup error:", err.message);
       }
     });
   });
-};
 
-export { initSocket };
+  return io;
+};

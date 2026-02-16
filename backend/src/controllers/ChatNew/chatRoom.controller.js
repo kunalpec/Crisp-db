@@ -1,53 +1,57 @@
 import { ChatRoom } from "../../models/ChatRoom.model.js";
-import { Message } from "../../models/Message.model.js";
-import AsyncHandler from "../../utils/AsyncHandler.util.js";
-import ApiResponse from "../../utils/ApiResponse.util.js";
-import ApiError from "../../utils/ApiError.util.js";
 
-/**
- * ======================================================
- * GET COMPANY CHAT ROOMS (Dashboard List)
- * GET /api/company/chatrooms
- * ======================================================
- */
-export const getCompanyChatRooms = AsyncHandler(async (req, res) => {
-  const companyId = req.user.company_id;
+/* ===================================================
+   ✅ GET WAITING VISITORS (EMPLOYEE DASHBOARD)
+=================================================== */
+export const getWaitingVisitors = async (req, res) => {
+  try {
+    const company_id = req.user.company_id;
 
-  const rooms = await ChatRoom.find({
-    company_id: companyId,
-    status: { $ne: "closed" },
-  })
-    .populate("assigned_agent_id", "username email is_online")
-    .sort({ last_message_at: -1 })
-    .lean();
+    const waitingRooms = await ChatRoom.find({
+      company_id,
+      status: "waiting",
+    }).select("session_id room_id createdAt");
 
-  return res.status(200).json(
-    new ApiResponse(200, rooms, "Chat rooms fetched successfully")
-  );
-});
+    return res.json({
+      success: true,
+      visitors: waitingRooms,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
 
-/**
- * ======================================================
- * GET ROOM MESSAGES
- * GET /api/company/chatrooms/:roomId/messages
- * ======================================================
- */
-export const getRoomMessages = AsyncHandler(async (req, res) => {
-  const { roomId } = req.params;
-  const companyId = req.user.company_id;
+/* ===================================================
+   ✅ GET ACTIVE CHAT ROOM (EMPLOYEE)
+=================================================== */
+export const getActiveChatRoom = async (req, res) => {
+  try {
+    const { room_id } = req.params;
+    const company_id = req.user.company_id;
 
-  const room = await ChatRoom.findOne({
-    room_id: roomId,
-    company_id: companyId,
-  });
+    const room = await ChatRoom.findOne({
+      company_id,
+      room_id,
+    });
 
-  if (!room) throw new ApiError(404, "Room not found");
+    if (!room) {
+      return res.status(404).json({
+        success: false,
+        message: "Room not found",
+      });
+    }
 
-  const messages = await Message.find({
-    conversation_id: room._id,
-  }).sort({ createdAt: 1 });
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, messages, "Messages fetched"));
-});
+    return res.json({
+      success: true,
+      room,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};

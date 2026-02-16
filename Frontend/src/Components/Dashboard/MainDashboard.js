@@ -1,44 +1,39 @@
 import React, { useState, useEffect } from "react";
 import DashboardNav from "./DashboardNav";
-import styles from "./main-dashboard.module.css";
 import DashboardChats from "./DashboardChats";
 import Dashboard_MessageView from "./Dashboard_MessageView";
 import axios from "axios";
 import { socket } from "../../socket";
+import styles from "./main-dashboard.module.css";
 
 const MainDashboard = ({ dashboardData }) => {
-
-  // ===============================
-  // STATES
-  // ===============================
   const [chatRooms, setChatRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [messages, setMessages] = useState([]);
 
-  // ===============================
-  // FETCH COMPANY CHAT ROOMS
-  // ===============================
+  // ============================
+  // FETCH ROOMS
+  // ============================
   useEffect(() => {
     const fetchRooms = async () => {
       try {
         const res = await axios.get(
           "http://localhost:8000/api/company/chatrooms",
-
-          { withCredentials:true }
+          { withCredentials: true }
         );
 
         setChatRooms(res.data.data);
       } catch (err) {
-        console.error("Room fetch error:", err);
+        console.error("Room Fetch Error:", err);
       }
     };
 
     fetchRooms();
   }, []);
 
-  // ===============================
+  // ============================
   // LOAD ROOM MESSAGES
-  // ===============================
+  // ============================
   const loadMessages = async (roomId) => {
     try {
       const res = await axios.get(
@@ -49,31 +44,30 @@ const MainDashboard = ({ dashboardData }) => {
       setMessages(res.data.data);
       setSelectedRoom(roomId);
     } catch (err) {
-      console.error("Message fetch error:", err);
+      console.error("Message Fetch Error:", err);
     }
   };
 
-  // ===============================
-  // REALTIME MESSAGE LISTENER
-  // ===============================
-useEffect(() => {
-  const handler = (data) => {
-    if (data.roomId === selectedRoom) {
-      setMessages((prev) => [...prev, data]);
-    }
-  };
+  // ============================
+  // REALTIME SOCKET MESSAGE LISTENER
+  // ============================
+  useEffect(() => {
+    const onMessageReceived = (data) => {
+      if (data.roomId === selectedRoom) {
+        setMessages((prev) => [...prev, data]);
+      }
+    };
 
-  socket.on("message:received", handler);
+    socket.on("message:received", onMessageReceived);
 
-  return () => {
-    socket.off("message:received", handler);
-  };
-}, [selectedRoom]);
+    return () => {
+      socket.off("message:received", onMessageReceived);
+    };
+  }, [selectedRoom]);
 
-
-  // ===============================
-  // SEND MESSAGE (SOCKET)
-  // ===============================
+  // ============================
+  // SEND MESSAGE
+  // ============================
   const handleSendMessage = (text) => {
     if (!selectedRoom) return;
 

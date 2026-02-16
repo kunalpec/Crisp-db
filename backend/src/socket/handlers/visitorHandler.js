@@ -1,63 +1,71 @@
-import crypto from "crypto";
-import { ApiKey } from "../../models/ApiKey.model.js";
 import { ChatRoom } from "../../models/ChatRoom.model.js";
+import { Message } from "../../models/Message.model.js";
+import { ApiKey } from "../../models/ApiKey.model.js";
+import { compareApiKey } from "../../utils/apiKey.util.js";
 
 /* ===================================================
-   HELPER → Validate API Key & Get company_id
+   ✅ Validate Company API Key
 =================================================== */
+export const validateCompany = async (company_apikey) => {
+  try {
+    if (!company_apikey) return null;
 
-const validateCompany = async (company_apikey) => {
-  const apiKeyHash = crypto
-    .createHash("sha256")
-    .update(company_apikey)
-    .digest("hex");
+    // 1. Find all active keys
+    const activeKeys = await ApiKey.find({
+      is_active: true,
+    });
 
-  const apiKeyDoc = await ApiKey.findOne({
-    api_key_hash: apiKeyHash,
-    is_active: true,
-  });
+    if (!activeKeys.length) return null;
 
-  if (!apiKeyDoc) return null;
-  if (apiKeyDoc.isExpired()) return null;
+    // 2. Compare raw key with bcrypt hashes
+    for (let keyDoc of activeKeys) {
+      const isMatch = await compareApiKey(
+        company_apikey,
+        keyDoc.api_key_hash
+      );
 
-  apiKeyDoc.last_used_at = new Date();
-  await apiKeyDoc.save();
+      if (isMatch) {
+        // Check expiry
+        if (keyDoc.isExpired()) return null;
 
-  return apiKeyDoc.company_id;
+        // Update last used
+        keyDoc.last_used_at = new Date();
+        await keyDoc.save();
+
+        // Return company id
+        return keyDoc.company_id;
+      }
+    }
+
+    return null;
+  } catch (err) {
+    console.error("validateCompany error:", err.message);
+    return null;
+  }
 };
 
 /* ===================================================
-   CREATE NEW VISITOR
+   ✅ VISITOR CREATE ROOM
 =================================================== */
-
-export const createNewVisitor = async (io, socket, payload) => {
+export const createNewVisitor = async (io, socket, payload, callback) => {
   try {
     const { company_apikey, session_id } = payload;
     if (!company_apikey || !session_id) return;
 
     const company_id = await validateCompany(company_apikey);
+    console.log("comapny id", company_id);
     if (!company_id) return;
 
     const room_id = `${company_id}_${session_id}`;
 
-    let chatRoom = await ChatRoom.findOne({
+    let room = await ChatRoom.findOne({
       company_id,
       session_id,
-      status: { $in: ["waiting", "active", "disconnected"] },
+      status: { $ne: "closed" },
     });
 
-    if (chatRoom) {
-      chatRoom.is_visitor_online = true;
-      chatRoom.visitor_socket_id = socket.id;
-
-      // ✅ FIX: Do NOT override active chats
-      if (chatRoom.status === "disconnected") {
-        chatRoom.status = "waiting";
-      }
-
-      await chatRoom.save();
-    } else {
-      chatRoom = await ChatRoom.create({
+    if (!room) {
+      room = await ChatRoom.create({
         company_id,
         session_id,
         room_id,
@@ -65,193 +73,215 @@ export const createNewVisitor = async (io, socket, payload) => {
         is_visitor_online: true,
         status: "waiting",
       });
+    } else {
+      room.visitor_socket_id = socket.id;
+      room.is_visitor_online = true;
+      room.status = "waiting";
+      await room.save();
     }
 
+    // Join socket room
     socket.join(room_id);
 
-    io.to(`company_${company_id}`).emit(
-      "employee:new-waiting-visitor",
-      {
-        session_id,
-        room_id,
-        chatRoomId: chatRoom._id,
-      }
-    );
+    // Notify Employees
+    io.to(`company_${company_id}`).emit("employee:new-waiting-visitor", {
+      room_id,
+      session_id,
+    });
 
+    callback?.({
+      room_id,
+      chatRoomId: room._id,
+    });
+
+    console.log("✅ Visitor Room Created:", room_id);
   } catch (err) {
     console.error("createNewVisitor error:", err.message);
   }
 };
 
 /* ===================================================
-   RESUME VISITOR CHAT  ✅ FIXED SECURITY
+   ✅ RESUME VISITOR ROOM
 =================================================== */
-
-export const resumeVisitorChat = async (io, socket, payload) => {
+export const resumeVisitorRoom = async (io, socket, payload) => {
   try {
-    const { company_apikey, session_id } = payload;
-    if (!company_apikey || !session_id) return;
-
-    const company_id = await validateCompany(company_apikey);
-    if (!company_id) return;
-
-    const chatRoom = await ChatRoom.findOne({
-      company_id, // ✅ FIXED
+    const { room_id, session_id } = payload;
+    if (!room_id || !session_id) return;
+   
+    const room = await ChatRoom.findOne({
+      room_id,
       session_id,
-      status: { $in: ["waiting", "active", "disconnected"] },
+      status: { $ne: "closed" },
     });
 
-    if (!chatRoom) return;
+    if (!room) return;
 
-    chatRoom.visitor_socket_id = socket.id;
-    chatRoom.is_visitor_online = true;
+    // Join first (important)
+    socket.join(room_id);
 
-    socket.join(chatRoom.room_id);
+    // Update visitor socket + online
+    room.visitor_socket_id = socket.id;
+    room.is_visitor_online = true;
 
-    if (
-      chatRoom.assigned_agent_id &&
-      chatRoom.is_agent_online &&
-      chatRoom.agent_socket_id
-    ) {
-      chatRoom.status = "active";
-      await chatRoom.save();
+    // If agent already connected → active
+    if (room.agent_socket_id && room.is_agent_online) {
+      room.status = "active";
 
-      io.to(chatRoom.agent_socket_id).emit(
-        "employee:visitor-reconnected",
-        {
-          session_id,
-          room_id: chatRoom.room_id,
-        }
-      );
-
-      return;
-    }
-
-    chatRoom.status = "waiting";
-    chatRoom.assigned_agent_id = null;
-    chatRoom.agent_socket_id = null;
-    chatRoom.is_agent_online = false;
-
-    await chatRoom.save();
-
-    io.to(`company_${company_id}`).emit(
-      "employee:new-waiting-visitor",
-      {
+      io.to(room.agent_socket_id).emit("employee:visitor-reconnected", {
+        room_id,
         session_id,
-        room_id: chatRoom.room_id,
-        chatRoomId: chatRoom._id,
-      }
-    );
+      });
+    } else {
+      room.status = "waiting";
+    }
 
+    await room.save();
+
+    console.log("✅ Visitor Resumed Room:", room_id);
   } catch (err) {
-    console.error("resumeVisitorChat error:", err.message);
+    console.error("resumeVisitorRoom error:", err.message);
   }
 };
 
 /* ===================================================
-   VISITOR DISCONNECT (UNCHANGED)
+   ✅ VISITOR LOAD CHAT HISTORY
 =================================================== */
-
-export const handleVisitorDisconnect = async (io, socket) => {
+export const visitorLoadHistory = async (io, socket, payload) => {
   try {
-    const chatRoom = await ChatRoom.findOne({
-      visitor_socket_id: socket.id,
-      status: { $in: ["waiting", "active"] },
-    });
+    const { room_id } = payload;
+    if (!room_id) return;
 
-    if (!chatRoom) return;
+    const room = await ChatRoom.findOne({ room_id });
+    if (!room) return;
 
-    chatRoom.is_visitor_online = false;
-    chatRoom.visitor_socket_id = null;
-    chatRoom.status = "disconnected";
+    const messages = await Message.find({
+      conversation_id: room._id,
+    }).sort({ createdAt: 1 });
 
-    await chatRoom.save();
+    socket.emit("chat:history", messages);
 
-    if (
-      chatRoom.assigned_agent_id &&
-      chatRoom.is_agent_online &&
-      chatRoom.agent_socket_id
-    ) {
-      io.to(chatRoom.agent_socket_id).emit(
-        "employee:visitor-disconnected",
-        {
-          session_id: chatRoom.session_id,
-          room_id: chatRoom.room_id,
-          chatRoomId: chatRoom._id,
-        }
-      );
-      return;
-    }
-
-    io.to(`company_${chatRoom.company_id}`).emit(
-      "employee:visitor-disconnected",
-      {
-        session_id: chatRoom.session_id,
-        room_id: chatRoom.room_id,
-        chatRoomId: chatRoom._id,
-      }
-    );
-
+    console.log("📜 History Sent:", room_id);
   } catch (err) {
-    console.error("handleVisitorDisconnect error:", err.message);
+    console.error("visitorLoadHistory error:", err.message);
   }
 };
 
 /* ===================================================
-   VISITOR LEAVE  ✅ FIXED SECURITY
+   ✅ VISITOR TYPING
 =================================================== */
-
-export const handleVisitorLeave = async (io, socket, payload) => {
+export const visitorTyping = async (io, socket, payload) => {
   try {
-    const { company_apikey, session_id } = payload;
-    if (!company_apikey || !session_id) return;
+    const { room_id } = payload;
+    if (!room_id) return;
 
-    const company_id = await validateCompany(company_apikey);
-    if (!company_id) return;
-
-    const chatRoom = await ChatRoom.findOne({
-      company_id, // ✅ FIXED
-      session_id,
-      status: { $in: ["waiting", "active", "disconnected"] },
+    // Optimized: No DB call
+    socket.to(room_id).emit("visitor:typing", {
+      room_id,
     });
+  } catch (err) {
+    console.error("visitorTyping error:", err.message);
+  }
+};
 
-    if (!chatRoom) return;
+/* ===================================================
+   ✅ VISITOR STOP TYPING
+=================================================== */
+export const visitorStopTyping = async (io, socket, payload) => {
+  try {
+    const { room_id } = payload;
+    if (!room_id) return;
 
-    chatRoom.status = "closed";
-    chatRoom.closed_by = "visitor";
-    chatRoom.closed_at = new Date();
-    chatRoom.is_visitor_online = false;
-    chatRoom.visitor_socket_id = null;
+    socket.to(room_id).emit("visitor:stop-typing", {
+      room_id,
+    });
+  } catch (err) {
+    console.error("visitorStopTyping error:", err.message);
+  }
+};
 
-    await chatRoom.save();
+/* ===================================================
+   ✅ VISITOR LEAVE ROOM (END CHAT)
+=================================================== */
+export const visitorLeaveRoom = async (io, socket, payload) => {
+  try {
+    const { room_id } = payload;
+    if (!room_id) return;
 
-    if (
-      chatRoom.assigned_agent_id &&
-      chatRoom.is_agent_online &&
-      chatRoom.agent_socket_id
-    ) {
-      io.to(chatRoom.agent_socket_id).emit(
-        "employee:visitor-left-chat",
-        {
-          session_id,
-          room_id: chatRoom.room_id,
-          chatRoomId: chatRoom._id,
-        }
-      );
-      return;
+    const room = await ChatRoom.findOne({ room_id });
+    if (!room) return;
+
+    room.status = "closed";
+    room.closed_by = "visitor";
+    room.closed_at = new Date();
+
+    room.is_visitor_online = false;
+    room.visitor_socket_id = null;
+
+    await room.save();
+
+    socket.leave(room_id);
+
+    console.log("🚪 Visitor Left Chat:", room_id);
+
+    // Notify employee
+    if (room.agent_socket_id) {
+      io.to(room.agent_socket_id).emit("visitor:left", {
+        room_id,
+      });
     }
 
-    io.to(`company_${company_id}`).emit(
+    // Remove from waiting list
+    io.to(`company_${room.company_id}`).emit(
       "employee:visitor-left-waiting",
-      {
-        session_id,
-        room_id: chatRoom.room_id,
-        chatRoomId: chatRoom._id,
-      }
+      { room_id }
     );
-
   } catch (err) {
-    console.error("handleVisitorLeave error:", err.message);
+    console.error("visitorLeaveRoom error:", err.message);
   }
 };
 
+/* ===================================================
+   ✅ VISITOR OFFLINE (DISCONNECT SAFE)
+=================================================== */
+export const visitorOffline = async (io, socket, payload) => {
+  try {
+    let room_id = payload?.room_id;
+
+    let room = null;
+
+    // Case 1: Payload room_id exists
+    if (room_id) {
+      room = await ChatRoom.findOne({ room_id });
+    }
+
+    // Case 2: Browser closed → find by socket.id
+    if (!room) {
+      room = await ChatRoom.findOne({
+        visitor_socket_id: socket.id,
+        status: { $in: ["waiting", "active"] },
+      });
+    }
+
+    if (!room) return;
+
+    room.is_visitor_online = false;
+    room.visitor_socket_id = null;
+
+    if (room.status !== "closed") {
+      room.status = "disconnected";
+    }
+
+    await room.save();
+
+    console.log("⚠ Visitor Offline:", room.room_id);
+
+    // Notify employee
+    if (room.agent_socket_id) {
+      io.to(room.agent_socket_id).emit("visitor:disconnected", {
+        room_id: room.room_id,
+      });
+    }
+  } catch (err) {
+    console.error("visitorOffline error:", err.message);
+  }
+};
