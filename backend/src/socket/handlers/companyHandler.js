@@ -63,12 +63,14 @@ export const employeeJoinRoom = async (io, socket, payload) => {
     const user = socket.user;
     if (!room_id || !user) return;
 
-    // Assign visitor only if waiting
     const room = await ChatRoom.findOneAndUpdate(
       {
         room_id,
         status: "waiting",
-        assigned_agent_id: null,
+        $or: [
+          { assigned_agent_id: null },
+          { assigned_agent_id: user._id },
+        ],
       },
       {
         status: "active",
@@ -85,23 +87,19 @@ export const employeeJoinRoom = async (io, socket, payload) => {
 
     socket.join(room_id);
 
-    console.log("🎯 Employee Joined Room:", room_id);
-
-    // Notify visitor agent joined
     if (room.visitor_socket_id) {
-      io.to(room.visitor_socket_id).emit("visitor:agent-joined", {
-        room_id,
-      });
+      io.to(room.visitor_socket_id).emit("visitor:agent-joined", { room_id });
     }
 
-    // Remove visitor from waiting dashboard
     io.to(`company_${user.company_id}`).emit("employee:visitor-assigned", {
       room_id,
     });
+
   } catch (err) {
     console.error("employeeJoinRoom error:", err.message);
   }
 };
+
 
 /* ===================================================
    ✅ EMPLOYEE RESUME ROOM (RECONNECT SUPPORT)
@@ -120,26 +118,24 @@ export const employeeResumeRoom = async (io, socket, payload) => {
 
     if (!room) return;
 
-    // Update agent socket
     room.agent_socket_id = socket.id;
     room.is_agent_online = true;
-    room.status = "active";
-    await room.save();
 
+    // ✅ Only active if visitor online
+    room.status = room.is_visitor_online ? "active" : "waiting";
+
+    await room.save();
     socket.join(room_id);
 
-    console.log("🔄 Employee Resumed Room:", room_id);
-
-    // Notify visitor employee reconnected
     if (room.visitor_socket_id) {
-      io.to(room.visitor_socket_id).emit("visitor:agent-joined", {
-        room_id,
-      });
+      io.to(room.visitor_socket_id).emit("visitor:agent-joined", { room_id });
     }
+
   } catch (err) {
     console.error("employeeResumeRoom error:", err.message);
   }
 };
+
 
 /* ===================================================
    ✅ EMPLOYEE LOAD CHAT HISTORY
@@ -168,22 +164,12 @@ export const employeeLoadHistory = async (io, socket, payload) => {
    ✅ EMPLOYEE TYPING
 =================================================== */
 export const employeeTyping = async (io, socket, payload) => {
-  try {
-    const { room_id } = payload;
-    if (!room_id) return;
+  const { room_id } = payload;
+  if (!room_id) return;
 
-    const room = await ChatRoom.findOne({ room_id });
-    if (!room) return;
-
-    if (room.visitor_socket_id) {
-      io.to(room.visitor_socket_id).emit("employee:typing", {
-        room_id,
-      });
-    }
-  } catch (err) {
-    console.error("employeeTyping error:", err.message);
-  }
+  socket.to(room_id).emit("employee:typing", { room_id });
 };
+
 
 /* ===================================================
    ✅ EMPLOYEE STOP TYPING
@@ -209,6 +195,9 @@ export const employeeStopTyping = async (io, socket, payload) => {
 /* ===================================================
    ✅ EMPLOYEE LEAVE ROOM (END CHAT)
 =================================================== */
+/* ===================================================
+   ✅ EMPLOYEE LEAVE ROOM (FIXED: Visitor Goes Back Waiting)
+=================================================== */
 export const employeeLeaveRoom = async (io, socket, payload) => {
   try {
     const { room_id } = payload;
@@ -217,29 +206,52 @@ export const employeeLeaveRoom = async (io, socket, payload) => {
     const room = await ChatRoom.findOne({ room_id });
     if (!room) return;
 
-    room.status = "closed";
-    room.closed_by = "employee";
-    room.closed_at = new Date();
+    /* ==========================================
+       ✅ Employee Leaving Should NOT Close Chat
+    ========================================== */
 
-    room.is_agent_online = false;
+    room.status = "waiting"; // ✅ visitor back in queue
+
+    room.closed_by = null;
+    room.closed_at = null;
+
+    // Remove agent assignment
+    room.assigned_agent_id = null;
     room.agent_socket_id = null;
+    room.is_agent_online = false;
 
     await room.save();
 
     socket.leave(room_id);
 
-    console.log("🚪 Employee Left Chat:", room_id);
+    console.log("🚪 Employee Left → Visitor Back Waiting:", room_id);
 
-    // Notify visitor
+    /* ==========================================
+       ✅ Notify Visitor
+    ========================================== */
     if (room.visitor_socket_id) {
       io.to(room.visitor_socket_id).emit("visitor:agent-left", {
         room_id,
+        message: "Agent left. Waiting for another agent...",
       });
     }
+
+    /* ==========================================
+       ✅ Notify Company Dashboard (Waiting List Update)
+    ========================================== */
+    io.to(`company_${room.company_id}`).emit(
+      "employee:new-waiting-visitor",
+      {
+        room_id,
+        session_id: room.session_id,
+      }
+    );
+
   } catch (err) {
     console.error("employeeLeaveRoom error:", err.message);
   }
 };
+
 
 /* ===================================================
    ✅ EMPLOYEE OFFLINE (DISCONNECT / TAB CLOSE)

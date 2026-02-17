@@ -68,7 +68,7 @@ const chatRoomSchema = new mongoose.Schema(
 
     closed_by: {
       type: String,
-      enum: ["agent", "visitor", "system"],
+      enum: ["employee", "visitor", "system"],
       default: null,
     },
 

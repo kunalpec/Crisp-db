@@ -42,20 +42,40 @@ const VisitorChatRoom = () => {
       ✅ INIT SESSION + ROOM PERSISTENCE
   ====================================================== */
   useEffect(() => {
-    // Restore session if exists
     let savedSession = localStorage.getItem("visitor_session");
     let savedRoom = localStorage.getItem("visitor_room");
+    let savedTime = localStorage.getItem("visitor_session_time");
 
+    const now = Date.now();
+
+    // ✅ Expiry limit (30 min)
+    const SESSION_EXPIRY = 30 * 60 * 1000;
+
+    // ✅ If session exists but expired
+    if (savedTime && now - savedTime > SESSION_EXPIRY) {
+      console.log("⏳ Session Expired → Creating Fresh Session");
+
+      localStorage.removeItem("visitor_session");
+      localStorage.removeItem("visitor_room");
+      localStorage.removeItem("visitor_session_time");
+
+      savedSession = null;
+      savedRoom = null;
+    }
+
+    // ✅ Create new session if missing
     if (!savedSession) {
       savedSession = createSession();
+
       localStorage.setItem("visitor_session", savedSession);
+      localStorage.setItem("visitor_session_time", now);
     }
 
     sessionRef.current = savedSession;
 
+    // ✅ Restore room only if not expired
     if (savedRoom) {
       roomRef.current = savedRoom;
-      setRoomReady(true);
     }
   }, []);
 
@@ -230,6 +250,7 @@ const VisitorChatRoom = () => {
     const payload = {
       msg_id: Date.now(),
       room_id: roomRef.current,
+      session_id: sessionRef.current, // ✅ MUST ADD THIS
       msg_content: text.trim(),
       sender_type: "visitor",
       send_at: new Date(),
@@ -239,13 +260,13 @@ const VisitorChatRoom = () => {
     setMessages((prev) => [...prev, payload]);
     setText("");
 
-    // Emit with ACK
     socket.emit("visitor:send-message", payload, (ack) => {
       if (!ack?.success) {
         alert("❌ Message delivery failed.");
       }
     });
   };
+
 
   /* ======================================================
       ✍ VISITOR TYPING EVENT (THROTTLED)
@@ -258,6 +279,7 @@ const VisitorChatRoom = () => {
     if (text.length > 0 && now - lastTypingEmit.current > 500) {
       socket.emit("visitor:typing", {
         room_id: roomRef.current,
+        session_id: sessionRef.current,
       });
       lastTypingEmit.current = now;
     }
@@ -267,6 +289,7 @@ const VisitorChatRoom = () => {
     typingTimeout.current = setTimeout(() => {
       socket.emit("visitor:stop-typing", {
         room_id: roomRef.current,
+        session_id: sessionRef.current,
       });
     }, 800);
 
@@ -338,9 +361,8 @@ const VisitorChatRoom = () => {
         {messages.map((m) => (
           <div
             key={m.msg_id}
-            className={`message-row ${
-              m.sender_type === "visitor" ? "visitor" : "agent"
-            }`}
+            className={`message-row ${m.sender_type === "visitor" ? "visitor" : "agent"
+              }`}
           >
             <div className="message-bubble">{m.msg_content}</div>
           </div>

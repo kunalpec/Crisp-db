@@ -47,24 +47,82 @@ export const validateCompany = async (company_apikey) => {
 /* ===================================================
    ✅ VISITOR CREATE ROOM
 =================================================== */
+/* ===================================================
+   ✅ VISITOR CREATE ROOM (FINAL FIXED)
+=================================================== */
 export const createNewVisitor = async (io, socket, payload, callback) => {
   try {
     const { company_apikey, session_id } = payload;
-    if (!company_apikey || !session_id) return;
 
+    if (!company_apikey || !session_id) {
+      return callback?.({ error: "MISSING_DATA" });
+    }
+
+    // ✅ FIX: Store session_id in socket
+    socket.session_id = session_id;
+
+    /* ==========================================
+       ✅ Validate Company Key
+    ========================================== */
     const company_id = await validateCompany(company_apikey);
-    console.log("comapny id", company_id);
-    if (!company_id) return;
+
+    if (!company_id) {
+      return callback?.({ error: "INVALID_COMPANY" });
+    }
 
     const room_id = `${company_id}_${session_id}`;
 
+    /* ==========================================
+       ✅ Find Existing Room
+    ========================================== */
     let room = await ChatRoom.findOne({
       company_id,
       session_id,
-      status: { $ne: "closed" },
     });
 
-    if (!room) {
+    /* ==========================================
+       ✅ CASE 1: Room Exists
+    ========================================== */
+    if (room) {
+      room.visitor_socket_id = socket.id;
+      room.is_visitor_online = true;
+
+      // ✅ Closed Room → Apply 30 min Rule
+      if (room.status === "closed") {
+        const now = Date.now();
+        const closedTime = room.closed_at
+          ? new Date(room.closed_at).getTime()
+          : 0;
+
+        const diffMinutes = (now - closedTime) / (1000 * 60);
+
+        if (diffMinutes <= 30) {
+          console.log("♻️ Reopening room within 30 min:", room_id);
+          room.status = "waiting";
+          room.closed_at = null;
+        } else {
+          console.log("⏳ Room expired → Creating fresh room:", room_id);
+
+          room = await ChatRoom.create({
+            company_id,
+            session_id,
+            room_id,
+            visitor_socket_id: socket.id,
+            is_visitor_online: true,
+            status: "waiting",
+          });
+        }
+      } else {
+        room.status = "waiting";
+      }
+
+      await room.save();
+    }
+
+    /* ==========================================
+       ✅ CASE 2: No Room Exists → Create New
+    ========================================== */
+    else {
       room = await ChatRoom.create({
         company_id,
         session_id,
@@ -73,57 +131,104 @@ export const createNewVisitor = async (io, socket, payload, callback) => {
         is_visitor_online: true,
         status: "waiting",
       });
-    } else {
-      room.visitor_socket_id = socket.id;
-      room.is_visitor_online = true;
-      room.status = "waiting";
-      await room.save();
+
+      console.log("🆕 New Visitor Room Created:", room_id);
     }
 
-    // Join socket room
+    /* ==========================================
+       ✅ Join Socket Room
+    ========================================== */
     socket.join(room_id);
 
-    // Notify Employees
+    /* ==========================================
+       ✅ Notify Employees
+    ========================================== */
     io.to(`company_${company_id}`).emit("employee:new-waiting-visitor", {
       room_id,
       session_id,
     });
 
     callback?.({
+      success: true,
       room_id,
       chatRoomId: room._id,
     });
 
-    console.log("✅ Visitor Room Created:", room_id);
+    console.log("✅ Visitor Room Ready:", room_id);
+
   } catch (err) {
     console.error("createNewVisitor error:", err.message);
+
+    callback?.({
+      success: false,
+      error: "SERVER_ERROR",
+    });
   }
 };
+
+
 
 /* ===================================================
    ✅ RESUME VISITOR ROOM
 =================================================== */
+/* ===================================================
+   ✅ RESUME VISITOR ROOM (FINAL FIXED)
+=================================================== */
 export const resumeVisitorRoom = async (io, socket, payload) => {
   try {
     const { room_id, session_id } = payload;
+
     if (!room_id || !session_id) return;
-   
-    const room = await ChatRoom.findOne({
+
+    // ✅ FIX: Store session_id again on reconnect
+    socket.session_id = session_id;
+
+    let room = await ChatRoom.findOne({
       room_id,
       session_id,
-      status: { $ne: "closed" },
     });
 
-    if (!room) return;
+    if (!room) {
+      console.log("❌ Resume failed: Room not found");
+      return;
+    }
 
-    // Join first (important)
-    socket.join(room_id);
+    /* ==========================================
+       ✅ If Closed → Apply 30 min Rule
+    ========================================== */
+    if (room.status === "closed") {
+      const now = Date.now();
 
-    // Update visitor socket + online
+      const closedTime = room.closed_at
+        ? new Date(room.closed_at).getTime()
+        : 0;
+
+      const diffMinutes = (now - closedTime) / (1000 * 60);
+
+      if (diffMinutes > 30) {
+        console.log("⏳ Resume blocked: Room expired");
+        return;
+      }
+
+      console.log("♻️ Reopening closed room:", room_id);
+
+      room.status = "waiting";
+      room.closed_at = null;
+      room.closed_by = null;
+      room.closed_reason = null;
+    }
+
+    /* ==========================================
+       ✅ Update Visitor Online
+    ========================================== */
     room.visitor_socket_id = socket.id;
     room.is_visitor_online = true;
 
-    // If agent already connected → active
+    socket.join(room_id);
+
+    /* ==========================================
+       ✅ Agent Online → Active
+    ========================================== */
     if (room.agent_socket_id && room.is_agent_online) {
       room.status = "active";
 
@@ -137,11 +242,15 @@ export const resumeVisitorRoom = async (io, socket, payload) => {
 
     await room.save();
 
-    console.log("✅ Visitor Resumed Room:", room_id);
+    console.log("✅ Visitor Resumed Successfully:", room_id);
+
   } catch (err) {
     console.error("resumeVisitorRoom error:", err.message);
   }
 };
+
+
+
 
 /* ===================================================
    ✅ VISITOR LOAD CHAT HISTORY
@@ -201,43 +310,36 @@ export const visitorStopTyping = async (io, socket, payload) => {
 
 /* ===================================================
    ✅ VISITOR LEAVE ROOM (END CHAT)
-=================================================== */
+// =============================================new code ok ====== */
 export const visitorLeaveRoom = async (io, socket, payload) => {
-  try {
-    const { room_id } = payload;
-    if (!room_id) return;
+  const { room_id } = payload;
 
-    const room = await ChatRoom.findOne({ room_id });
-    if (!room) return;
+  const room = await ChatRoom.findOne({ room_id });
+  if (!room) return;
 
-    room.status = "closed";
-    room.closed_by = "visitor";
-    room.closed_at = new Date();
+  // ✅ Permanently closed
+  room.status = "closed";
+  room.closed_by = "visitor";
+  room.closed_reason = "visitor_left";
+  room.closed_at = new Date();
 
-    room.is_visitor_online = false;
-    room.visitor_socket_id = null;
+  room.is_visitor_online = false;
+  room.visitor_socket_id = null;
 
-    await room.save();
+  await room.save();
 
-    socket.leave(room_id);
+  socket.leave(room_id);
 
-    console.log("🚪 Visitor Left Chat:", room_id);
-
-    // Notify employee
-    if (room.agent_socket_id) {
-      io.to(room.agent_socket_id).emit("visitor:left", {
-        room_id,
-      });
-    }
-
-    // Remove from waiting list
-    io.to(`company_${room.company_id}`).emit(
-      "employee:visitor-left-waiting",
-      { room_id }
-    );
-  } catch (err) {
-    console.error("visitorLeaveRoom error:", err.message);
+  // ✅ Notify employee
+  if (room.agent_socket_id) {
+    io.to(room.agent_socket_id).emit("visitor:left", { room_id });
   }
+
+  // ✅ Remove from waiting list
+  io.to(`company_${room.company_id}`).emit(
+    "employee:visitor-left",
+    { room_id }
+  );
 };
 
 /* ===================================================

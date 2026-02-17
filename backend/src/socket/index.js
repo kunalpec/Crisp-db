@@ -80,11 +80,11 @@ export const initSocket = (server) => {
       );
 
       /* ✅ FIXED TYPING EVENTS */
-      socket.on("visitor:me-typing", (payload) =>
+      socket.on("visitor:typing", (payload) =>
         visitorTyping(io, socket, payload)
       );
 
-      socket.on("visitor:me-stoptyping", (payload) =>
+      socket.on("visitor:stop-typing", (payload) =>
         visitorStopTyping(io, socket, payload)
       );
 
@@ -129,9 +129,10 @@ export const initSocket = (server) => {
         employeeStopTyping(io, socket, payload)
       );
 
-      socket.on("employee:leave-room", (payload) =>
-        employeeLeaveRoom(io, socket, payload)
-      );
+      socket.on("employee:leave-room", (payload) =>{
+        employeeLeaveRoom(io, socket, payload);
+        console.log("employee:leave-room call");
+      });
     }
 
     /* ======================================================
