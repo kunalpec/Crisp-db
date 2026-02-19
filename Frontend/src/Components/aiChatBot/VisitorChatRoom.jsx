@@ -4,7 +4,7 @@ import { createSession } from "./createSession";
 import "./VisitorChatRoom.css";
 
 /* ======================================================
-   ✅ VISITOR CHAT ROOM (200% PRODUCTION READY)
+   ✅ VISITOR CHAT ROOM (FIXED + PRODUCTION READY)
 ====================================================== */
 
 const VisitorChatRoom = () => {
@@ -51,7 +51,6 @@ const VisitorChatRoom = () => {
     // ✅ Expiry limit (30 min)
     const SESSION_EXPIRY = 30 * 60 * 1000;
 
-    // ✅ If session exists but expired
     if (savedTime && now - savedTime > SESSION_EXPIRY) {
       console.log("⏳ Session Expired → Creating Fresh Session");
 
@@ -73,14 +72,14 @@ const VisitorChatRoom = () => {
 
     sessionRef.current = savedSession;
 
-    // ✅ Restore room only if not expired
+    // ✅ Restore room if exists
     if (savedRoom) {
       roomRef.current = savedRoom;
     }
   }, []);
 
   /* ======================================================
-      ✅ SOCKET CONNECTION + ALL EVENTS
+      ✅ SOCKET CONNECTION + EVENTS
   ====================================================== */
   useEffect(() => {
     if (!socket.connected) socket.connect();
@@ -92,8 +91,12 @@ const VisitorChatRoom = () => {
       console.log("✅ Visitor Connected:", socket.id);
       setConnected(true);
 
-      // Resume if room already exists
+      // ✅ Resume if room already exists
       if (roomRef.current) {
+        console.log("♻ Resuming Old Room:", roomRef.current);
+
+        setRoomReady(true); // ✅ FIXED
+
         socket.emit("visitor:resume-room", {
           room_id: roomRef.current,
           session_id: sessionRef.current,
@@ -106,7 +109,7 @@ const VisitorChatRoom = () => {
         return;
       }
 
-      // First time room creation
+      // ✅ First time room creation
       socket.emit(
         "visitor:create-new",
         {
@@ -123,7 +126,6 @@ const VisitorChatRoom = () => {
           console.log("🎯 Room Created:", res.room_id);
           setRoomReady(true);
 
-          // Load history immediately
           socket.emit("visitor:load-history", {
             room_id: res.room_id,
           });
@@ -148,11 +150,19 @@ const VisitorChatRoom = () => {
     };
 
     /* ======================================================
-        📜 CHAT HISTORY EVENT
+        📜 CHAT HISTORY EVENT (FIXED)
     ====================================================== */
     const handleHistory = (history) => {
-      console.log("📜 Chat History Loaded:", history.length);
-      setMessages(history || []);
+      console.log("📜 Chat History Loaded:", history);
+
+      // ✅ Normalize messages so bubble text never blank
+      const normalized = (history || []).map((m) => ({
+        msg_id: m.msg_id || Date.now() + Math.random(),
+        sender_type: m.sender_type,
+        msg_content: m.msg_content || m.message || m.text || "",
+      }));
+
+      setMessages(normalized);
     };
 
     /* ======================================================
@@ -162,7 +172,14 @@ const VisitorChatRoom = () => {
       setMessages((prev) => {
         const exists = prev.some((m) => m.msg_id === msg.msg_id);
         if (exists) return prev;
-        return [...prev, msg];
+
+        return [
+          ...prev,
+          {
+            ...msg,
+            msg_content: msg.msg_content || msg.message || msg.text || "",
+          },
+        ];
       });
     };
 
@@ -242,21 +259,20 @@ const VisitorChatRoom = () => {
   }, []);
 
   /* ======================================================
-      ✅ SEND MESSAGE (ACK SAFE)
+      ✅ SEND MESSAGE (FIXED msg_id)
   ====================================================== */
   const sendMessage = () => {
     if (!text.trim() || !roomRef.current) return;
 
     const payload = {
-      msg_id: Date.now(),
+      msg_id: Date.now() + Math.random(), // ✅ FIXED UNIQUE
       room_id: roomRef.current,
-      session_id: sessionRef.current, // ✅ MUST ADD THIS
+      session_id: sessionRef.current,
       msg_content: text.trim(),
       sender_type: "visitor",
       send_at: new Date(),
     };
 
-    // Optimistic UI
     setMessages((prev) => [...prev, payload]);
     setText("");
 
@@ -266,7 +282,6 @@ const VisitorChatRoom = () => {
       }
     });
   };
-
 
   /* ======================================================
       ✍ VISITOR TYPING EVENT (THROTTLED)
@@ -306,7 +321,6 @@ const VisitorChatRoom = () => {
       room_id: roomRef.current,
     });
 
-    // Reset everything
     roomRef.current = null;
     setRoomReady(false);
 
@@ -361,10 +375,13 @@ const VisitorChatRoom = () => {
         {messages.map((m) => (
           <div
             key={m.msg_id}
-            className={`message-row ${m.sender_type === "visitor" ? "visitor" : "agent"
-              }`}
+            className={`message-row ${
+              m.sender_type === "visitor" ? "visitor" : "agent"
+            }`}
           >
-            <div className="message-bubble">{m.msg_content}</div>
+            <div className="message-bubble">
+              {m.msg_content} {/* ✅ FIXED */}
+            </div>
           </div>
         ))}
 

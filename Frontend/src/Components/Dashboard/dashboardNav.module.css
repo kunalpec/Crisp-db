@@ -1,228 +1,324 @@
-/* GLOBAL RESET */
+/* ==============================
+   PREMIUM CRISP SIDEBAR (FINAL)
+============================== */
+
 * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
-
-/* ================= CONTAINER ================= */
 
 .dashboardNav-container {
-  width: 210px;
+  width: 250px;
   height: 100vh;
-  background-color: white;
-  padding: 20px;
-  font-family: 'Segoe UI', sans-serif;
+
+  background: #ffffff;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #ddd;
+
+  padding: 18px 16px;
+
+  font-family: "Inter", sans-serif;
+
+  overflow: hidden;
 }
 
-/* ================= HEADER ================= */
+/* ==============================
+   HEADER COMPANY AREA
+============================== */
 
 .dashboardNav-header {
   display: flex;
-  align-items: flex-start;   /* 🔥 IMPORTANT */
-  justify-content: flex-start; /* 🔥 IMPORTANT */
+  align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
+
+  margin-bottom: 18px;
 }
 
 .dashboardNav-companyIcon {
-  width: 40px;
-  height: 40px;
-  background-color: #2f80ed;
+  width: 46px;
+  height: 46px;
+
   border-radius: 50%;
-  position: relative;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   flex-shrink: 0;
+
+  box-shadow: 0 6px 15px rgba(37, 99, 235, 0.25);
 }
 
 .dashboardNav-companyIcon::after {
   content: "💬";
-  position: absolute;
-  top: 6px;
-  left: 11px;
   font-size: 18px;
   color: white;
 }
 
 .dashboardNav-Name {
-  font-weight: 600;
   font-size: 15px;
-  line-height: 1.2;
+  font-weight: 700;
+  color: #111827;
 }
 
 .dashboardNav-Domain {
   font-size: 12px;
-  color: gray;
+  color: #6b7280;
+  margin-top: 2px;
 }
 
-/* ================= GET STARTED ================= */
+/* ==============================
+   GET STARTED BUTTON
+============================== */
 
 .dashboardNav-getStarted {
-  background-color: #00c48c;
-  color: white;
+  width: 100%;
+  padding: 10px 14px;
+
   border: none;
-  padding: 10px 12px;
-  border-radius: 8px;
-  margin-bottom: 15px;
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: white;
+
+  font-size: 14px;
+  font-weight: 600;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: bold;
+
   cursor: pointer;
-  width: 100%;
+  transition: 0.25s ease;
+}
+
+.dashboardNav-getStarted:hover {
+  transform: scale(1.02);
+  opacity: 0.95;
 }
 
 .dashboardNav-notificationbadge {
-  background-color: red;
-  border-radius: 50%;
-  padding: 3px 7px;
+  background: #dc2626;
   font-size: 12px;
+  font-weight: 700;
+
+  padding: 3px 8px;
+  border-radius: 999px;
 }
 
-/* ================= SECTION ================= */
+/* ==============================
+   SCROLLABLE SECTION
+============================== */
 
 .dashboardNav-section {
   flex: 1;
   overflow-y: auto;
+
+  padding-top: 16px;
+  min-height: 0;
 }
 
-/* ================= INBOX ================= */
+/* Premium Scrollbar */
+
+.dashboardNav-section::-webkit-scrollbar {
+  width: 5px;
+}
+
+.dashboardNav-section::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 10px;
+}
+
+/* ==============================
+   INBOX HEADER
+============================== */
 
 .dashboardNav-inboxHeader {
-  background-color: #1976f2;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
-  padding: 10px;
-  border-radius: 8px;
-  font-weight: 500;
+
+  padding: 10px 12px;
+  border-radius: 12px;
+
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  margin-bottom: 14px;
 }
 
-.dashboardNav-subtitle {
-  font-size: 13px;
-  margin: 15px 0 5px;
-  color: gray;
+.dashboardNav-icon {
+  font-size: 16px;
 }
+
+/* ==============================
+   SUBTITLE
+============================== */
+
+.dashboardNav-subtitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+
+  margin: 18px 0 8px;
+}
+
+/* ==============================
+   NAV ITEMS
+============================== */
 
 .dashboardNav-defaultInbox,
 .dashboardNav-newSubInbox,
 .dashboardNav-otherInbox {
-  padding: 9px 10px;
-  background-color: #f5f5f5;
-  border-radius: 6px;
-  margin-bottom: 6px;
+  padding: 10px 12px;
+
+  border-radius: 12px;
+
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+
   font-size: 14px;
+  font-weight: 500;
+
   cursor: pointer;
-  transition: background 0.2s ease;
+
+  transition: 0.25s ease;
 }
 
 .dashboardNav-defaultInbox:hover,
 .dashboardNav-newSubInbox:hover,
 .dashboardNav-otherInbox:hover {
-  background-color: #eaeaea;
+  background: #eef2ff;
+  color: #2563eb;
 }
 
-/* ================= BOTTOM ================= */
+/* Active Crisp Effect */
+
+.dashboardNav-defaultInbox.active {
+  background: rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* ==============================
+   BOTTOM OPTIONS
+============================== */
 
 .dashboardNav-bottom {
-  padding-top: 10px;
-  border-top: 1px solid #eee;
-  margin-top: 10px;
+  padding: 14px 8px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .dashboardNav-option {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 10px;
+
+  padding: 10px 10px;
+
+  border-radius: 12px;
+
   font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+
   cursor: pointer;
-  color: #333;
+  transition: 0.25s ease;
 }
 
-/* ================= USER ================= */
+.dashboardNav-option:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+/* ==============================
+   USER PROFILE FIXED
+============================== */
 
 .dashboardNav-user {
+  margin-top: auto;
+
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #eee;
-  margin-top: 10px;
+  gap: 12px;
+
+  padding: 14px 12px;
+
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.dashboardNav-user:hover {
+  background: #f9fafb;
 }
 
 .dashboardNav-userIcon {
-  width: 40px;
-  height: 40px;
-  background-color: #d2ebf3;
+  width: 42px;
+  height: 42px;
+
   border-radius: 50%;
+  background: #dbeafe;
+
   flex-shrink: 0;
 }
 
 .dashboardNav-userName {
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
 }
 
 .dashboardNav-userEmail {
   font-size: 12px;
-  color: gray;
+  color: #6b7280;
 }
 
-/* ================= RESPONSIVE ================= */
+/* ==============================
+   RESPONSIVE (ALL DEVICES)
+============================== */
 
-@media (max-width: 768px) {
+/* Tablet */
+
+@media (max-width: 900px) {
   .dashboardNav-container {
-    width: 150px;
-    padding: 15px;
+    width: 200px;
   }
 }
 
+/* Mobile Collapse */
+
 @media (max-width: 600px) {
   .dashboardNav-container {
-    width: 110px;
+    width: 80px;
+    padding: 14px 10px;
   }
 
   .dashboardNav-Name,
   .dashboardNav-Domain,
   .dashboardNav-userName,
-  .dashboardNav-userEmail {
+  .dashboardNav-userEmail,
+  .dashboardNav-subtitle {
     display: none;
   }
 
   .dashboardNav-getStarted {
     justify-content: center;
     font-size: 12px;
-  }
-}
-
-@media (max-width: 400px) {
-  .dashboardNav-container {
-    width: 80px;
     padding: 10px;
   }
 
-  .dashboardNav-getStarted {
+  .dashboardNav-notificationbadge {
     display: none;
-  }
-
-  .dashboardNav-subtitle {
-    display: none;
-  }
-
-  .dashboardNav-option span,
-  .dashboardNav-inboxHeader span {
-    display: none;
-  }
-
-  .dashboardNav-option,
-  .dashboardNav-inboxHeader {
-    justify-content: center;
   }
 }

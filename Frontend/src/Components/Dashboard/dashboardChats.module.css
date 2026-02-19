@@ -1,359 +1,189 @@
-/* Chat List Container - Full height with sticky header */
-.dashboardChats-container {
+/* ==============================
+   VISITOR ITEM (PREMIUM CARD)
+============================== */
+
+.visitorItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 12px 14px;
+  border-radius: 16px;
+
+  background: #f9fafb;
+  border: 1px solid transparent;
+
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  gap: 12px;
+}
+
+.visitorItem:hover {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.08);
+
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Active Selected Visitor */
+
+.visitorItem.active {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.06);
+}
+
+/* ==============================
+   AVATAR (PREMIUM CIRCLE)
+============================== */
+
+.avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+
+  flex-shrink: 0;
+
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* ==============================
+   VISITOR INFO (FLEX CLEAN)
+============================== */
+
+.visitorInfo {
+  flex: 1;
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  width: 100%;
-  background-color: #ffffff;
-  overflow: hidden;
-}
-
-/* Sticky Header Section */
-.dashboardChats-header {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 500;
-  font-size: 1rem;
-  padding: 1rem;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
-  z-index: 10;
-}
-
-/* Scrollable Chat List */
-.dashboardChats-list {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-  /* Custom scrollbar */
-  scrollbar-width: thin;
-  scrollbar-color: #c0c0c0 #f5f5f5;
-}
-
-.dashboardChats-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.dashboardChats-list::-webkit-scrollbar-track {
-  background: #f5f5f5;
-}
-
-.dashboardChats-list::-webkit-scrollbar-thumb {
-  background: #c0c0c0;
-  border-radius: 3px;
-}
-
-.dashboardChats-list::-webkit-scrollbar-thumb:hover {
-  background: #a0a0a0;
-}
-
-.dropdown {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
-}
-
-.icons {
-  display: flex;
-  gap: 15px;
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-
-.message-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
-  padding: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  gap: 0.75rem;
-}
-
-.message-card:hover {
-  background-color: #f5f9ff;
-  transform: translateX(2px);
-}
-
-.message-card:active {
-  background-color: #e8f2ff;
-  transform: translateX(0);
-}
-
-.message-left {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.message-left img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-}
-
-.message-left h4 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.message-left p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.message-right {
-  text-align: right;
-  font-size: 0.9rem;
-  color: #888;
-}
-
-.arrow {
-  color: #f05d23;
-  margin-left: 5px;
-}
-
-.connect-card {
-  background: #f5f8fc;
-  padding: 1.25rem;
-  border-radius: 10px;
-  margin-top: 2rem;
-  text-align: center;
-}
-
-.icons-row {
-  display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 1rem;
+
+  gap: 2px;
 }
 
-.icons-row img {
-  width: 32px;
-  height: 32px;
+/* Visitor Name */
+
+.name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.connect-card h4 {
-  margin: 0.5rem 0;
-  font-size: 1rem;
+/* Session ID */
+
+.sessionId {
+  font-size: 11px;
+  font-weight: 500;
+  color: #9ca3af;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.connect-card p {
-  font-size: 0.85rem;
-  color: #555;
-  margin-bottom: 1rem;
+/* Preview Message */
+
+.preview {
+  font-size: 13px;
+  color: #6b7280;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.btn {
-  background: #007bff;
-  border: none;
+/* ==============================
+   RIGHT SIDE AREA
+============================== */
+
+.rightSide {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+
+  gap: 6px;
+
+  flex-shrink: 0;
+}
+
+/* Badge */
+
+.badge {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
-  padding: 8px 18px;
-  font-size: 0.95rem;
-  border-radius: 6px;
-  cursor: pointer;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  padding: 4px 10px;
+  border-radius: 999px;
+
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
 }
 
-.btn:hover {
-  background: #0062cc;
+/* Check Icon */
+
+.checkIcon {
+  font-size: 14px;
+  color: #22c55e;
+  font-weight: bold;
 }
 
-/* Responsive Media Queries */
+/* ==============================
+   RESPONSIVE (MOBILE FRIENDLY)
+============================== */
 
-/* Large tablets */
-@media (max-width: 1200px) {
-  .dashboardChats-header {
-    padding: 0.9rem;
-    font-size: 0.95rem;
-  }
-
-  .message-card {
-    padding: 0.9rem;
-  }
-}
-
-/* Tablets */
-@media (max-width: 992px) {
-  .dashboardChats-header {
-    padding: 0.8rem;
-    font-size: 0.9rem;
-  }
-
-  .message-card {
-    padding: 0.85rem;
-  }
-
-  .message-left h4 {
-    font-size: 0.95rem;
-  }
-
-  .message-left p {
-    font-size: 0.85rem;
-  }
-
-  .icons {
-    font-size: 1rem;
-    gap: 12px;
-  }
-}
-
-/* Mobile devices */
 @media (max-width: 768px) {
-  .dashboardChats-header {
-    padding: 0.75rem;
-    font-size: 0.9rem;
+  .visitorItem {
+    padding: 10px 12px;
+    border-radius: 14px;
   }
 
-  .message-card {
-    padding: 0.75rem;
-    flex-direction: row;
-    align-items: center;
+  .avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 13px;
   }
 
-  .message-left {
-    gap: 0.6rem;
-    flex: 1;
-    min-width: 0; /* Allow text truncation */
+  .name {
+    font-size: 13px;
   }
 
-  .message-left img {
-    width: 36px;
-    height: 36px;
-    flex-shrink: 0;
+  .preview {
+    font-size: 12px;
   }
 
-  .message-left h4 {
-    font-size: 0.9rem;
-    margin-bottom: 2px;
+  .badge {
+    font-size: 10px;
+    padding: 3px 8px;
   }
+}
 
-  .message-left p {
-    font-size: 0.8rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .message-right {
-    text-align: right;
-    font-size: 0.75rem;
-    flex-shrink: 0;
-    display: flex;
+@media (max-width: 480px) {
+  .visitorItem {
     flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
+    align-items: flex-start;
   }
 
-  .icons {
-    font-size: 0.95rem;
-    gap: 10px;
-  }
-}
-
-/* Small mobile devices */
-@media (max-width: 600px) {
-  .dashboardChats-header {
-    padding: 0.7rem;
-    font-size: 0.85rem;
-  }
-
-  .message-card {
-    padding: 0.7rem;
-  }
-
-  .message-left img {
-    width: 32px;
-    height: 32px;
-  }
-
-  .message-left h4 {
-    font-size: 0.85rem;
-  }
-
-  .message-left p {
-    font-size: 0.75rem;
-  }
-
-  .message-right {
-    font-size: 0.7rem;
-  }
-
-  .icons {
-    font-size: 0.9rem;
-    gap: 8px;
-  }
-}
-
-/* Extra small devices */
-@media (max-width: 425px) {
-  .dashboardChats-header {
-    padding: 0.6rem;
-    font-size: 0.8rem;
-  }
-
-  .message-card {
-    padding: 0.6rem;
-  }
-
-  .message-left {
-    gap: 0.5rem;
-  }
-
-  .message-left img {
-    width: 28px;
-    height: 28px;
-  }
-
-  .message-left h4 {
-    font-size: 0.8rem;
-  }
-
-  .message-left p {
-    font-size: 0.7rem;
-  }
-
-  .message-right {
-    font-size: 0.65rem;
-  }
-
-  .icons {
-    font-size: 0.85rem;
-    gap: 6px;
-  }
-}
-
-/* Very small devices */
-@media (max-width: 375px) {
-  .dashboardChats-header {
-    padding: 0.5rem;
-  }
-
-  .message-card {
-    padding: 0.5rem;
-  }
-
-  .message-left img {
-    width: 24px;
-    height: 24px;
-  }
-
-  .message-left h4 {
-    font-size: 0.75rem;
-  }
-
-  .message-left p {
-    font-size: 0.65rem;
-  }
-
-  .message-right {
-    font-size: 0.6rem;
+  .rightSide {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 6px;
   }
 }

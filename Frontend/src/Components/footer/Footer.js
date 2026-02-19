@@ -8,7 +8,7 @@ const Footer = () => {
       {/* Brand & Socials */}
       <div className={styles.section}>
         <div className={styles.logoContainer}>
-          <span className={styles.logoText}>CRISP</span>
+          <span className={styles.logoText}>Mediator</span>
         </div>
 
         <div className={styles.socials}>

@@ -152,13 +152,27 @@ export const employeeLoadHistory = async (io, socket, payload) => {
       conversation_id: room._id,
     }).sort({ createdAt: 1 });
 
-    socket.emit("chat:history", messages);
+    // ✅ MAP DB FORMAT → FRONTEND FORMAT
+    const formatted = messages.map((m) => ({
+      msg_id: m.metadata?.client_msg_id || m._id.toString(),
+      room_id,
+      sender_type: m.sender_type,
+      sender_id: m.sender_id,
+
+      // ✅ THIS IS MOST IMPORTANT
+      msg_content: m.content,
+
+      send_at: m.createdAt,
+    }));
+
+    socket.emit("chat:history", formatted);
 
     console.log("📜 Employee History Loaded:", room_id);
   } catch (err) {
     console.error("employeeLoadHistory error:", err.message);
   }
 };
+
 
 /* ===================================================
    ✅ EMPLOYEE TYPING

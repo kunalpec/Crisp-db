@@ -305,7 +305,6 @@ const EmployeeChatRoom = () => {
     roomRef.current = null;
     setActiveRoom(null);
     setActiveVisitor(null);
-    setMessages([]);
     setVisitorTyping(false);
   };
 

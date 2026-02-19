@@ -1,0 +1,80 @@
+/* ================================
+   Floating Button (Crisp Style)
+================================ */
+
+.chat-float-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+
+  background: #2563eb;
+  color: white;
+  font-size: 26px;
+
+  border: none;
+  cursor: pointer;
+
+  z-index: 9999;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+
+  transition: transform 0.2s ease;
+}
+
+.chat-float-btn:hover {
+  transform: scale(1.08);
+}
+
+/* ================================
+   Popup Window
+================================ */
+
+.chat-popup {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+
+  width: 350px;
+  height: 500px;
+
+  background: white;
+  border-radius: 16px;
+
+  overflow: hidden;
+  z-index: 9999;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* ================================
+   Popup Header
+================================ */
+
+.chat-popup-header {
+  background: #2563eb;
+  color: white;
+
+  padding: 12px;
+  font-weight: bold;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ================================
+   Close Button
+================================ */
+
+.chat-close-btn {
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.chat-close-btn:hover {
+  opacity: 0.7;
+}

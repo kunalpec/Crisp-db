@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import MainDashboard from "./MainDashboard";
-import { socket } from "../../socket";
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ============================
-  // FETCH DASHBOARD DATA
-  // ============================
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
@@ -29,37 +25,8 @@ const Dashboard = () => {
     fetchDashboard();
   }, []);
 
-  // ============================
-  // SOCKET CONNECT ONCE
-  // ============================
-  useEffect(() => {
-    if (!dashboardData) return;
-
-    if (!socket.connected) {
-      socket.connect();
-      console.log("🟢 Socket Connecting...");
-    }
-
-    const onConnect = () =>
-      console.log("✅ Socket Connected:", socket.id);
-
-    const onDisconnect = () =>
-      console.log("🔴 Socket Disconnected");
-
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-
-    return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-    };
-  }, [dashboardData]);
-
-  // ============================
-  // UI STATES
-  // ============================
-  if (loading) return <div>Loading...</div>;
-  if (!dashboardData) return <div>Unauthorized</div>;
+  if (loading) return <h2>Loading...</h2>;
+  if (!dashboardData) return <h2>Unauthorized</h2>;
 
   return <MainDashboard dashboardData={dashboardData} />;
 };

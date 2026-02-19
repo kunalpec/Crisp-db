@@ -1,65 +1,102 @@
 /* ======================================================
-   MAIN CONTAINER
+   🌟 PREMIUM CHAT WIDGET (CRISP STYLE)
 ====================================================== */
 
 .chat-container {
-  width: 95vw;
-  height: 75vh;
-  min-height: 500px;
-  margin: 30px auto;
+  width: 100%;
+  height: 100%;
+
   display: flex;
   flex-direction: column;
+
   background: #ffffff;
-  border-radius: 14px;
+  border-radius: 0px;
   overflow: hidden;
-  font-family: Arial, sans-serif;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+
+  font-family: "Inter", sans-serif;
 }
 
 /* ======================================================
-   HEADER
+   ✅ HEADER (Premium Top Bar)
 ====================================================== */
 
 .chat-header {
-  padding: 16px;
-  background: #111;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+
   color: #fff;
   font-weight: 600;
+  font-size: 14px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 
 .status-online {
-  font-size: 12px;
-  color: #2ecc71;
+  font-size: 11px;
+  font-weight: 600;
+  color: #4ade80;
 }
 
 .status-offline {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* End Chat Button */
+
+.leave-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  padding: 6px 10px;
+  border-radius: 10px;
+
+  color: white;
   font-size: 12px;
-  color: #aaa;
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.leave-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* ======================================================
-   MESSAGE AREA
+   ✅ MESSAGES AREA (Smooth Scroll)
 ====================================================== */
 
 .chat-messages {
   flex: 1;
-  padding: 18px;
+  padding: 16px;
+
   overflow-y: auto;
-  background: #f9f9f9;
+  background: #f8fafc;
+
   scroll-behavior: smooth;
 }
 
-.no-messages {
-  text-align: center;
-  color: #999;
-  margin-top: 20px;
+/* Premium Scrollbar */
+
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(37, 99, 235, 0.35);
+  border-radius: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(37, 99, 235, 0.55);
 }
 
 /* ======================================================
-   MESSAGE ROW
+   ✅ MESSAGE ROW
 ====================================================== */
 
 .message-row {
@@ -71,127 +108,143 @@
   justify-content: flex-end;
 }
 
-.message-row.employee {
+.message-row.agent {
   justify-content: flex-start;
 }
 
 /* ======================================================
-   MESSAGE BUBBLE
+   ✅ MESSAGE BUBBLES (Premium Look)
 ====================================================== */
 
 .message-bubble {
-  max-width: 75%;
-  padding: 10px 14px;
-  border-radius: 16px;
-  font-size: 14px;
+  max-width: 78%;
+  padding: 11px 14px;
+
+  border-radius: 18px;
+  font-size: 13px;
+  line-height: 1.4;
+
   word-wrap: break-word;
-  position: relative;
+  display: inline-block;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.message-bubble.visitor {
-  background: #111;
-  color: #fff;
-  border-bottom-right-radius: 4px;
+/* Visitor Bubble */
+
+.message-row.visitor .message-bubble {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+
+  border-bottom-right-radius: 6px;
 }
 
-.message-bubble.employee {
-  background: #e5e5e5;
-  color: #000;
-  border-bottom-left-radius: 4px;
-}
+/* Agent Bubble */
 
-.message-time {
-  font-size: 10px;
-  margin-top: 6px;
-  opacity: 0.6;
-  text-align: right;
+.message-row.agent .message-bubble {
+  background: #ffffff;
+  color: #111827;
+
+  border: 1px solid #e5e7eb;
+  border-bottom-left-radius: 6px;
 }
 
 /* ======================================================
-   TYPING + LEAVE TEXT
+   ✍ Typing Indicator
 ====================================================== */
 
 .typing-text {
   font-size: 12px;
-  color: #777;
+  color: #64748b;
   margin-top: 6px;
-}
-
-.leave-text {
-  font-size: 12px;
-  color: #e74c3c;
-  margin-top: 6px;
+  font-style: italic;
 }
 
 /* ======================================================
-   INPUT AREA
+   ✅ INPUT AREA (Sticky Bottom)
 ====================================================== */
 
 .chat-input-area {
   padding: 12px;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid #e5e7eb;
+
   display: flex;
-  gap: 8px;
+  gap: 10px;
+
   background: #ffffff;
 }
 
-.chat-input {
+/* Input */
+
+.chat-input-area input {
   flex: 1;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 20px;
+  padding: 11px 14px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+
   outline: none;
-  font-size: 14px;
-  transition: border 0.2s ease;
+  font-size: 13px;
+
+  transition: 0.2s ease;
 }
 
-.chat-input:focus {
-  border-color: #111;
+.chat-input-area input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
 }
 
-.send-btn {
-  padding: 0 20px;
+/* Send Button */
+
+.chat-input-area button {
+  padding: 0px 18px;
   border: none;
-  border-radius: 20px;
-  background: #111;
-  color: #fff;
+  border-radius: 999px;
+
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: white;
+
+  font-size: 13px;
+  font-weight: 600;
+
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: 0.25s ease;
 }
 
-.send-btn:hover {
-  background: #333;
+.chat-input-area button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Disabled */
+
+.chat-input-area button:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
 }
 
 /* ======================================================
-   LEAVE BUTTON
+   📱 RESPONSIVE FIX (Mobile Perfect)
 ====================================================== */
 
-.leave-btn {
-  margin: 10px auto 15px auto;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 20px;
-  background: #ff4d4d;
-  color: #fff;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background 0.2s ease;
-}
+@media (max-width: 500px) {
+  .chat-header {
+    font-size: 13px;
+    padding: 12px;
+  }
 
-.leave-btn:hover {
-  background: #e60000;
-}
+  .message-bubble {
+    max-width: 90%;
+    font-size: 12px;
+  }
 
-/* ======================================================
-   SCROLLBAR
-====================================================== */
+  .chat-input-area input {
+    font-size: 12px;
+    padding: 10px;
+  }
 
-.chat-messages::-webkit-scrollbar {
-  width: 6px;
-}
-
-.chat-messages::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 3px;
+  .chat-input-area button {
+    padding: 0px 14px;
+    font-size: 12px;
+  }
 }

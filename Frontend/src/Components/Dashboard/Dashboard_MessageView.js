@@ -1,104 +1,196 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./dashboardMessageView.module.css";
-import { IoMdSend } from "react-icons/io";
+import { socket } from "../../socket";
 
-const Dashboard_MessageView = ({ messages, onSendMessage }) => {
-  const [newMessage, setNewMessage] = useState("");
-  const messageAreaRef = useRef(null);
-  const inputRef = useRef(null);
+const DashboardMessageView = ({
+  activeRoom,
+  activeVisitor,
+  messages,
+  visitorTyping,
+  employeeOnline,
+  onSendMessage,
+  onLeaveRoom, // ✅ Leave callback from MainDashboard
+}) => {
+  const [text, setText] = useState("");
+  const bottomRef = useRef(null);
 
-  // ===============================
-  // AUTO SCROLL
-  // ===============================
+  /* ==============================
+      EMPLOYEE TYPING REFS
+  ============================== */
+  const typingTimeout = useRef(null);
+  const lastTypingEmit = useRef(0);
+
+  /* ==============================
+      AUTO SCROLL
+  ============================== */
   useEffect(() => {
-    if (messageAreaRef.current) {
-      messageAreaRef.current.scrollTop =
-        messageAreaRef.current.scrollHeight;
-    }
-  }, [messages]);
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, visitorTyping]);
 
-  // ===============================
-  // AUTO FOCUS INPUT
-  // ===============================
+  /* ======================================================
+      ✅ EMPLOYEE TYPING EMIT SYSTEM
+  ====================================================== */
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
+    if (!socket.connected) return;
+    if (!activeRoom) return;
+
+    const now = Date.now();
+
+    // ✅ Emit typing max every 500ms
+    if (text.length > 0 && now - lastTypingEmit.current > 500) {
+      socket.emit("employee:typing", {
+        room_id: activeRoom,
+      });
+
+      lastTypingEmit.current = now;
     }
-  }, [messages]);
 
-  // ===============================
-  // NO ROOM SELECTED
-  // ===============================
-  if (!messages) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.messageview}>
-          <p>Select a chat room to view messages</p>
-        </div>
-      </div>
-    );
-  }
+    // Clear old timeout
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
 
-  // ===============================
-  // SEND MESSAGE
-  // ===============================
+    // ✅ Stop typing after 800ms idle
+    typingTimeout.current = setTimeout(() => {
+      socket.emit("employee:stop-typing", {
+        room_id: activeRoom,
+      });
+    }, 800);
+
+    return () => clearTimeout(typingTimeout.current);
+  }, [text, activeRoom]);
+
+  /* ==============================
+      ✅ SEND MESSAGE
+  ============================== */
   const handleSend = () => {
-    if (!newMessage.trim()) return;
+    if (!text.trim()) return;
 
-    onSendMessage(newMessage);
-    setNewMessage("");
+    onSendMessage(text.trim());
+
+    // ✅ Stop typing immediately after send
+    socket.emit("employee:stop-typing", {
+      room_id: activeRoom,
+    });
+
+    setText("");
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+  /* ==============================
+      ✅ LEAVE CHAT FUNCTION
+  ============================== */
+  const handleLeaveChat = () => {
+    if (!activeRoom) return;
+
+    // Emit leave room event
+    socket.emit("employee:leave-room", {
+      room_id: activeRoom,
+    });
+
+    // Reset from parent dashboard
+    if (onLeaveRoom) onLeaveRoom();
+  };
+
+  /* ==============================
+      TIME FORMAT
+  ============================== */
+  const formatTime = (date) => {
+    if (!date) return "";
+    return new Date(date).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   return (
-    <div className={styles.container}>
-      {/* Scrollable Message Area */}
-      <div className={styles.messageArea} ref={messageAreaRef}>
-        {messages.length > 0 ? (
-          messages.map((msg, index) => (
-            <div
-              key={msg._id || msg.msg_id || index}
-              className={
-                msg.sender_type === "agent"
-                  ? styles.outgoingMsg
-                  : styles.incomingMsg
-              }
-            >
-              {msg.content}
-            </div>
-          ))
-        ) : (
-          <div className={styles.messageview}>
-            <p>No messages yet. Start the conversation!</p>
-          </div>
+    <div className={styles.chatPanel}>
+      {/* ================= HEADER ================= */}
+      <div className={styles.header}>
+        <div>
+          <h2>
+            Employee Inbox{" "}
+            <span className={employeeOnline ? styles.online : styles.offline}>
+              {employeeOnline ? "Online" : "Offline"}
+            </span>
+          </h2>
+
+          {activeRoom && (
+            <p>
+              Chatting with <b>{activeVisitor}</b>
+            </p>
+          )}
+        </div>
+
+        {/* ✅ LEAVE BUTTON */}
+        {activeRoom && (
+          <button className={styles.leaveBtn} onClick={handleLeaveChat}>
+            Leave ✖
+          </button>
         )}
       </div>
 
-      {/* Input Section */}
-      <div className={styles.replyBar}>
-        <div className={styles.inputSection}>
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Type your message..."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-
-          <button onClick={handleSend} disabled={!newMessage.trim()}>
-            <IoMdSend />
-          </button>
+      {/* ================= EMPTY ================= */}
+      {!activeRoom && (
+        <div className={styles.noRoom}>
+          Select a visitor to start chatting
         </div>
-      </div>
+      )}
+
+      {/* ================= CHAT AREA ================= */}
+      {activeRoom && (
+        <>
+
+      
+          {/* ================= MESSAGES ================= */}
+          <div className={styles.messages}>
+            {messages
+              .filter((m) => (m.msg_content || m.content)?.trim())
+              .map((m) => (
+                <div
+                  key={m.msg_id}
+                  className={
+                    m.sender_type === "agent"
+                      ? styles.agentWrapper
+                      : styles.visitorWrapper
+                  }
+                >
+                  <div
+                    className={
+                      m.sender_type === "agent"
+                        ? styles.agentMsg
+                        : styles.visitorMsg
+                    }
+                  >
+                    {m.msg_content || m.content}
+
+                    <span className={styles.time}>
+                      {formatTime(m.send_at)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+            {visitorTyping && (
+              <div className={styles.typing}>Visitor is typing...</div>
+            )}
+
+            <div ref={bottomRef} />
+          </div>
+
+
+          {/* ================= INPUT ================= */}
+          <div className={styles.inputArea}>
+            <input
+              value={text}
+              placeholder="Reply..."
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            />
+
+            <button onClick={handleSend}>Send</button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
 
-export default Dashboard_MessageView;
+export default DashboardMessageView;
