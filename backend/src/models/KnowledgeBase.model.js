@@ -23,35 +23,11 @@ const knowledgeDocSchema = new mongoose.Schema(
       trim: true,
     },
 
-    // Optional organization
-    category: {
-      type: String,
-      default: "general",
-    },
-
-    tags: {
-      type: [String],
-      default: [],
-    },
-
     // Embedding Vector
     question_embedding: {
       type: [Number],
       required: true,
-    },
-
-    // Document source
-    source: {
-      type: String,
-      enum: ["manual", "pdf", "website"],
-      default: "manual",
-    },
-
-    // Active / Inactive (soft delete)
-    is_active: {
-      type: Boolean,
-      default: true,
-    },
+    }
   },
   { timestamps: true }
 );

@@ -261,6 +261,16 @@ export const employeeLeaveRoom = async (io, socket, payload) => {
       }
     );
 
+    const waitingRooms = await ChatRoom.find({
+      company_id: room.company_id,
+      status: "waiting",
+    }).select("room_id session_id");
+
+    io.to(`company_${room.company_id}`).emit(
+      "employee:waiting-list",
+      waitingRooms
+    );
+
   } catch (err) {
     console.error("employeeLeaveRoom error:", err.message);
   }

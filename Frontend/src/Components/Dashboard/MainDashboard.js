@@ -9,41 +9,30 @@ import styles from "./main-dashboard.module.css";
 
 const MainDashboard = ({ dashboardData }) => {
   /* ==============================
-      STATE MANAGEMENT
+      STATE
   ============================== */
 
   const [waitingVisitors, setWaitingVisitors] = useState([]);
-
-  // ✅ Room-wise messages store
   const [roomMessages, setRoomMessages] = useState({});
-
   const [activeRoom, setActiveRoom] = useState(null);
   const [activeVisitor, setActiveVisitor] = useState(null);
-
   const [visitorTyping, setVisitorTyping] = useState(false);
   const [employeeOnline, setEmployeeOnline] = useState(false);
-
   const [unreadRooms, setUnreadRooms] = useState({});
 
-  /* ==============================
-      REFS
-  ============================== */
   const roomRef = useRef(null);
 
   /* ======================================================
-      ✅ SOCKET CONNECT + EVENTS
+      SOCKET INIT
   ====================================================== */
+
   useEffect(() => {
     if (!socket.connected) socket.connect();
 
-    /* ================= CONNECT ================= */
     const handleConnect = () => {
-      console.log("✅ Connected:", socket.id);
       setEmployeeOnline(true);
-
       socket.emit("employee:ready");
 
-      // Resume room if exists
       if (roomRef.current) {
         socket.emit("employee:resume-room", {
           room_id: roomRef.current,
@@ -51,47 +40,30 @@ const MainDashboard = ({ dashboardData }) => {
       }
     };
 
-    /* ================= DISCONNECT ================= */
     const handleDisconnect = () => {
-      console.log("❌ Disconnected");
       setEmployeeOnline(false);
     };
 
-    /* ================= WAITING LIST ================= */
     const handleWaitingList = (list) => {
       setWaitingVisitors(list || []);
     };
 
-    /* ================= NEW VISITOR ================= */
-    const handleNewWaitingVisitor = (visitor) => {
-      setWaitingVisitors((prev) => {
-        const exists = prev.some((v) => v.room_id === visitor.room_id);
-        return exists ? prev : [...prev, visitor];
-      });
+    const refreshWaitingList = () => {
+      socket.emit("employee:ready");
     };
 
-    /* ================= CHAT HISTORY ================= */
     const handleChatHistory = (history) => {
       if (!roomRef.current) return;
 
-      console.log("📌 Loaded History:", history);
-
-      // ✅ Save history in correct room
       setRoomMessages((prev) => ({
         ...prev,
         [roomRef.current]: history || [],
       }));
     };
 
-    /* ================= NEW MESSAGE ================= */
     const handleNewMessage = (msg) => {
-      console.log("📩 New Message:", msg);
-
-      // ✅ Add message to correct room
       setRoomMessages((prev) => {
         const oldMsgs = prev[msg.room_id] || [];
-
-        // Prevent duplicates
         const exists = oldMsgs.some((m) => m.msg_id === msg.msg_id);
         if (exists) return prev;
 
@@ -101,7 +73,6 @@ const MainDashboard = ({ dashboardData }) => {
         };
       });
 
-      // If not active room → increase unread count
       if (msg.room_id !== roomRef.current) {
         setUnreadRooms((prev) => ({
           ...prev,
@@ -110,7 +81,6 @@ const MainDashboard = ({ dashboardData }) => {
       }
     };
 
-    /* ================= TYPING ================= */
     const handleVisitorTyping = ({ room_id }) => {
       if (room_id === roomRef.current) setVisitorTyping(true);
     };
@@ -119,12 +89,28 @@ const MainDashboard = ({ dashboardData }) => {
       if (room_id === roomRef.current) setVisitorTyping(false);
     };
 
-    /* ================= EVENT BIND ================= */
+    /* 🔥 VISITOR LEFT ALERT */
+    const handleVisitorLeft = ({ room_id }) => {
+      if (room_id === roomRef.current) {
+        alert("Visitor has left the chat.");
+
+        roomRef.current = null;
+        setActiveRoom(null);
+        setActiveVisitor(null);
+        setVisitorTyping(false);
+
+        socket.emit("employee:ready");
+      }
+    };
+
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
 
     socket.on("employee:waiting-list", handleWaitingList);
-    socket.on("employee:new-waiting-visitor", handleNewWaitingVisitor);
+
+    socket.on("employee:new-waiting-visitor", refreshWaitingList);
+    socket.on("employee:visitor-left", refreshWaitingList);
+    socket.on("employee:visitor-assigned", refreshWaitingList);
 
     socket.on("chat:history", handleChatHistory);
     socket.on("chat:new-message", handleNewMessage);
@@ -132,57 +118,64 @@ const MainDashboard = ({ dashboardData }) => {
     socket.on("visitor:typing", handleVisitorTyping);
     socket.on("visitor:stop-typing", handleVisitorStopTyping);
 
+    socket.on("visitor:left", handleVisitorLeft); // ✅ important
+
     return () => {
       socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
 
       socket.off("employee:waiting-list", handleWaitingList);
-      socket.off("employee:new-waiting-visitor", handleNewWaitingVisitor);
+
+      socket.off("employee:new-waiting-visitor", refreshWaitingList);
+      socket.off("employee:visitor-left", refreshWaitingList);
+      socket.off("employee:visitor-assigned", refreshWaitingList);
 
       socket.off("chat:history", handleChatHistory);
       socket.off("chat:new-message", handleNewMessage);
 
       socket.off("visitor:typing", handleVisitorTyping);
       socket.off("visitor:stop-typing", handleVisitorStopTyping);
+
+      socket.off("visitor:left", handleVisitorLeft);
     };
   }, []);
 
   /* ======================================================
-      ✅ SELECT VISITOR (JOIN ROOM)
+      SELECT VISITOR (JOIN PROTECTION ADDED)
   ====================================================== */
+
   const selectVisitor = (visitor) => {
     if (!visitor?.room_id) return;
+
+    // 🔥 PROTECTION: Already inside another room
+    if (roomRef.current && roomRef.current !== visitor.room_id) {
+      alert("Please leave current room first.");
+      return;
+    }
 
     roomRef.current = visitor.room_id;
 
     setActiveRoom(visitor.room_id);
     setActiveVisitor(visitor.session_id);
 
-    // Reset unread count
     setUnreadRooms((prev) => ({
       ...prev,
       [visitor.room_id]: 0,
     }));
 
-    // Join room
     socket.emit("employee:join-room", {
       room_id: visitor.room_id,
     });
 
-    // Load history
     socket.emit("employee:load-history", {
       room_id: visitor.room_id,
     });
-
-    // Remove from waiting list
-    setWaitingVisitors((prev) =>
-      prev.filter((v) => v.room_id !== visitor.room_id)
-    );
   };
 
   /* ======================================================
-      ✅ SEND MESSAGE
+      SEND MESSAGE
   ====================================================== */
+
   const sendMessage = (text) => {
     if (!text.trim() || !roomRef.current) return;
 
@@ -194,7 +187,6 @@ const MainDashboard = ({ dashboardData }) => {
       send_at: new Date(),
     };
 
-    // ✅ Optimistic add into correct room
     setRoomMessages((prev) => ({
       ...prev,
       [roomRef.current]: [...(prev[roomRef.current] || []), payload],
@@ -204,34 +196,34 @@ const MainDashboard = ({ dashboardData }) => {
   };
 
   /* ======================================================
-      ✅ LEAVE ROOM (SAFE)
+      LEAVE ROOM
   ====================================================== */
+
   const leaveRoom = () => {
+    if (!roomRef.current) return;
+
+    socket.emit("employee:leave-room", {
+      room_id: roomRef.current,
+    });
+
     roomRef.current = null;
     setActiveRoom(null);
     setActiveVisitor(null);
-    
     setVisitorTyping(false);
 
-    // ❌ Messages delete nahi karne
-    console.log("🚪 Employee left room (messages preserved)");
+    socket.emit("employee:ready");
   };
 
-  /* ======================================================
-      ✅ CURRENT ROOM MESSAGES
-  ====================================================== */
   const currentMessages = activeRoom
     ? roomMessages[activeRoom] || []
     : [];
 
   return (
     <div className={styles.mainDashboard}>
-      {/* LEFT NAV */}
       <div className={styles.leftNav}>
         <DashboardNav dashboardData={dashboardData} />
       </div>
 
-      {/* WAITING VISITORS */}
       <div className={styles.chatList}>
         <DashboardChats
           waitingVisitors={waitingVisitors}
@@ -240,13 +232,12 @@ const MainDashboard = ({ dashboardData }) => {
         />
       </div>
 
-      {/* CHAT PANEL */}
       <div className={styles.chatPanel}>
         {activeRoom ? (
           <DashboardMessageView
             activeRoom={activeRoom}
             activeVisitor={activeVisitor}
-            messages={currentMessages} // ✅ Correct messages
+            messages={currentMessages}
             visitorTyping={visitorTyping}
             employeeOnline={employeeOnline}
             onSendMessage={sendMessage}

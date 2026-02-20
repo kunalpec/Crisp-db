@@ -76,6 +76,11 @@ const chatRoomSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    knowledge_processed: {
+      type: Boolean,
+      default: false,
+      index: true
+    }
   },
   { timestamps: true }
 );

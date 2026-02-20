@@ -1,8 +1,7 @@
 import { ChatRoom } from "../../models/ChatRoom.model.js";
 import { Message } from "../../models/Message.model.js";
 import { CompanyUser } from "../../models/CompanyUser.model.js";
-
-
+import { handleAIReply } from "../../controllers/AINew/kb.controller.js"; // 👈 import AI handler
 
 export const handleSendMessage = async (io, socket, payload) => {
   try {
@@ -23,7 +22,7 @@ export const handleSendMessage = async (io, socket, payload) => {
     const sender_id = sender_type === "agent" ? socket.user?._id : null;
 
     /* ==========================================
-       ✅ Visitor Security Check (SESSION BASED)
+       ✅ Visitor Security Check
     ========================================== */
     if (
       sender_type === "visitor" &&
@@ -81,9 +80,26 @@ export const handleSendMessage = async (io, socket, payload) => {
     });
 
     console.log("✅ Message Sent:", room_id);
+    console.log("DEBUG CHECK:");
+    console.log("sender_type:", sender_type);
+    console.log("assigned_agent_id:", chatRoom.assigned_agent_id);
+    console.log("condition result:",
+      sender_type === "visitor",
+      !chatRoom.assigned_agent_id
+    );
+    /* ==========================================
+       🤖 AUTO AI REPLY LOGIC
+    ========================================== */
+    if (sender_type === "visitor" && !chatRoom.assigned_agent_id) {
+      console.log("🤖 No agent assigned. Triggering AI reply...");
+
+      // Call AI async (non-blocking)
+      handleAIReply(io, chatRoom, message.content);
+    }
 
   } catch (err) {
     console.error("handleSendMessage error:", err.message);
   }
 };
 
+// from chatgpt

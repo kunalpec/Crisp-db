@@ -194,6 +194,7 @@ const VisitorChatRoom = () => {
     const handleAgentLeft = () => {
       console.log("🚪 Agent Left Chat");
       setAgentOnline(false);
+      alert("agent left the room please wait for other agent to join...");
     };
 
     /* ======================================================
@@ -375,9 +376,7 @@ const VisitorChatRoom = () => {
         {messages.map((m) => (
           <div
             key={m.msg_id}
-            className={`message-row ${
-              m.sender_type === "visitor" ? "visitor" : "agent"
-            }`}
+            className={`message-row ${m.sender_type === "visitor" ? "visitor" : "agent"}`}
           >
             <div className="message-bubble">
               {m.msg_content} {/* ✅ FIXED */}
