@@ -7,6 +7,7 @@ import HelpTopicArticles from "../Components/help/HelpTopicArticles";
 import Widgets from "../Components/furtherMenu/Widgets";
 import KnowledgeBase from "../Components/furtherMenu/Knowledge/KnowledgeBase";
 import AiChatbotIntro from "../Components/AIChatBot/AiChatbotIntro";
+import OtherWidgetChat from "../Components/OtherChat";
 
 export const publicRoutes = [
   { path: "/", element: <Main /> },
@@ -18,4 +19,5 @@ export const publicRoutes = [
   { path: "/widget", element: <Widgets /> },
   { path: "/knowledge", element: <KnowledgeBase /> },
   { path: "/chatbot", element: <AiChatbotIntro /> },
+  { path: "/widget-chat", element: < OtherWidgetChat /> },
 ];

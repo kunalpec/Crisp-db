@@ -1,13 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
+make this all correction ok import React, { useEffect, useRef, useState } from "react";
 import { socket } from "../../socket";
 import { createSession } from "./createSession";
 import "./VisitorChatRoom.css";
 
 /* ======================================================
-   ✅ VISITOR CHAT ROOM (FULLY SaaS READY)
+   ✅ VISITOR CHAT ROOM (FIXED + PRODUCTION READY)
 ====================================================== */
 
-const VisitorChatRoom = ({ apiKey }) => {
+const VisitorChatRoom = ({apiKey}) => {
   /* ==============================
       STATE MANAGEMENT
   ============================== */
@@ -21,7 +21,7 @@ const VisitorChatRoom = ({ apiKey }) => {
   const [roomReady, setRoomReady] = useState(false);
 
   /* ==============================
-      REFS
+      REFS (NO RE-RENDER)
   ============================== */
   const sessionRef = useRef(null);
   const roomRef = useRef(null);
@@ -39,62 +39,63 @@ const VisitorChatRoom = ({ apiKey }) => {
   }, [messages, employeeTyping]);
 
   /* ======================================================
-      ✅ INIT SESSION + ROOM (NAMESPACE SAFE)
+      ✅ INIT SESSION + ROOM PERSISTENCE
   ====================================================== */
   useEffect(() => {
-    if (!apiKey) return;
-
     let savedSession = localStorage.getItem(`visitor_session_${apiKey}`);
     let savedRoom = localStorage.getItem(`visitor_room_${apiKey}`);
-    let savedTime = localStorage.getItem(
-      `visitor_session_time_${apiKey}`
-    );
+    let savedTime = localStorage.getItem(`visitor_session_time_${apiKey}`);
 
     const now = Date.now();
+
+    // ✅ Expiry limit (30 min)
     const SESSION_EXPIRY = 30 * 60 * 1000;
 
     if (savedTime && now - savedTime > SESSION_EXPIRY) {
+      console.log("⏳ Session Expired → Creating Fresh Session");
+
       localStorage.removeItem(`visitor_session_${apiKey}`);
       localStorage.removeItem(`visitor_room_${apiKey}`);
       localStorage.removeItem(`visitor_session_time_${apiKey}`);
+
       savedSession = null;
       savedRoom = null;
     }
 
+    // ✅ Create new session if missing
     if (!savedSession) {
       savedSession = createSession();
 
-      localStorage.setItem(
-        `visitor_session_${apiKey}`,
-        savedSession
-      );
-      localStorage.setItem(
-        `visitor_session_time_${apiKey}`,
-        now
-      );
+      localStorage.setItem("visitor_session", savedSession);
+      localStorage.setItem("visitor_session_time", now);
     }
 
     sessionRef.current = savedSession;
 
+    // ✅ Restore room if exists
     if (savedRoom) {
       roomRef.current = savedRoom;
     }
-  }, [apiKey]);
+  }, []);
 
   /* ======================================================
       ✅ SOCKET CONNECTION + EVENTS
   ====================================================== */
   useEffect(() => {
-    if (!apiKey) return;
-
     if (!socket.connected) socket.connect();
 
+    /* ======================================================
+        ✅ CONNECT EVENT
+    ====================================================== */
     const handleConnect = () => {
       console.log("✅ Visitor Connected:", socket.id);
       setConnected(true);
 
+      // ✅ Resume if room already exists
       if (roomRef.current) {
-        setRoomReady(true);
+        console.log("♻ Resuming Old Room:", roomRef.current);
+
+        setRoomReady(true); // ✅ FIXED
 
         socket.emit("visitor:resume-room", {
           room_id: roomRef.current,
@@ -107,23 +108,21 @@ const VisitorChatRoom = ({ apiKey }) => {
 
         return;
       }
-
+      // ck_098a8cb8851120927a0d3a95fdd938a0be703302caf9ddf066c6694a78a4ea91
+      // ✅ First time room creation
       socket.emit(
         "visitor:create-new",
         {
-          company_apikey: apiKey, // ✅ FIXED
+          company_apikey:apiKey,
           session_id: sessionRef.current,
         },
         (res) => {
           if (!res?.room_id) return;
 
           roomRef.current = res.room_id;
+          localStorage.setItem("visitor_room", res.room_id);
 
-          localStorage.setItem(
-            `visitor_room_${apiKey}`,
-            res.room_id
-          );
-
+          console.log("🎯 Room Created:", res.room_id);
           setRoomReady(true);
 
           socket.emit("visitor:load-history", {
@@ -133,16 +132,29 @@ const VisitorChatRoom = ({ apiKey }) => {
       );
     };
 
+    /* ======================================================
+        ❌ DISCONNECT EVENT
+    ====================================================== */
     const handleDisconnect = () => {
+      console.log("❌ Visitor Disconnected");
       setConnected(false);
       setAgentOnline(false);
     };
 
+    /* ======================================================
+        ⚠ SOCKET ERROR EVENT
+    ====================================================== */
     const handleConnectError = (err) => {
       console.error("⚠ Socket Error:", err.message);
     };
 
+    /* ======================================================
+        📜 CHAT HISTORY EVENT (FIXED)
+    ====================================================== */
     const handleHistory = (history) => {
+      console.log("📜 Chat History Loaded:", history);
+
+      // ✅ Normalize messages so bubble text never blank
       const normalized = (history || []).map((m) => ({
         msg_id: m.msg_id || Date.now() + Math.random(),
         sender_type: m.sender_type,
@@ -152,75 +164,108 @@ const VisitorChatRoom = ({ apiKey }) => {
       setMessages(normalized);
     };
 
+    /* ======================================================
+        ✅ RECEIVE MESSAGE (DEDUP SAFE)
+    ====================================================== */
     const handleNewMessage = (msg) => {
       setMessages((prev) => {
-        const exists = prev.some(
-          (m) => m.msg_id === msg.msg_id
-        );
+        const exists = prev.some((m) => m.msg_id === msg.msg_id);
         if (exists) return prev;
 
         return [
           ...prev,
           {
             ...msg,
-            msg_content:
-              msg.msg_content || msg.message || msg.text || "",
+            msg_content: msg.msg_content || msg.message || msg.text || "",
           },
         ];
       });
     };
 
-    const handleAgentJoined = () => setAgentOnline(true);
-    const handleAgentLeft = () => setAgentOnline(false);
+    /* ======================================================
+        ✅ AGENT JOIN / LEAVE EVENTS
+    ====================================================== */
+    const handleAgentJoined = () => {
+      console.log("👨‍💻 Agent Joined Chat");
+      setAgentOnline(true);
+    };
 
+    const handleAgentLeft = () => {
+      console.log("🚪 Agent Left Chat");
+      setAgentOnline(false);
+      alert("agent left the room please wait for other agent to join...");
+    };
+
+    /* ======================================================
+        ✍ EMPLOYEE TYPING EVENTS
+    ====================================================== */
     const handleEmployeeTyping = (payload) => {
-      if (payload.room_id === roomRef.current)
+      if (payload.room_id === roomRef.current) {
         setEmployeeTyping(true);
+      }
     };
 
     const handleEmployeeStopTyping = (payload) => {
-      if (payload.room_id === roomRef.current)
+      if (payload.room_id === roomRef.current) {
         setEmployeeTyping(false);
+      }
     };
 
+    /* ======================================================
+        ❌ CHAT CLOSED BY SYSTEM
+    ====================================================== */
     const handleChatClosed = () => {
       alert("Chat session ended.");
       leaveChat();
     };
 
+    /* ======================================================
+        SOCKET BINDINGS
+    ====================================================== */
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
     socket.on("connect_error", handleConnectError);
+
     socket.on("chat:history", handleHistory);
     socket.on("chat:new-message", handleNewMessage);
+
     socket.on("visitor:agent-joined", handleAgentJoined);
     socket.on("visitor:agent-left", handleAgentLeft);
+
     socket.on("employee:typing", handleEmployeeTyping);
     socket.on("employee:stop-typing", handleEmployeeStopTyping);
+
     socket.on("chat:closed", handleChatClosed);
 
+    /* ======================================================
+        CLEANUP
+    ====================================================== */
     return () => {
       socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
       socket.off("connect_error", handleConnectError);
+
       socket.off("chat:history", handleHistory);
       socket.off("chat:new-message", handleNewMessage);
+
       socket.off("visitor:agent-joined", handleAgentJoined);
       socket.off("visitor:agent-left", handleAgentLeft);
+
       socket.off("employee:typing", handleEmployeeTyping);
       socket.off("employee:stop-typing", handleEmployeeStopTyping);
+
       socket.off("chat:closed", handleChatClosed);
     };
-  }, [apiKey]);
+  }, []);
 
   /* ======================================================
-      ✅ SEND MESSAGE
+      ✅ SEND MESSAGE (FIXED msg_id)
   ====================================================== */
   const sendMessage = () => {
     if (!text.trim() || !roomRef.current) return;
 
     const payload = {
-      msg_id: Date.now() + Math.random(),
+      msg_id: Date.now() + Math.random(), // ✅ FIXED UNIQUE
       room_id: roomRef.current,
       session_id: sessionRef.current,
       msg_content: text.trim(),
@@ -239,7 +284,7 @@ const VisitorChatRoom = ({ apiKey }) => {
   };
 
   /* ======================================================
-      ✍ VISITOR TYPING
+      ✍ VISITOR TYPING EVENT (THROTTLED)
   ====================================================== */
   useEffect(() => {
     if (!roomRef.current) return;
@@ -254,8 +299,7 @@ const VisitorChatRoom = ({ apiKey }) => {
       lastTypingEmit.current = now;
     }
 
-    if (typingTimeout.current)
-      clearTimeout(typingTimeout.current);
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
 
     typingTimeout.current = setTimeout(() => {
       socket.emit("visitor:stop-typing", {
@@ -279,11 +323,12 @@ const VisitorChatRoom = ({ apiKey }) => {
 
     roomRef.current = null;
     setRoomReady(false);
+
     setMessages([]);
     setAgentOnline(false);
     setEmployeeTyping(false);
 
-    localStorage.removeItem(`visitor_room_${apiKey}`);
+    localStorage.removeItem("visitor_room");
   };
 
   /* ======================================================
@@ -298,11 +343,7 @@ const VisitorChatRoom = ({ apiKey }) => {
 
     window.addEventListener("beforeunload", handleUnload);
 
-    return () =>
-      window.removeEventListener(
-        "beforeunload",
-        handleUnload
-      );
+    return () => window.removeEventListener("beforeunload", handleUnload);
   }, []);
 
   /* ======================================================
@@ -310,14 +351,11 @@ const VisitorChatRoom = ({ apiKey }) => {
   ====================================================== */
   return (
     <div className="chat-container">
+      {/* Header */}
       <div className="chat-header">
         <span>Live Support</span>
 
-        <span
-          className={
-            agentOnline ? "status-online" : "status-offline"
-          }
-        >
+        <span className={agentOnline ? "status-online" : "status-offline"}>
           {connected
             ? agentOnline
               ? "Agent Online"
@@ -326,57 +364,41 @@ const VisitorChatRoom = ({ apiKey }) => {
         </span>
 
         {roomReady && (
-          <button
-            className="leave-btn"
-            onClick={leaveChat}
-          >
+          <button className="leave-btn" onClick={leaveChat}>
             End Chat
           </button>
         )}
       </div>
 
+      {/* Messages */}
       <div className="chat-messages">
         {messages.map((m) => (
           <div
             key={m.msg_id}
-            className={`message-row ${
-              m.sender_type === "visitor"
-                ? "visitor"
-                : "agent"
-            }`}
+            className={`message-row ${m.sender_type === "visitor" ? "visitor" : "agent"}`}
           >
             <div className="message-bubble">
-              {m.msg_content}
+              {m.msg_content} {/* ✅ FIXED */}
             </div>
           </div>
         ))}
 
-        {employeeTyping && (
-          <div className="typing-text">
-            Agent typing...
-          </div>
-        )}
+        {employeeTyping && <div className="typing-text">Agent typing...</div>}
 
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Input */}
       <div className="chat-input-area">
         <input
           value={text}
           disabled={!roomReady}
           placeholder="Type message..."
-          onChange={(e) =>
-            setText(e.target.value)
-          }
-          onKeyDown={(e) =>
-            e.key === "Enter" && sendMessage()
-          }
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
 
-        <button
-          disabled={!roomReady}
-          onClick={sendMessage}
-        >
+        <button disabled={!roomReady} onClick={sendMessage}>
           Send
         </button>
       </div>
@@ -384,4 +406,76 @@ const VisitorChatRoom = ({ apiKey }) => {
   );
 };
 
-export default VisitorChatRoom;
+export default VisitorChatRoom;  i want full code and not remove any code aswell
+
+
+
+
+(function () {
+  // Prevent multiple loads
+  if (window.__CHAT_WIDGET_LOADED__) return;
+  window.__CHAT_WIDGET_LOADED__ = true;
+
+  // Get current script tag
+  var currentScript = document.currentScript;
+
+  // Read API key from script attribute
+  var apiKey = currentScript.getAttribute("data-api-key");
+
+  if (!apiKey) {
+    console.error("Chat Widget: data-api-key is missing.");
+    return;
+  }
+
+  // ===============================
+  // Create Floating Button
+  // ===============================
+  var button = document.createElement("div");
+  button.innerHTML = "💬";
+  button.style.position = "fixed";
+  button.style.bottom = "20px";
+  button.style.right = "20px";
+  button.style.width = "60px";
+  button.style.height = "60px";
+  button.style.borderRadius = "50%";
+  button.style.background = "#2563eb";
+  button.style.color = "#fff";
+  button.style.display = "flex";
+  button.style.alignItems = "center";
+  button.style.justifyContent = "center";
+  button.style.cursor = "pointer";
+  button.style.zIndex = "999999";
+  button.style.fontSize = "24px";
+  button.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
+
+  document.body.appendChild(button);
+
+  // ===============================
+  // Create Iframe (Hidden Initially)
+  // ===============================
+  var iframe = document.createElement("iframe");
+  iframe.src = "http://localhost:49296/widget-chat?apiKey=" + apiKey;
+  iframe.style.position = "fixed";
+  iframe.style.bottom = "90px";
+  iframe.style.right = "20px";
+  iframe.style.width = "380px";
+  iframe.style.height = "600px";
+  iframe.style.border = "none";
+  iframe.style.borderRadius = "12px";
+  iframe.style.boxShadow = "0 10px 30px rgba(0,0,0,0.3)";
+  iframe.style.display = "none";
+  iframe.style.zIndex = "999999";
+
+  document.body.appendChild(iframe);
+
+  // ===============================
+  // Toggle Widget
+  // ===============================
+  button.addEventListener("click", function () {
+    if (iframe.style.display === "none") {
+      iframe.style.display = "block";
+    } else {
+      iframe.style.display = "none";
+    }
+  });
+})();

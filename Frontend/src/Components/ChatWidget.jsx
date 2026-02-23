@@ -1,37 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import VisitorChatRoom from "../Components/AIChatBot/VisitorChatRoom";
-import "./ChatWidget.css"; // ✅ CSS Import
+import "./ChatWidget.css";
 
 const ChatWidget = () => {
   const [open, setOpen] = useState(false);
+  const [apiKey, setApiKey] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const key = params.get("apiKey");
+    setApiKey(key);
+  }, []);
 
   return (
     <>
-      {/* ✅ Floating Chat Button */}
       <button
         className="chat-float-btn"
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen((prev) => !prev)}
       >
         💬
       </button>
 
-      {/* ✅ Popup Chat Box */}
-      {open && (
+      {open && apiKey && (
         <div className="chat-popup">
-          {/* Header */}
-          <div className="chat-popup-header">
-            Live Support
-
-            <span
-              className="chat-close-btn"
-              onClick={() => setOpen(false)}
-            >
-              ✖
-            </span>
-          </div>
-
-          {/* Chat Component */}
-          <VisitorChatRoom />
+          <VisitorChatRoom apiKey={apiKey} />
         </div>
       )}
     </>
