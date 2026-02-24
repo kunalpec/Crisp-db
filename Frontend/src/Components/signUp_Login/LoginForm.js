@@ -5,7 +5,6 @@ import axios from "axios";
 import styles from "./LoginForm.module.css";
 import { loginActions } from "../../store/loginSlice";
 import { FaUser, FaLock } from "react-icons/fa";
-
 const LoginForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();

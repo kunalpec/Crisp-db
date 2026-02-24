@@ -102,3 +102,4 @@ export const getDefaultPlan = AsyncHandler(async (req, res) => {
     new ApiResponse(200, defaultPlan, "Default plan retrieved successfully")
   );
 });
+

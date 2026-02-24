@@ -24,6 +24,12 @@ const Navbar = () => {
 
         {/* Right Section */}
         <div className={styles.right}>
+           <Link to="/" className={styles.headerBtn}>
+            Home
+          </Link>
+          <Link to="/Plans" className={styles.headerBtn}>
+            Plans
+          </Link>
           <Link to="/signup" className={styles.headerBtn}>
             Sign Up
           </Link>

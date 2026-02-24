@@ -1,0 +1,123 @@
+.card {
+  position: relative;
+  background: #1e1e1e;
+  border: 1px solid #2c2c2c;
+  border-radius: 16px;
+  padding: 24px;
+  color: #ffffff;
+  transition: 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  max-width: 300px;   /* smaller width */
+  width: 100%;
+}
+
+.card:hover {
+  border-color: #3b82f6;
+}
+
+.popularCard {
+  border: 1px solid #3b82f6;
+}
+
+.badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: #3b82f6;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.planName {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.priceContainer {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+
+.currency {
+  font-size: 16px;
+  margin-right: 2px;
+}
+
+.price {
+  font-size: 30px;   /* smaller price */
+  font-weight: 700;
+}
+
+.billing {
+  margin-left: 6px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.description {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.limits div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+.limitIcon {
+  font-size: 13px;
+  color: #3b82f6;
+}
+
+.features {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+}
+
+.features li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #e5e7eb;
+}
+
+.checkIcon {
+  font-size: 12px;
+  color: #22c55e;
+}
+
+.button {
+  margin-top: auto;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  background: #3b82f6;
+  color: #fff;
+  transition: 0.2s;
+}
+
+.button:hover {
+  background: #2563eb;
+}
+
+.popularButton {
+  background: #2563eb;
+}

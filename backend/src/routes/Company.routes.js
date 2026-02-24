@@ -7,9 +7,9 @@ import {
   logout,
   forgetPassword,
   resetPassword,
-  refreshAccessToken, 
+  refreshAccessToken,
   verifyOtp,
-  generateCompanyApiKey 
+  generateCompanyApiKey
 } from "../controllers/CompanyNew/companyAuth.controller.js";
 
 /* ================= DASHBOARD CONTROLLERS ================= */
@@ -42,7 +42,12 @@ import {
   acceptInvite,
 } from "../controllers/InviteNew/invite.controller.js";
 
+import { createCheckoutSession } from "../controllers/CompanyNew/CompanyCheckoutSession.controller.js";
+
+import { stripeWebhook } from "../controllers/CompanyNew/stripeWebhook.controller.js"
+
 import { authenticate } from "../middlewares/Auth.middleware.js";
+
 import { authorize } from "../middlewares/role.middleware.js"; // optional role-based middleware
 
 const router = express.Router();
@@ -56,8 +61,8 @@ router.post("/auth/logout", authenticate, logout);
 router.post("/auth/forgot-password", forgetPassword);
 router.post("/auth/verify-otp", verifyOtp);
 router.post("/auth/reset-password", resetPassword);
-router.get("/auth/refresh", refreshAccessToken );
-router.get("/auth/get-apiKey",authenticate,generateCompanyApiKey);
+router.get("/auth/refresh", refreshAccessToken);
+router.get("/auth/get-apiKey", authenticate, generateCompanyApiKey);
 
 /* =====================================================
    DASHBOARD ROUTES
@@ -69,11 +74,17 @@ router.patch("/dashboard/status/:companyId", authenticate, updateCompanyStatus);
 /* =====================================================
    PLAN ROUTES
 ===================================================== */
-router.get("/plans", authenticate, getAllPlans);
+router.get("/plans", getAllPlans); // modified
 router.get("/plans/current", authenticate, getCurrentCompanyPlan);
 router.get("/plans/default", authenticate, getDefaultPlan);
 router.patch("/plans/update", authenticate, updateCompanyPlan);
 
+// ====================================================
+// Payment
+// ====================================================
+router.post("/create-checkout-session", authenticate, createCheckoutSession);
+router.post("/payment-webhook", express.raw({ type: "application/json" }), stripeWebhook);
+// NOTE:USE THIS IN STRIP CLI: stripe listen --forward-to localhost:8000/api/company/payment-webhookc
 /* =====================================================
    COMPANY USER ROUTES
    - Admin can manage employees

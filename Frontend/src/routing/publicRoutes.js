@@ -8,7 +8,7 @@ import Widgets from "../Components/furtherMenu/Widgets";
 import KnowledgeBase from "../Components/furtherMenu/Knowledge/KnowledgeBase";
 import AiChatbotIntro from "../Components/AIChatBot/AiChatbotIntro";
 import OtherWidgetChat from "../Components/OtherChat";
-
+import PricingPage from "../Components/PlanCard/PricingPage"
 export const publicRoutes = [
   { path: "/", element: <Main /> },
   { path: "/pricing", element: <Pricing /> },
@@ -20,4 +20,5 @@ export const publicRoutes = [
   { path: "/knowledge", element: <KnowledgeBase /> },
   { path: "/chatbot", element: <AiChatbotIntro /> },
   { path: "/widget-chat", element: < OtherWidgetChat /> },
+  { path: "/Plans", element: <PricingPage /> }
 ];
